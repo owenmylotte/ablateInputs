@@ -12,7 +12,7 @@ timestepper:
     ts_type: rk
     ts_max_time: 1000000
     ts_max_steps: 5000000
-    ts_dt: 1.0E-10
+    ts_dt: 1.0E-5
     # petsc adaptive timestepping can be turned on to replace physics timestepping
     #ts_adapt_safety: 0.9
     #ts_adapt_monitor: ""
@@ -35,20 +35,20 @@ timestepper:
       # label the vertices of regions with all faces labeled
       - !ablate::domain::modifiers::CompleteLabel
         region:
-          name: R0
+          name: R1
       - !ablate::domain::modifiers::CompleteLabel
         region:
-          name: R1
+          name: R2
       # extrude all boundaries to add needed ghost cells for the boundary solver
       - !ablate::domain::modifiers::ExtrudeLabel
         # extrude the boundary cells marked
         regions:
-          - &R0
-            name: R0
-            value: 8
-          - &R1
+          - &R2
             name: R1
             value: 9
+          - &R2
+            name: R2
+            value: 10
         # mark all the resulting boundary faces with boundaryFaces label
         boundaryRegion:
           name: boundaryFaces
@@ -93,13 +93,17 @@ timestepper:
         eos: *eos
         pressure: 101325.0
         temperature: 500.0
-        velocity: "0, 0"
+        velocity: "0, 0, 0"
+    - !ablate::finiteVolume::fieldFunctions::Euler
+      region:
+        name: boundaryCells
+      state: *initFlowState
 solvers:
   - !ablate::radiation::VolumeRadiation
     id: radiation
     eos: *eos
     region:
-      name: interiorFlowRegion
+      name: flowRegion
     fieldBoundary:
       name: boundaryFaces
     rays: 15
@@ -110,7 +114,7 @@ solvers:
   # use a boundary solver to update the cells in the wallBoundaryCells region to represent standard wall
   - !ablate::boundarySolver::BoundarySolver
     id: outerSphereBoundary
-    region: *R1
+    region: *R2
     fieldBoundary:
       name: boundaryFaces
     mergeFaces: true
@@ -120,7 +124,7 @@ solvers:
         temperature: 400.0
   - !ablate::boundarySolver::BoundarySolver
     id: outerSphereBoundary
-    region: *R0
+    region: *R2
     fieldBoundary:
       name: boundaryFaces
     mergeFaces: true

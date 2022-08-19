@@ -12,7 +12,7 @@ timestepper:
     ts_type: rk
     ts_max_time: 1000000
     ts_max_steps: 5000000
-    ts_dt: 1.0E-10
+    ts_dt: 1.0E-5
     # petsc adaptive timestepping can be turned on to replace physics timestepping
     #ts_adapt_safety: 0.9
     #ts_adapt_monitor: ""
@@ -93,7 +93,11 @@ timestepper:
         eos: *eos
         pressure: 101325.0
         temperature: 500.0
-        velocity: "0, 0"
+        velocity: "0, 0, 0"
+    - !ablate::finiteVolume::fieldFunctions::Euler
+      region:
+        name: boundaryCells
+      state: *initFlowState
 solvers:
   - !ablate::radiation::VolumeRadiation
     id: radiation
