@@ -305,3 +305,14 @@ solvers:
               radius: 0.025
           insideValues: "t < .06? 500000 : 0.0 "# 150 KW/m2
         massFractions: *fuelMassFrac
+  - !ablate::radiation::VolumeRadiation
+    id: radiation
+    region:
+      name: flowRegion
+    fieldBoundary:
+      name: fuelGrainBoundaryFaces
+    rays: 10
+    properties: !ablate::eos::radiationProperties::Zimmer
+      eos: *eos
+    log: !ablate::monitors::logs::StdOut
+      name: radlog
