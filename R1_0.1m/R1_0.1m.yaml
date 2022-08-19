@@ -1,4 +1,5 @@
-# testing 2d gmsh files, trying to apply sublimation solver to a simple cylinder before an actual combustion chamber
+# Radiative equilibrium problem for testing the coupling of the radiation solver with the
+# energy equation. This serves as verification for the radiation solver.
 ---
 environment:
   title: _SphRadEq_0.1
@@ -37,13 +38,7 @@ timestepper:
           name: R1
       - !ablate::domain::modifiers::CompleteLabel
         region:
-          name: outlet
-      - !ablate::domain::modifiers::CompleteLabel
-        region:
-          name: fuelGrain
-      - !ablate::domain::modifiers::CompleteLabel
-        region:
-          name: chamberWalls
+          name: R2
       # extrude all boundaries to add needed ghost cells for the boundary solver
       - !ablate::domain::modifiers::ExtrudeLabel
         # extrude the boundary cells marked
@@ -66,39 +61,12 @@ timestepper:
       #        thickness: 0.001
       # if using mpi, this modifier distributes cells
       - !ablate::domain::modifiers::DistributeWithGhostCells
-        ghostCellDepth: 2
+        ghostCellDepth: 1
       - !ablate::domain::modifiers::FvmCheck
         region:
           name: flowRegion
         expectedFaceCount: 4
         expectedNodeCount: 4
-      #define the boundary between the flow region and the fuel grain
-      - !ablate::domain::modifiers::TagLabelInterface
-        leftRegion:
-          name: flowRegion
-        rightRegion: *R1
-        boundaryFaceRegion:
-          name: fuelGrainBoundaryFaces
-        rightBoundaryCellRegion:
-          name: fuelGrainBoundaryCells
-      #      # Remove the fuelGrainBoundaryFaces from the flow region, necessary for sublimation surfaces
-      - !ablate::domain::modifiers::SubtractLabel
-        differenceRegion:
-          name: interiorFlowRegion
-        minuendRegion:
-          name: flowRegion
-        subtrahendRegions:
-          - name: fuelGrainBoundaryFaces
-        incompleteLabel: true
-      # tagging outlet boundary for rocket monitor
-      - !ablate::domain::modifiers::TagLabelInterface
-        leftRegion:
-          name: interiorFlowRegion
-        rightRegion: *R2
-        boundaryFaceRegion:
-          name: outletBoundaryFaces
-        leftBoundaryCellRegion:
-          name: outletFlowCells
       # the DmViewFromOptions "modifier" does not modify the dm but outputs. Used to examine dm for errors
     #      - !ablate::monitors::DmViewFromOptions
     #        options: ascii
@@ -108,151 +76,37 @@ timestepper:
     #        options: ":$OutputDirectory/mesh.tex:ascii_latex"
     #       the $OutputDirectory is a special keyword that gets parsed by ablate to update to the output directory
     fields:
-      # all fields must be defined before solvers.  The ablate::finiteVolume::CompressibleFlowFields is a helper
-      # class that creates the required fields for the compressible flow solver (rho, rhoE, rhoU, ...)
       - !ablate::finiteVolume::CompressibleFlowFields
-        eos: !ablate::eos::TChem  &eos
-          mechFile: ../mechanisms/grimech30.mech.dat
-          thermoFile: ../mechanisms/grimech30.thermo.dat
-        conservedFieldOptions:
-          petscfv_type: upwind
+        eos: !ablate::eos::PerfectGas &eos
+          parameters:
+            gamma: 1.4
+            Rgas: 287.0
+        name: domain
       - !ablate::domain::FieldDescription
-        name: pressure
+        name: error
         type: FV
         location: aux
-        region:
-          name: domain
   # set the initial conditions of the flow field
   initialization:
     - !ablate::finiteVolume::fieldFunctions::Euler
       state: &initFlowState
         eos: *eos
         pressure: 101325.0
-        temperature: !ablate::mathFunctions::geom::Sphere
-          center: [0.125, 0.0]
-          radius: 0.12
-          insideValues: [1500]
-          outsideValues: [298.15]
+        temperature: 500.0
         velocity: "0, 0"
-        massFractions: !ablate::finiteVolume::fieldFunctions::MassFractions
-          &airMassFrac
-          eos: *eos
-          values:
-            - fieldName: O2
-              field: 0.22968530497578818
-            - fieldName: N2
-              field: 0.7703146950242119
-    - !ablate::finiteVolume::fieldFunctions::DensityMassFractions
-      state: *initFlowState
-    - !ablate::finiteVolume::fieldFunctions::Euler
-      region:
-        name: boundaryCells
-      state: *initFlowState
-    - !ablate::finiteVolume::fieldFunctions::DensityMassFractions
-      region:
-        name: boundaryCells
-      state: *initFlowState
-    - !ablate::finiteVolume::fieldFunctions::Euler
-      region:
-        name: fuelGrainBoundaryCells
-      state: &fuelFieldState
-        eos: *eos
-        temperature: 653.0
-        pressure: 101325
-        velocity: "0.0, 0.0"
-        massFractions: !ablate::finiteVolume::fieldFunctions::MassFractions
-          &fuelMassFrac
-          eos: *eos
-          values:
-            - fieldName: H2
-              field: 3.11573908295E-07
-            - fieldName: CH4
-              field: 1.37640311576E-01
-            - fieldName: CO
-              field: 5.59511130432E-01
-            - fieldName: CO2
-              field: 2.67621505110E-05
-            - fieldName: C2H2
-              field: 8.12221908950E-04
-            - fieldName: C2H4
-              field: 8.12221908950E-04
-            - fieldName: C2H6
-              field: 2.61085823724E-02
-            - fieldName: CH2CO
-              field: 2.00544314596E-07
-            - fieldName: C3H8
-              field: 2.51803728765E-02
-    - !ablate::finiteVolume::fieldFunctions::DensityMassFractions
-      region:
-        name: fuelGrainBoundaryCells
-      state: *fuelFieldState
 solvers:
-  - !ablate::finiteVolume::CompressibleFlowSolver
-    id: vortexFlowField
-    # only apply this solver to the flowRegion
+  - !ablate::radiation::VolumeRadiation
+    id: radiation
+    eos: *eos
     region:
       name: interiorFlowRegion
-    additionalProcesses:
-      - !ablate::finiteVolume::processes::PressureGradientScaling
-        &pgs
-        eos: *eos
-        alphaInit: 1.0
-        maxAlphaAllowed: 100.0
-        domainLength: 2.105
-        log: !ablate::monitors::logs::StdOut
-      - !ablate::finiteVolume::processes::TChemReactions
-        eos: *eos
-    # a flux calculator must be specified to so solver for advection
-    fluxCalculator: !ablate::finiteVolume::fluxCalculator::AusmpUp
-      pgs: *pgs
-    # physics time stepping is turned on to control size of time steps
-    computePhysicsTimeStep: true
-    # the cfl is used to compute the physics time step
-    parameters:
-      cfl: 0.25
-    # set the eos and transport
-    eos: *eos
-    transport: !ablate::eos::transport::Sutherland
-      &transportModel
-      eos: *eos
-  # use a boundary solver enforce an inlet
-  - !ablate::boundarySolver::BoundarySolver
-    id: inlet
-    region: *R1
     fieldBoundary:
       name: boundaryFaces
-    mergeFaces: true
-    processes:
-      - !ablate::boundarySolver::lodi::Inlet
-        eos: *eos
-        pgs: *pgs
-        velocity: "t < 0.025 ? 0 : min(42.4881033311,42.4881033311*(t-0.025)/0.1) , 0.0"
-  # use a boundary solver allow outward flow
-  - !ablate::boundarySolver::BoundarySolver
-    id: outlet
-    region: *R2
-    fieldBoundary:
-      name: boundaryFaces
-    mergeFaces: true
-    processes:
-      - !ablate::boundarySolver::lodi::OpenBoundary
-        eos: *eos
-        reflectFactor: 0.0
-        referencePressure: 101325.0
-        maxAcousticsLength: 2.105
-        pgs: *pgs
-  #  - !ablate::radiation::VolumeRadiation
-  #    id: radiation
-  #    eos: *eos
-  #    region:
-  #      name: interiorFlowRegion
-  #    fieldBoundary:
-  #      name: boundaryFaces
-  #    rays: 10
-  #    properties: !ablate::eos::radiationProperties::Zimmer
-  #      eos: *eos
-  #    log: !ablate::monitors::logs::StdOut
-  #      name: radlog
+    rays: 15
+    properties: !ablate::eos::radiationProperties::Constant
+      absorptivity: 1
+    log: !ablate::monitors::logs::StdOut
+      name: radlog
   # use a boundary solver to update the cells in the wallBoundaryCells region to represent standard wall
   - !ablate::boundarySolver::BoundarySolver
     id: outerSphereBoundary
@@ -263,7 +117,6 @@ solvers:
     processes:
       - !ablate::boundarySolver::lodi::IsothermalWall
         eos: *eos
-        pgs: *pgs
         temperature: 400.0
   - !ablate::boundarySolver::BoundarySolver
     id: outerSphereBoundary
@@ -274,5 +127,4 @@ solvers:
     processes:
       - !ablate::boundarySolver::lodi::IsothermalWall
         eos: *eos
-        pgs: *pgs
         temperature: 800.0
