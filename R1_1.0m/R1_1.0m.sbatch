@@ -2,7 +2,7 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -N 128
+#SBATCH -N 10
 #SBATCH -J RadEq_R1_1.0
 #SBATCH -t 24:00:00
 #SBATCH -p pbatch
