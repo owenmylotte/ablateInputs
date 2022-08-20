@@ -94,6 +94,10 @@ timestepper:
         pressure: 101325.0
         temperature: 500.0
         velocity: "0, 0, 0"
+    - !ablate::finiteVolume::fieldFunctions::Euler
+      region:
+        name: boundaryCells
+      state: *initFlowState
 solvers:
   - !ablate::radiation::VolumeRadiation
     id: radiation
@@ -119,7 +123,7 @@ solvers:
         eos: *eos
         temperature: 400.0
   - !ablate::boundarySolver::BoundarySolver
-    id: outerSphereBoundary
+    id: innerSphereBoundary
     region: *R1
     fieldBoundary:
       name: boundaryFaces
