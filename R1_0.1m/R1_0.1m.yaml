@@ -2,25 +2,25 @@
 # energy equation. This serves as verification for the radiation solver.
 ---
 environment:
-  title: _SphRadEq_0.1
+  title: _SphRadEq_0.1m
   tagDirectory: true
 arguments:
   dm_plex_gmsh_use_regions: true
 timestepper:
   # setup default controls for the time stepper
   arguments:
-    ts_type: rk
+    ts_type: euler
     ts_max_time: 1000000
-    ts_max_steps: 5000000
-    ts_dt: 1.0E-5
+    ts_max_steps: 500
+    ts_dt: 1.0E-2
     # petsc adaptive timestepping can be turned on to replace physics timestepping
-    #ts_adapt_safety: 0.9
-    #ts_adapt_monitor: ""
+    #    ts_adapt_safety: 0.9
+    #    ts_adapt_monitor: ""
     ts_adapt_type: none
   # io controls how often the results are saved to a file for visualization and restart
   io:
     #  results are outputted every 0.001 seconds of real simulation time
-    interval: !ablate::io::interval::SimulationTimeInterval 0.001
+    interval: 0 #!ablate::io::interval::SimulationTimeInterval 0.001
   # load in a mesh file
   domain: !ablate::domain::MeshFile
     name: flowRegionMesh
@@ -30,7 +30,8 @@ timestepper:
       dm_refine: 0
       dm_plex_check_all: true
       dm_partition_view: true
-      dm_distribute_overlap: 1
+      dm_plex_hash_location: true
+      dm_distribute_overlap: 0
     modifiers:
       # label the vertices of regions with all faces labeled
       - !ablate::domain::modifiers::CompleteLabel
@@ -45,23 +46,36 @@ timestepper:
         regions:
           - &R1
             name: R1
-            value: 7
-          - &R2
-            name: R2
             value: 8
         # mark all the resulting boundary faces with boundaryFaces label
         boundaryRegion:
-          name: boundaryFaces
+          name: R1BoundaryFaces
+        #          thickness: 500
         # tag the original mesh as the flow region
         originalRegion:
           name: flowRegion
         # tag the new boundary cells for easy boundary condition specifications
         extrudedRegion:
-          name: boundaryCells
-      #        thickness: 0.001
+          name: R1BoundaryCells
+          thickness: 500
+      - !ablate::domain::modifiers::ExtrudeLabel
+        # extrude the boundary cells marked
+        regions:
+          - &R2
+            name: R2
+            value: 9
+        # mark all the resulting boundary faces with boundaryFaces label
+        boundaryRegion:
+          name: R2BoundaryFaces
+        # tag the original mesh as the flow region
+        originalRegion:
+          name: flowRegion
+        # tag the new boundary cells for easy boundary condition specifications
+        extrudedRegion:
+          name: R2BoundaryCells
       # if using mpi, this modifier distributes cells
       - !ablate::domain::modifiers::DistributeWithGhostCells
-        ghostCellDepth: 1
+        ghostCellDepth: 2
       - !ablate::domain::modifiers::FvmCheck
         region:
           name: flowRegion
@@ -82,31 +96,55 @@ timestepper:
             gamma: 1.4
             Rgas: 287.0
         name: domain
-      - !ablate::domain::FieldDescription
-        name: error
-        type: FV
-        location: aux
-  # set the initial conditions of the flow field
   initialization:
     - !ablate::finiteVolume::fieldFunctions::Euler
       state: &initFlowState
         eos: *eos
         pressure: 101325.0
-        temperature: 500.0
+        temperature: !ablate::mathFunctions::geom::Union
+          geometries:
+            - !ablate::mathFunctions::geom::Sphere # sphere touching lower half of fuel grain
+              center: [ 0, 0, 0 ]
+              radius: 0.25
+          insideValues: [ 1500 ]
+          outsideValues: [ 298.15 ]
         velocity: "0, 0, 0"
     - !ablate::finiteVolume::fieldFunctions::Euler
       region:
-        name: boundaryCells
-      state: *initFlowState
+        name: R1BoundaryCells
+      state: &R1State
+        eos: *eos
+        temperature: 800.0
+        pressure: 101325
+        velocity: "0, 0, 0"
+    - !ablate::finiteVolume::fieldFunctions::Euler
+      region:
+        name: R2BoundaryCells
+      state: &R2State
+        eos: *eos
+        temperature: 400.0
+        pressure: 101325
+        velocity: "0, 0, 0"
 solvers:
+  - !ablate::finiteVolume::CompressibleFlowSolver
+    id: vortexFlowField
+    region:
+      name: flowRegion
+    parameters:
+      cfl: 0.9
+    monitors:
+      - !ablate::monitors::MaxMinAverage
+        field: euler
+    eos: *eos
+  #    computePhysicsTimeStep: true
   - !ablate::radiation::VolumeRadiation
     id: radiation
     eos: *eos
     region:
-      name: interiorFlowRegion
+      name: flowRegion
     fieldBoundary:
-      name: boundaryFaces
-    rays: 15
+      name: R1BoundaryFaces
+    rays: 5
     properties: !ablate::eos::radiationProperties::Constant
       absorptivity: 1
     log: !ablate::monitors::logs::StdOut
@@ -116,19 +154,17 @@ solvers:
     id: outerSphereBoundary
     region: *R2
     fieldBoundary:
-      name: boundaryFaces
+      name: R2BoundaryFaces
     mergeFaces: true
     processes:
       - !ablate::boundarySolver::lodi::IsothermalWall
         eos: *eos
-        temperature: 400.0
   - !ablate::boundarySolver::BoundarySolver
-    id: outerSphereBoundary
+    id: innerSphereBoundary
     region: *R1
     fieldBoundary:
-      name: boundaryFaces
+      name: R1BoundaryFaces
     mergeFaces: true
     processes:
       - !ablate::boundarySolver::lodi::IsothermalWall
         eos: *eos
-        temperature: 800.0
