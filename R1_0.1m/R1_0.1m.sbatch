@@ -2,7 +2,7 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -N 2
+#SBATCH -N 1
 #SBATCH -J RadEq_R1_0.1
 #SBATCH -t 24:00:00
 #SBATCH -p pbatch
@@ -32,7 +32,7 @@ cd tmp_$SLURM_JOBID
 export TITLE=RadEq_R1_0.1_360
 
 ##### Launch parallel job using srun
-srun -n72 /g/g20/mylotte1/ablateOpt/ablate \
+srun -n10 /g/g20/mylotte1/ablateOpt/ablate \
 	--input /p/lustre1/mylotte1/ablateInputs/R1_0.1m/R1_0.1m.yaml
 
 echo 'Done'
