@@ -12,7 +12,7 @@ timestepper:
     ts_type: euler
     ts_max_time: 1.0E6
     ts_max_steps: 10000000000
-    ts_dt: 1.0E-10
+    ts_dt: 1.0E-9
     # petsc adaptive timestepping can be turned on to replace physics timestepping
     #    ts_adapt_safety: 0.9
     #    ts_adapt_monitor: ""
@@ -20,7 +20,7 @@ timestepper:
   # io controls how often the results are saved to a file for visualization and restart
   io:
     #  results are outputted every 0.001 seconds of real simulation time
-    interval: 10 #!ablate::io::interval::SimulationTimeInterval 0.001
+    interval: 100 #!ablate::io::interval::SimulationTimeInterval 0.001
   # load in a mesh file
   domain: !ablate::domain::MeshFile
     name: flowRegionMesh
@@ -124,8 +124,8 @@ solvers:
       name: flowRegion
     fieldBoundary:
       name: R1BoundaryFaces
-    rays: 15
-    interval: 10
+    rays: 5
+    interval: 100
     properties: !ablate::eos::radiationProperties::Constant
       absorptivity: 1
     log: !ablate::monitors::logs::StdOut
