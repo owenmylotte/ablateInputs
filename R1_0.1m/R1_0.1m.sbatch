@@ -32,7 +32,7 @@ cd tmp_$SLURM_JOBID
 export TITLE=RadEq_R1_0.1_360
 
 ##### Launch parallel job using srun
-srun -n10 /g/g20/mylotte1/ablateOpt/ablate \
+srun -n36 /g/g20/mylotte1/ablateOpt/ablate \
 	--input /p/lustre1/mylotte1/ablateInputs/R1_0.1m/R1_0.1m.yaml
 
 echo 'Done'
