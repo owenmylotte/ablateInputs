@@ -124,7 +124,7 @@ solvers:
       name: flowRegion
     fieldBoundary:
       name: R1BoundaryFaces
-    rays: 15
+    rays: 5
     interval: 100
     properties: !ablate::eos::radiationProperties::Constant
       absorptivity: 1
