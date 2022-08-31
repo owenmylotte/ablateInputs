@@ -11,7 +11,7 @@ timestepper:
   arguments:
     ts_type: euler
     ts_max_time: 1.0E6
-    ts_max_steps: 10000000000
+    ts_max_steps: 10
     ts_dt: 1.0E-9
     # petsc adaptive timestepping can be turned on to replace physics timestepping
     #    ts_adapt_safety: 0.9
@@ -121,21 +121,19 @@ solvers:
   - !ablate::radiation::VolumeRadiation
     id: radiation
     eos: *eos
-    region:
-      name: flowRegion
+    region: *R2
     fieldBoundary:
-      name: R1BoundaryFaces
+      name: BoundaryFaces
     rays: 5
-    interval: 100
+    interval: 1
     properties: !ablate::eos::radiationProperties::Constant
       absorptivity: 1
     log: !ablate::monitors::logs::StdOut
       name: radlog
-  # use a boundary solver to update the cells in the wallBoundaryCells region to represent standard wall
-  - !ablate::boundarySolver::DebugBoundarySolver
+#   use a boundary solver to update the cells in the wallBoundaryCells region to represent standard wall
+  - !ablate::boundarySolver::BoundarySolver
     id: sphereBoundary
-    region:
-      name: BoundaryCells
+    region: *R1
     fieldBoundary:
       name: BoundaryFaces
     mergeFaces: true
