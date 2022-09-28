@@ -1,0 +1,81 @@
+---
+
+environment:
+  title: _planeEquilibrium
+  tagDirectory: true
+arguments: { }
+timestepper:
+  name: theMainTimeStepper
+  arguments:
+    ts_type: rk
+    ts_max_steps: 2000000000
+    ts_dt: 1.0E-10
+    ts_adapt_safety: 0.8
+  domain: !ablate::domain::BoxMeshBoundaryCells
+    name: simpleBoxField
+    faces: [ 100 ]
+    lower: [ 0 ]
+    upper: [ 1 ]
+    simplex: false
+    options:
+      dm_refine: 0
+      dm_plex_hash_location: true
+    preModifiers:
+      - !ablate::domain::modifiers::DistributeWithGhostCells
+        ghostCellDepth: 2
+    postModifiers:
+      - !ablate::domain::modifiers::GhostBoundaryCells
+    fields:
+      - !ablate::finiteVolume::CompressibleFlowFields
+        eos: !ablate::eos::PerfectGas &eos
+          parameters:
+            gamma: 1.4
+            Rgas: 287.0
+        name: domain
+  initialization:
+    - !ablate::finiteVolume::fieldFunctions::Euler
+      state:
+        eos: *eos
+        pressure: 1
+        temperature: "2000 - 500*x"
+        velocity: 0.
+    - !ablate::finiteVolume::fieldFunctions::Euler
+      region:
+        name: boundaryCells
+      state:
+        eos: *eos
+        temperature: "x < 0.5 ? 2000 : 1000"
+        pressure: 1
+        velocity: 0.0
+solvers:
+  - !ablate::finiteVolume::CompressibleFlowSolver
+    id: vortexFlowField
+    region:
+      name: interiorCells
+    parameters:
+      cfl: 0.85
+    eos: *eos
+    monitors:
+      - !ablate::monitors::TimeStepMonitor
+        interval: 0
+  - !ablate::boundarySolver::BoundarySolver
+    id: openBoundary
+    region:
+      name: boundaryCells
+    fieldBoundary:
+      name: boundaryFaces
+    processes:
+      - !ablate::boundarySolver::lodi::IsothermalWall
+        eos: *eos
+  - !ablate::radiation::VolumeRadiation
+    id: radiation
+    region:
+      name: interiorCells
+    fieldBoundary:
+      name: boundaryCells
+    rays: 5
+    interval: 1
+    properties: !ablate::eos::radiationProperties::Constant
+      absorptivity: 1
+    log: !ablate::monitors::logs::StdOut
+      name: radlog
