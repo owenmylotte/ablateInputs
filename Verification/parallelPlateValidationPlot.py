@@ -64,7 +64,7 @@ l2_irradiation = np.array(
 
 plt.figure(figsize=(6, 4), num=2)
 plt.title("Parallel Plates Irradiation Convergence", pad=1)  # TITLE HERE
-plt.loglog(ref_irradiation, l2_irradiation, c='blue', linewidth=1, marker='.')
+plt.loglog(ref_irradiation[0:9], l2_irradiation[0:9], c='blue', linewidth=1, marker='.')
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
 plt.xlabel('Ray Number', fontsize=10)
@@ -83,6 +83,7 @@ dataAblate_15rays = np.loadtxt("equilibriumResult01_15rays.txt", delimiter=' ', 
 dataAblate_10rays = np.loadtxt("equilibriumResult01_10rays.txt", delimiter=' ', skiprows=1, dtype=float)
 dataAblate_5rays = np.loadtxt("equilibriumResult01_5rays.txt", delimiter=' ', skiprows=1, dtype=float)
 dataAblate10n = np.loadtxt("equilibriumResult10.txt", delimiter=' ', skiprows=1, dtype=float)
+dataAblate10sh = np.loadtxt("equilibriumResult_raySharing10.txt", delimiter=' ', skiprows=1, dtype=float)
 
 plt.figure(figsize=(6, 4), num=3)
 plt.title("Radiative Equilibrium", pad=1)  # TITLE HERE
@@ -96,8 +97,9 @@ plt.scatter(dataAblate_500rays[:, 0], dataAblate_500rays[:, 5], c='red', s=4)
 # plt.scatter(dataAblate_10rays[:, 0], dataAblate_10rays[:, 5], c='red', s=4)
 # plt.scatter(dataAblate_5rays[:, 0], dataAblate_5rays[:, 5], c='red', s=4)
 plt.scatter(dataAblate10n[:, 0], dataAblate10n[:, 5], c='green', s=4)
+plt.scatter(dataAblate10sh[:, 0], dataAblate10sh[:, 6], c='purple', s=4)
 
-plt.legend(["Simit", "ABLATE (n = 1)", "ABLATE (n = 10)"], loc="upper right", prop={'size': 7})
+plt.legend(["Simit", "ABLATE (n = 1)", "ABLATE (n = 10)", "Ray Sharing"], loc="upper right", prop={'size': 7})
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
 plt.xlabel('Postion [meters]', fontsize=10)
