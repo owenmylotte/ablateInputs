@@ -33,6 +33,6 @@ export TITLE=SublimationTest2
 
 ##### Launch parallel job using srun
 srun -N1 -n1 /g/g20/mylotte1/ablateOpt/ablate \
-	--input /p/lustre1/mylotte1/ablateInputs/SmallCases/sublimationTest2.yaml
+	--input /p/lustre1/mylotte1/ablateInputs/SmallCases/sublimationTest2.yaml -log_view
 
 echo 'Done'
