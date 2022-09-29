@@ -72,6 +72,8 @@ plt.ylabel('Error', fontsize=10)
 plt.savefig('PlatesIrradiation_Convergence', dpi=1000, bbox_inches='tight')
 plt.show()
 
+## Scaling Stuff
+
 # %% Radiative Equilibrium Plot
 dataSimit = np.loadtxt("PlanarEquilibrium01.txt", delimiter=' ', skiprows=0, dtype=float)
 dataAblate_500rays = np.loadtxt("equilibriumResult01_500rays.txt", delimiter=' ', skiprows=1, dtype=float)
@@ -127,6 +129,8 @@ plt.ylabel('Error', fontsize=10)
 plt.savefig('Equilibrium_Convergence', dpi=1000, bbox_inches='tight')
 plt.show()
 
+## Scaling Stuff
+
 # %% Diffusion Flame Verification
 diffusionFlame = np.loadtxt("diffusionFlame01.txt", delimiter=' ', skiprows=1,
                             dtype=float)  # Import data, skip first row (header), float data format
@@ -151,3 +155,5 @@ plt.show()
 # # %% Error Convergence Plot
 
 print(l2norm(diffusionFlame[:, 5], flameSimit[:, 1]))
+
+## Scaling Stuff
