@@ -8,12 +8,12 @@ timestepper:
   name: theMainTimeStepper
   arguments:
     ts_type: rk
-    ts_max_steps: 2000000000
+    ts_max_steps: 200
     ts_dt: 1.0E-10
     ts_adapt_safety: 0.8
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 100 ]
+    faces: [ 10000 ]
     lower: [ 0 ]
     upper: [ 1 ]
     simplex: false
@@ -73,7 +73,7 @@ solvers:
       name: interiorCells
     fieldBoundary:
       name: boundaryCells
-    rays: 5
+    rays: 500
     interval: 1
     properties: !ablate::eos::radiationProperties::Constant
       absorptivity: 1

@@ -8,12 +8,12 @@ timestepper:
   name: theMainTimeStepper
   arguments:
     ts_type: rk
-    ts_max_steps: 250000000
+    ts_max_steps: 5000
     ts_dt: 1.0E-10
     ts_adapt_safety: 0.8
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 100 ]
+    faces: [ 10000 ]
     lower: [ 0 ]
     upper: [ 0.01 ]
     simplex: false
@@ -33,15 +33,15 @@ timestepper:
           name: domain
         boundaryFaceRegion:
           name: boundaryFaceLeft
-      - !ablate::domain::modifiers::SubtractLabel
-        # define the flow solver without the rightBoundary
-        differenceRegion:
-          name: flowRegion
-        minuendRegion:
-          name: interiorCells
-        subtrahendRegions:
-          - name: boundaryFaceLeft
-        incompleteLabel: true
+      #      - !ablate::domain::modifiers::SubtractLabel
+      #        # define the flow solver without the rightBoundary
+      #        differenceRegion:
+      #          name: flowRegion
+      #        minuendRegion:
+      #          name: interiorCells
+      #        subtrahendRegions:
+      #          - name: boundaryFaceLeft
+      #        incompleteLabel: true
       - !ablate::domain::modifiers::GhostBoundaryCells
     fields:
       - !ablate::finiteVolume::CompressibleFlowFields
@@ -123,8 +123,8 @@ solvers:
     parameters:
       cfl: 0.75
     monitors:
-      - !ablate::monitors::CurveMonitor
-        interval: 1000
+      #      - !ablate::monitors::CurveMonitor
+      #        interval: 1000
       - !ablate::monitors::TimeStepMonitor
         interval: 1000
     eos: *eos
@@ -141,48 +141,48 @@ solvers:
       - !ablate::boundarySolver::lodi::Inlet
         eos: *eos
         massFractions: *airMassFrac
-#  - !ablate::boundarySolver::BoundarySolver
-#    id: openBoundary
-#    region:
-#      name: boundaryCellsLeft
-#    fieldBoundary:
-#      name: boundaryFaces
-#    processes:
-#      - !ablate::boundarySolver::lodi::Inlet
-#        eos: *eos
-#        massFractions: *fuelMassFrac
   - !ablate::boundarySolver::BoundarySolver
-    id: slab boundary
+    id: openBoundary
     region:
       name: boundaryCellsLeft
     fieldBoundary:
       name: boundaryFaces
     processes:
-      - !ablate::boundarySolver::physics::Sublimation
-        latentHeatOfFusion: 941000.000
-        transportModel: *transportModel
+      - !ablate::boundarySolver::lodi::Inlet
         eos: *eos
         massFractions: *fuelMassFrac
-        diffusionFlame: true
-        radiationInterval: 1000
-        radiation: !ablate::radiation::Radiation
-            id: surfaceflux
-            region:
-              name: interiorCells
-            fieldBoundary:
-              name: boundaryCells
-            rays: 250
-            properties: !ablate::eos::radiationProperties::Zimmer
-              eos: *eos
-            log: !ablate::monitors::logs::StdOut
-              name: surfaceradlog
+  #  - !ablate::boundarySolver::BoundarySolver
+  #    id: slab boundary
+  #    region:
+  #      name: boundaryCellsLeft
+  #    fieldBoundary:
+  #      name: boundaryFaces
+  #    processes:
+  #      - !ablate::boundarySolver::physics::Sublimation
+  #        latentHeatOfFusion: 941000.000
+  #        transportModel: *transportModel
+  #        eos: *eos
+  #        massFractions: *fuelMassFrac
+  #        diffusionFlame: true
+  #        radiationInterval: 1000
+  #        radiation: !ablate::radiation::Radiation
+  #          id: surfaceflux
+  #          region:
+  #            name: interiorCells
+  #          fieldBoundary:
+  #            name: boundaryCells
+  #          rays: 250
+  #          properties: !ablate::eos::radiationProperties::Zimmer
+  #            eos: *eos
+  #          log: !ablate::monitors::logs::StdOut
+  #            name: surfaceradlog
   - !ablate::radiation::VolumeRadiation
     id: radiation
     region:
       name: interiorCells
     fieldBoundary:
       name: boundaryCells
-    rays: 250
+    rays: 500
     interval: 1000
     properties: !ablate::eos::radiationProperties::Zimmer
       eos: *eos
