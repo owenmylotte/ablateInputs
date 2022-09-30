@@ -2,7 +2,7 @@
 ---
 environment:
   title: _3dSlabBurner
-  tagDirectory: false
+  tagDirectory: true
 arguments:
   outputAuxVector: true
 timestepper:
@@ -17,11 +17,12 @@ timestepper:
     interval: 1000
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [100,20,20]
+    faces: [50,10,10]
     lower: [ 0.0, 0.0, -0.0127]
     upper: [ 0.165354, 0.027686, 0.0127]
     simplex: false
-    options: {}
+    options:
+      dm_plex_hash_location: true
     preModifiers:
       # distribute the mesh across the mpi rank with ghost cells
       - !ablate::domain::modifiers::DistributeWithGhostCells
@@ -290,22 +291,22 @@ solvers:
             name: interiorCells
           fieldBoundary:
             name: boundaryCells
-          rays: 30
+          rays: 15
           properties: !ablate::eos::radiationProperties::Zimmer
             eos: *eos
           log: !ablate::monitors::logs::StdOut
             name: surfaceradlog
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
-  - !ablate::radiation::VolumeRadiation
-    id: radiation
-    region:
-      name: interiorCells
-    fieldBoundary:
-      name: boundaryCells
-    rays: 15
-    interval: 1000
-    properties: !ablate::eos::radiationProperties::Zimmer
-      eos: *eos
-    log: !ablate::monitors::logs::StdOut
-      name: radlog
+#  - !ablate::radiation::VolumeRadiation
+#    id: radiation
+#    region:
+#      name: interiorCells
+#    fieldBoundary:
+#      name: boundaryCells
+#    rays: 4
+#    interval: 1000
+#    properties: !ablate::eos::radiationProperties::Zimmer
+#      eos: *eos
+#    log: !ablate::monitors::logs::StdOut
+#      name: radlog

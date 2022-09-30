@@ -39,17 +39,17 @@ plt.scatter(data50[:, 0], data50[:, 3], c='blue', s=4)
 plt.scatter(data100[:, 0], data100[:, 3], c='green', s=4)
 plt.scatter(data250[:, 0], data250[:, 3], c='yellow', s=4)
 plt.scatter(data500[:, 0], data500[:, 3], c='orange', s=4)
+# plt.scatter(data2000[:, 0], data2000[:, 3], c='purple', s=4)
 plt.scatter(data1000[:, 0], data1000[:, 3], c='red', s=4)
-plt.scatter(data2000[:, 0], data2000[:, 3], c='purple', s=4)
 # plt.scatter(data5000[:, 0], data5000[:, 3], c='black', s=4)
-plt.plot(data500[:, 0], data500[:, 5], c='black', linewidth=2)
+plt.plot(data500[:, 0], data500[:, 5], c='black', linewidth=1)
 
-plt.legend(["dTheta = 3.6", "dTheta = 1.8", "dTheta = 0.72", "dTheta = 0.36", "dTheta = 0.18", "dTheta = 0.09", "Analytical Solution"],
+plt.legend([r"$d \theta = 3.6$", r"$d \theta = 1.8$", r"$d \theta = 0.72$", r"$d \theta = 0.36$", r"$d \theta = 0.18$", "Analytical Solution"],#, r"$d \theta = 0.09$", "Analytical Solution"],
            loc="upper right", prop={'size': 7})
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
-plt.xlabel('Postion [meters]', fontsize=10)
-plt.ylabel('Irradiation [Watts]', fontsize=10)
+plt.xlabel('Postion $[m]$', fontsize=10)
+plt.ylabel(r'Irradiation $[\frac{W}{m^3}]$', fontsize=10)
 plt.savefig('PlatesValidation1D', dpi=1000, bbox_inches='tight')
 plt.show()
 
@@ -59,16 +59,16 @@ ref_irradiation = [5 * 10, 10 * 20, 25 * 50, 50 * 100, 100 * 200, 250 * 500, 500
 l2_irradiation = np.array(
     [l2norm(data5[:, 3], data100[:, 5]), l2norm(data10[:, 3], data100[:, 5]), l2norm(data25[:, 3], data100[:, 5]),
      l2norm(data50[:, 3], data100[:, 5]), l2norm(data100[:, 3], data100[:, 5]), l2norm(data250[:, 3], data250[:, 5]),
-     l2norm(data500[:, 3], data500[:, 5]), l2norm(data1000[:, 3], data500[:, 5]), l2norm(data2000[:, 3], data2000[:, 5]),
+     l2norm(data500[:, 3], data500[:, 5]), l2norm(data1000[:, 3], data2000[:, 5]), l2norm(data2000[:, 3], data2000[:, 5]),
      l2norm(data5000[:, 3], data5000[:, 5])])
 
 plt.figure(figsize=(6, 4), num=2)
 plt.title("Parallel Plates Irradiation Convergence", pad=1)  # TITLE HERE
-plt.loglog(ref_irradiation[0:9], l2_irradiation[0:9], c='blue', linewidth=1, marker='.')
+plt.loglog(ref_irradiation[0:8], l2_irradiation[0:8], c='blue', linewidth=1, marker='.')
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
 plt.xlabel('Ray Number', fontsize=10)
-plt.ylabel('Error', fontsize=10)
+plt.ylabel('Irradiation Error', fontsize=10)
 plt.savefig('PlatesIrradiation_Convergence', dpi=1000, bbox_inches='tight')
 plt.show()
 
@@ -88,7 +88,7 @@ dataAblate10n = np.loadtxt("equilibriumResult10.txt", delimiter=' ', skiprows=1,
 dataAblate10sh = np.loadtxt("equilibriumResult_raySharing10.txt", delimiter=' ', skiprows=1, dtype=float)
 
 plt.figure(figsize=(6, 4), num=3)
-plt.title("Radiative Equilibrium", pad=1)  # TITLE HERE
+plt.title("Planar Radiative Equilibrium", pad=1)  # TITLE HERE
 plt.plot(dataSimit[:, 0], dataSimit[:, 1], c='black', linewidth=1.5)
 plt.scatter(dataAblate_500rays[:, 0], dataAblate_500rays[:, 5], c='red', s=4)
 # plt.scatter(dataAblate_250rays[:, 0], dataAblate_250rays[:, 5], c='red', s=4)
@@ -99,13 +99,13 @@ plt.scatter(dataAblate_500rays[:, 0], dataAblate_500rays[:, 5], c='red', s=4)
 # plt.scatter(dataAblate_10rays[:, 0], dataAblate_10rays[:, 5], c='red', s=4)
 # plt.scatter(dataAblate_5rays[:, 0], dataAblate_5rays[:, 5], c='red', s=4)
 plt.scatter(dataAblate10n[:, 0], dataAblate10n[:, 5], c='green', s=4)
-plt.scatter(dataAblate10sh[:, 0], dataAblate10sh[:, 6], c='purple', s=4)
+# plt.scatter(dataAblate10sh[:, 0], dataAblate10sh[:, 6], c='purple', s=4)
 
 plt.legend(["Simit", "ABLATE (n = 1)", "ABLATE (n = 10)", "Ray Sharing"], loc="upper right", prop={'size': 7})
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
-plt.xlabel('Postion [meters]', fontsize=10)
-plt.ylabel('Temperature [K]', fontsize=10)
+plt.xlabel('Postion $[m]$', fontsize=10)
+plt.ylabel('Temperature $[K]$', fontsize=10)
 plt.ylim(1400, 1900)
 plt.savefig('EquilibriumValidation1D_Parallel', dpi=1000, bbox_inches='tight')
 plt.show()
@@ -125,7 +125,7 @@ plt.loglog(ref_equilibrium, l2_equilibrium, c='blue', linewidth=1, marker='.')
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
 plt.xlabel('Ray Number', fontsize=10)
-plt.ylabel('Error', fontsize=10)
+plt.ylabel('Temperature Error', fontsize=10)
 plt.savefig('Equilibrium_Convergence', dpi=1000, bbox_inches='tight')
 plt.show()
 
@@ -138,7 +138,7 @@ flameSimit = np.loadtxt("diffusionFlameSimit.txt", delimiter=' ', skiprows=1,
                         dtype=float)  # Import data, skip first row (header), float data format
 
 plt.figure(figsize=(6, 4), num=5)
-plt.title("Diffusion Flame with Radiation", pad=1)  # TITLE HERE
+plt.title("1D Diffusion Flame with Radiation", pad=1)  # TITLE HERE
 
 plt.plot(flameSimit[:, 0], flameSimit[:, 1], c='black', linewidth=1)
 plt.scatter(diffusionFlame[:, 0], diffusionFlame[:, 5], c='red', s=4)
@@ -147,8 +147,8 @@ plt.legend(["Simit", "ABLATE"],
            loc="upper left", prop={'size': 7})
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
-plt.xlabel('Postion [meters]', fontsize=10)
-plt.ylabel('Temperature [K]', fontsize=10)
+plt.xlabel('Postion $[m]$', fontsize=10)
+plt.ylabel('Temperature $[K]$', fontsize=10)
 plt.savefig('DiffusionFlameValidation', dpi=1000, bbox_inches='tight')
 plt.show()
 
