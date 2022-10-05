@@ -2,10 +2,13 @@
 ---
 environment:
   title: _3dSlabBurner
-  tagDirectory: false
+  tagDirectory: true
 arguments:
   outputAuxVector: true
 timestepper:
+  io:
+    !ablate::io::Hdf5MultiFileSerializer
+    interval: 0
   arguments:
     ts_type: rk
     ts_max_time: 1
@@ -13,13 +16,11 @@ timestepper:
     ts_dt: 1.0e-10
     ts_adapt_monitor: ""
     ts_adapt_safety: 0.9
-  io: !ablate::io::Hdf5MultiFileSerializer
-    interval: 1000
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [50,10,10]
-    lower: [ 0.0, 0.0, -0.0127]
-    upper: [ 0.165354, 0.027686, 0.0127]
+    faces: [ 50,10,10 ]
+    lower: [ 0.0, 0.0, -0.0127 ]
+    upper: [ 0.165354, 0.027686, 0.0127 ]
     simplex: false
     options:
       dm_plex_hash_location: true
@@ -117,7 +118,7 @@ timestepper:
     - !ablate::finiteVolume::fieldFunctions::Euler
       state: &flowFieldState
         eos: *eos
-        temperature:  !ablate::mathFunctions::geom::Sphere
+        temperature: !ablate::mathFunctions::geom::Sphere
           center: [ .036,  0.01, 0.0 ]
           radius: 0.005
           insideValues: 1500
@@ -198,19 +199,19 @@ solvers:
     transport: &transportModel !ablate::eos::transport::Sutherland
       eos: *eos
     monitors:
-    - !ablate::monitors::TimeStepMonitor
-      interval: 25
-    - !ablate::monitors::PhysicsTimeStep
-      interval: 25
-    - !ablate::monitors::MixtureFractionMonitor
-      mixtureFractionCalculator: !ablate::chemistry::MixtureFractionCalculator
+      - !ablate::monitors::TimeStepMonitor
+        interval: 25
+      - !ablate::monitors::PhysicsTimeStep
+        interval: 25
+      - !ablate::monitors::MixtureFractionMonitor
+        mixtureFractionCalculator: !ablate::chemistry::MixtureFractionCalculator
+          eos: *eos
+          massFractionsFuel: *fuelMassFrac
+          massFractionsOxidizer: *oxMassFrac
+      - !ablate::monitors::TurbFlowStats
+        fields: [ velocity, temperature ]
         eos: *eos
-        massFractionsFuel: *fuelMassFrac
-        massFractionsOxidizer: *oxMassFrac
-    - !ablate::monitors::TurbFlowStats
-      fields: [velocity, temperature]
-      eos: *eos
-      interval: 25
+        interval: 25
     additionalProcesses:
       - !ablate::finiteVolume::processes::PressureGradientScaling
         &pgs
@@ -284,29 +285,33 @@ solvers:
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
-        radiationInterval: 1000
-        radiation: !ablate::radiation::Radiation
-          id: surfaceflux
-          region:
-            name: interiorCells
-          fieldBoundary:
-            name: boundaryCells
-          rays: 15
-          properties: !ablate::eos::radiationProperties::Zimmer
-            eos: *eos
-          log: !ablate::monitors::logs::StdOut
-            name: surfaceradlog
+#        radiationInterval: 50
+#        radiation: !ablate::radiation::SurfaceRadiation
+#          id: surfaceflux
+#          region:
+#            name: interiorCells
+#          fieldBoundary:
+#            name: boundaryCells
+#          rays: 5
+#          properties: !ablate::eos::radiationProperties::Zimmer
+#            eos: *eos
+#          log: !ablate::monitors::logs::StdOut
+#            name: surfaceradlog
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
-#  - !ablate::radiation::VolumeRadiation
-#    id: radiation
-#    region:
-#      name: interiorCells
-#    fieldBoundary:
-#      name: boundaryCells
-#    rays: 4
-#    interval: 1000
-#    properties: !ablate::eos::radiationProperties::Zimmer
-#      eos: *eos
-#    log: !ablate::monitors::logs::StdOut
-#      name: radlog
+  - !ablate::radiation::VolumeRadiation
+    id: radiationSolver
+    region:
+      name: interiorCells
+    interval: 100
+    radiation: !ablate::radiation::RaySharingRadiation
+      id: radiation
+      region:
+        name: interiorCells
+      fieldBoundary:
+        name: boundaryCells
+      rays: 25
+      properties: !ablate::eos::radiationProperties::Zimmer
+        eos: *eos
+      log: !ablate::monitors::logs::StdOut
+        name: radlog

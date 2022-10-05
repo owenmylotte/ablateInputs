@@ -29,7 +29,7 @@ export PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
 mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
-export TITLE=SublimationTest2
+export TITLE=ParallelPlatesScaling
 
 ##### Launch parallel job using srun
 srun -N8 -n256 /g/g20/mylotte1/ablateOpt/ablate \

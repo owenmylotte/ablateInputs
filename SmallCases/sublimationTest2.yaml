@@ -177,14 +177,18 @@ solvers:
   #          log: !ablate::monitors::logs::StdOut
   #            name: surfaceradlog
   - !ablate::radiation::VolumeRadiation
-    id: radiation
+    id: radiationSolver
     region:
       name: interiorCells
-    fieldBoundary:
-      name: boundaryCells
-    rays: 500
-    interval: 1000
-    properties: !ablate::eos::radiationProperties::Zimmer
-      eos: *eos
-    log: !ablate::monitors::logs::StdOut
-      name: radlog
+    interval: 1
+    radiation: !ablate::radiation::Radiation
+      id: radiation
+      region:
+        name: interiorCells
+      fieldBoundary:
+        name: boundaryCells
+      rays: 500
+      properties: !ablate::eos::radiationProperties::Constant
+        absorptivity: 1
+      log: !ablate::monitors::logs::StdOut
+        name: radlog

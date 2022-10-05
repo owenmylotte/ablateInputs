@@ -29,10 +29,10 @@ export PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
 mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
-export TITLE=SublimationTest2
+export TITLE=planeEquilibriumScaling
 
 ##### Launch parallel job using srun
-srun -N32 -n1024 /g/g20/mylotte1/ablateOpt/ablate \
+srun -N32 -n1000 /g/g20/mylotte1/ablateOpt/ablate \
 	--input /p/lustre1/mylotte1/ablateInputs/SmallCases/planeEquilibriumTest.yaml -log_view
 
 echo 'Done'

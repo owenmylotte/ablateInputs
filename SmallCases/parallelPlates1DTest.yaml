@@ -12,7 +12,7 @@ timestepper:
     ts_dt: 1.0E-12
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 10000 ]
+    faces: [ 1000 ]
     lower: [ -0.01 ]
     upper: [ 0.01 ]
     simplex: false
@@ -67,14 +67,18 @@ solvers:
       - !ablate::boundarySolver::lodi::Inlet
         eos: *eos
   - !ablate::radiation::VolumeRadiation
-    id: radiation
+    id: radiationSolver
     region:
       name: interiorCells
-    fieldBoundary:
-      name: boundaryCells
-    rays: 500
     interval: 1
-    properties: !ablate::eos::radiationProperties::Constant
-      absorptivity: 1
-    log: !ablate::monitors::logs::StdOut
-      name: radlog
+    radiation: !ablate::radiation::Radiation
+      id: radiation
+      region:
+        name: interiorCells
+      fieldBoundary:
+        name: boundaryCells
+      rays: 500
+      properties: !ablate::eos::radiationProperties::Constant
+        absorptivity: 1
+      log: !ablate::monitors::logs::StdOut
+        name: radlog
