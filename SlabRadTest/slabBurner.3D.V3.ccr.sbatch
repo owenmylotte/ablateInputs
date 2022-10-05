@@ -4,7 +4,7 @@
 #SBATCH --nodes=12
 #SBATCH --ntasks-per-node=16
 ##SBATCH --constraint=IB
-#SBATCH --mem=3000
+#SBATCH --mem=256000
 #SBATCH --job-name="ablate_framework_test"
 #SBATCH --output=ablate_framework_test-srun.out
 #SBATCH --mail-user=owenmylo@buffalo.edu
