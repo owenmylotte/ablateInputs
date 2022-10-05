@@ -18,7 +18,7 @@ timestepper:
     ts_adapt_safety: 0.9
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 50,10,10 ]
+    faces: [ 100,20,20 ]
     lower: [ 0.0, 0.0, -0.0127 ]
     upper: [ 0.165354, 0.027686, 0.0127 ]
     simplex: false
@@ -285,18 +285,18 @@ solvers:
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
-#        radiationInterval: 50
-#        radiation: !ablate::radiation::SurfaceRadiation
-#          id: surfaceflux
-#          region:
-#            name: interiorCells
-#          fieldBoundary:
-#            name: boundaryCells
-#          rays: 5
-#          properties: !ablate::eos::radiationProperties::Zimmer
-#            eos: *eos
-#          log: !ablate::monitors::logs::StdOut
-#            name: surfaceradlog
+        radiationInterval: 50
+        radiation: !ablate::radiation::SurfaceRadiation
+          id: surfaceflux
+          region:
+            name: interiorCells
+          fieldBoundary:
+            name: boundaryCells
+          rays: 25
+          properties: !ablate::eos::radiationProperties::Zimmer
+            eos: *eos
+          log: !ablate::monitors::logs::StdOut
+            name: surfaceradlog
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
   - !ablate::radiation::VolumeRadiation
