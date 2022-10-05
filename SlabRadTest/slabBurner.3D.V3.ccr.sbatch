@@ -47,9 +47,6 @@ export TITLE=slabRadTest
 export FACES=100,20,20
 export UPWIND=leastsquares
 
-srun -n $NPROCS  ablate --input /panasas/scratch/grp-chrest/owenmylo/ablateInputs/SlabRadTest/slabBurner.3D.V3.yaml \
- -yaml::environment::title \
-	-yaml::timestepper::domain::faces [$FACES] \
-	-yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND
+srun -n $NPROCS /projects/academic/chrest/owenmylo/ablateOpt/ablate --input /panasas/scratch/grp-chrest/owenmylo/ablateInputs/SlabRadTest/slabBurner.3D.V3.yaml
 
 echo 'Done'
