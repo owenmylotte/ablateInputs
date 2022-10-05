@@ -44,7 +44,9 @@ plt.scatter(data1000[:, 0], data1000[:, 3], c='red', s=4)
 # plt.scatter(data5000[:, 0], data5000[:, 3], c='black', s=4)
 plt.plot(data500[:, 0], data500[:, 5], c='black', linewidth=1)
 
-plt.legend([r"$d \theta = 3.6$", r"$d \theta = 1.8$", r"$d \theta = 0.72$", r"$d \theta = 0.36$", r"$d \theta = 0.18$", "Analytical Solution"],#, r"$d \theta = 0.09$", "Analytical Solution"],
+plt.legend([r"$d \theta = 3.6$", r"$d \theta = 1.8$", r"$d \theta = 0.72$", r"$d \theta = 0.36$", r"$d \theta = 0.18$",
+            "Analytical Solution"],
+           # , r"$d \theta = 0.09$", "Analytical Solution"],
            loc="upper right", prop={'size': 7})
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
@@ -59,7 +61,8 @@ ref_irradiation = [5 * 10, 10 * 20, 25 * 50, 50 * 100, 100 * 200, 250 * 500, 500
 l2_irradiation = np.array(
     [l2norm(data5[:, 3], data100[:, 5]), l2norm(data10[:, 3], data100[:, 5]), l2norm(data25[:, 3], data100[:, 5]),
      l2norm(data50[:, 3], data100[:, 5]), l2norm(data100[:, 3], data100[:, 5]), l2norm(data250[:, 3], data250[:, 5]),
-     l2norm(data500[:, 3], data500[:, 5]), l2norm(data1000[:, 3], data2000[:, 5]), l2norm(data2000[:, 3], data2000[:, 5]),
+     l2norm(data500[:, 3], data500[:, 5]), l2norm(data1000[:, 3], data2000[:, 5]),
+     l2norm(data2000[:, 3], data2000[:, 5]),
      l2norm(data5000[:, 3], data5000[:, 5])])
 
 plt.figure(figsize=(6, 4), num=2)
@@ -73,6 +76,26 @@ plt.savefig('PlatesIrradiation_Convergence', dpi=1000, bbox_inches='tight')
 plt.show()
 
 ## Scaling Stuff
+t_solve = [6.26E+01 / 6.26E+01, 6.26E+01 / 4.10E+01, 6.26E+01 / 3.48E+01, float("nan"), float("nan"), float("nan"),
+           float("nan"), 6.26E+01 / 2.41E+01, 6.26E+01 / 3.34E+01,
+           float("nan"), float("nan")]
+t_init = [1.76E+03 / 1.76E+03, 1.76E+03 / 9.98E+02, 1.76E+03 / 6.74E+02, float("nan"), float("nan"), float("nan"),
+          float("nan"), 1.76E+03 / 1.96E+02, 1.76E+03 / 2.86E+02,
+          float("nan"), float("nan")]
+n_proc = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+
+plt.figure(figsize=(6, 4), num=3)
+plt.title("Parallel Plates Irradiation Scaling", pad=1)  # TITLE HERE
+plt.loglog(n_proc, t_init, c='blue', linewidth=1, marker='.')
+plt.loglog(n_proc, t_solve, c='orange', linewidth=1, marker='.')
+plt.loglog(n_proc, n_proc, c='black', linewidth=1)
+plt.yticks(fontsize=7)
+plt.xticks(fontsize=7)
+plt.xlabel('# Processes', fontsize=10)
+plt.ylabel('Speedup', fontsize=10)
+plt.legend(["Initialization (no sharing)", "Solve (no sharing)", "Ideal"], loc="upper left", prop={'size': 7})
+plt.savefig('PlatesIrradiation_Scaling', dpi=1000, bbox_inches='tight')
+plt.show()
 
 # %% Radiative Equilibrium Plot
 dataSimit = np.loadtxt("PlanarEquilibrium01.txt", delimiter=' ', skiprows=0, dtype=float)
@@ -130,6 +153,26 @@ plt.savefig('Equilibrium_Convergence', dpi=1000, bbox_inches='tight')
 plt.show()
 
 ## Scaling Stuff
+t_solve_eq = [6.17E+03 / 6.17E+03, 6.17E+03 / 4.48E+03, 6.17E+03 / 3.37E+03, float("nan"), float("nan"), float("nan"),
+           float("nan"), 6.17E+03 / 2.36E+03, float("nan"),
+           float("nan"), float("nan")]
+t_init_eq = [1.76E+03 / 1.76E+03, 1.76E+03 / 9.93E+02, 1.76E+03 / 6.90E+02, float("nan"), float("nan"), float("nan"),
+          float("nan"), 1.76E+03 / 1.96E+02, float("nan"),
+          float("nan"), float("nan")]
+n_proc_eq = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+
+plt.figure(figsize=(6, 4), num=3)
+plt.title("Radiative Equilibrium Scaling", pad=1)  # TITLE HERE
+plt.loglog(n_proc_eq, t_init_eq, c='blue', linewidth=1, marker='.')
+plt.loglog(n_proc_eq, t_solve_eq, c='orange', linewidth=1, marker='.')
+plt.loglog(n_proc_eq, n_proc_eq, c='black', linewidth=1)
+plt.yticks(fontsize=7)
+plt.xticks(fontsize=7)
+plt.xlabel('# Processes', fontsize=10)
+plt.ylabel('Speedup', fontsize=10)
+plt.legend(["Initialization (no sharing)", "Solve (no sharing)", "Ideal"], loc="upper left", prop={'size': 7})
+plt.savefig('Equilibrium_Scaling', dpi=1000, bbox_inches='tight')
+plt.show()
 
 # %% Diffusion Flame Verification
 diffusionFlame = np.loadtxt("diffusionFlame01.txt", delimiter=' ', skiprows=1,
