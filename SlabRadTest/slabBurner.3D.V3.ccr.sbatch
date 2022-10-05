@@ -1,12 +1,12 @@
 #!/bin/sh
 #SBATCH --partition=general-compute --qos=general-compute
 #SBATCH --time=24:00:00
-#SBATCH --nodes=12
+#SBATCH --nodes=24
 #SBATCH --ntasks-per-node=16
 ##SBATCH --constraint=IB
 #SBATCH --mem=256000
-#SBATCH --job-name="ablate_framework_test"
-#SBATCH --output=ablate_framework_test-srun.out
+#SBATCH --job-name="radiationSlab"
+#SBATCH --output=radiationSlab.out
 #SBATCH --mail-user=owenmylo@buffalo.edu
 #SBATCH --mail-type=ALL
 
@@ -47,8 +47,8 @@ export TITLE=slabRadTest
 export FACES=100,20,20
 export UPWIND=leastsquares
 
-srun -n $NPROCS  ablate --input /panasas/scratch/grp-chrest/owenmylo/SlabRadTest/slabBurner.3D.V3.yaml \
- -yaml::environment::title example_$SLURM_JOBID \
+srun -n $NPROCS  ablate --input /panasas/scratch/grp-chrest/owenmylo/ablateInputs/SlabRadTest/slabBurner.3D.V3.yaml \
+ -yaml::environment::title \
 	-yaml::timestepper::domain::faces [$FACES] \
 	-yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND
 

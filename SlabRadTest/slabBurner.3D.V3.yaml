@@ -8,7 +8,7 @@ arguments:
 timestepper:
   io:
     !ablate::io::Hdf5MultiFileSerializer
-    interval: 0
+    interval: 500
   arguments:
     ts_type: rk
     ts_max_time: 1
@@ -285,7 +285,7 @@ solvers:
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
-        radiationInterval: 50
+        radiationInterval: 100
         radiation: !ablate::radiation::SurfaceRadiation
           id: surfaceflux
           region:
@@ -303,7 +303,7 @@ solvers:
     id: radiationSolver
     region:
       name: interiorCells
-    interval: 100
+    interval: 500
     radiation: !ablate::radiation::RaySharingRadiation
       id: radiation
       region:
