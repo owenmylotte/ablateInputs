@@ -8,7 +8,7 @@ arguments:
 timestepper:
   io:
     !ablate::io::Hdf5MultiFileSerializer
-    interval: 500
+    interval: 0
   arguments:
     ts_type: rk
     ts_max_time: 1
@@ -18,7 +18,7 @@ timestepper:
     ts_adapt_safety: 0.9
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 100,20,20 ]
+    faces: [ 70,45,45 ]
     lower: [ 0.0, 0.0, -0.0127 ]
     upper: [ 0.165354, 0.027686, 0.0127 ]
     simplex: false
@@ -273,7 +273,7 @@ solvers:
         eos: *eos
         pgs: *pgs
   - !ablate::boundarySolver::BoundarySolver
-    id: slab boundary
+    id: slabBoundary
     region:
       name: slabBurnerBoundaryCells
     fieldBoundary:
@@ -285,33 +285,31 @@ solvers:
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
-        radiationInterval: 100
+        radiationInterval: 1
         radiation: !ablate::radiation::SurfaceRadiation
           id: surfaceflux
           region:
-            name: interiorCells
-          fieldBoundary:
-            name: boundaryCells
-          rays: 25
+            name: flowRegion
+          rays: 50
           properties: !ablate::eos::radiationProperties::Zimmer
             eos: *eos
           log: !ablate::monitors::logs::StdOut
             name: surfaceradlog
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
-  - !ablate::radiation::VolumeRadiation
-    id: radiationSolver
-    region:
-      name: interiorCells
-    interval: 500
-    radiation: !ablate::radiation::RaySharingRadiation
-      id: radiation
-      region:
-        name: interiorCells
-      fieldBoundary:
-        name: boundaryCells
-      rays: 25
-      properties: !ablate::eos::radiationProperties::Zimmer
-        eos: *eos
-      log: !ablate::monitors::logs::StdOut
-        name: radlog
+#  - !ablate::radiation::VolumeRadiation
+#    id: radiationSolver
+#    region:
+#      name: interiorCells
+#    interval: 100
+#    radiation: !ablate::radiation::Radiation
+#      id: radiation
+#      region:
+#        name: interiorCells
+#      fieldBoundary:
+#        name: boundaryCells
+#      rays: 25
+#      properties: !ablate::eos::radiationProperties::Constant
+#        absorptivity: 10
+#      log: !ablate::monitors::logs::StdOut
+#        name: radlog

@@ -17,7 +17,7 @@ timestepper:
     interval: 0 # 1000
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [20, 8, 8] # [2240, 320]
+    faces: [250, 25, 25] # [2240, 320]
     lower: [ 0.0, 0.0, 0.0]
     upper: [ 0.165354, 0.027686] # [ 0.165354, 0.027686]
     simplex: false
