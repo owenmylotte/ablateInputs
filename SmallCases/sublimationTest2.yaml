@@ -168,10 +168,8 @@ solvers:
         radiation: !ablate::radiation::SurfaceRadiation
           id: surfaceflux
           region:
-            name: interiorCells
-          fieldBoundary:
-            name: boundaryCellsLeft
-          rays: 250
+            name: flowRegion
+          rays: 50
           properties: !ablate::eos::radiationProperties::Zimmer
             eos: *eos
           log: !ablate::monitors::logs::StdOut
@@ -179,15 +177,13 @@ solvers:
   - !ablate::radiation::VolumeRadiation
     id: radiationSolver
     region:
-      name: interiorCells
-    interval: 1
+      name: flowRegion
+    interval: 5
     radiation: !ablate::radiation::RaySharingRadiation
       id: radiation
       region:
-        name: interiorCells
-      fieldBoundary:
-        name: boundaryCells
-      rays: 20
+        name: flowRegion
+      rays: 25
       properties: !ablate::eos::radiationProperties::Zimmer
         eos: *eos
       log: !ablate::monitors::logs::StdOut
