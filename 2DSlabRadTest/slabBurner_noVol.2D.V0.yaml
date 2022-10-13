@@ -295,17 +295,3 @@ solvers:
             name: surfaceradlog
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
-  - !ablate::radiation::VolumeRadiation
-    id: radiationSolver
-    region:
-      name: flowRegion
-    interval: 100
-    radiation: !ablate::radiation::RaySharingRadiation
-      id: radiation
-      region:
-        name: flowRegion
-      rays: 25
-      properties: !ablate::eos::radiationProperties::Zimmer
-        eos: *eos
-      log: !ablate::monitors::logs::StdOut
-        name: radlog
