@@ -1,7 +1,7 @@
 # increase in reflection factor
 ---
 environment:
-  title: _2dSlabBurner
+  title: _testBoundary
   tagDirectory: true
 arguments:
   outputAuxVector: true
@@ -9,17 +9,17 @@ timestepper:
   arguments:
     ts_type: rk
     ts_max_time: 1
-    ts_max_steps: 10
+    ts_max_steps: 4
     ts_dt: 1.0e-10
     ts_adapt_monitor: ""
     ts_adapt_safety: 0.75
   io: !ablate::io::Hdf5MultiFileSerializer
-    interval: 100
+    interval: 0
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [336,48]
+    faces: [1000,1000]
     lower: [ 0.0, 0.0]
-    upper: [ 0.165354, 0.027686]
+    upper: [ 1, 1]
     simplex: false
     options:
       dm_plex_hash_location: true
@@ -39,16 +39,18 @@ timestepper:
       - !ablate::domain::modifiers::CreateLabel
         region:
           name: slabBurnerRegion
-        function: !ablate::mathFunctions::geom::Surface
-          path: ../geom/slabBurner.v1.stp
+        function: !ablate::mathFunctions::geom::Cylinder
+          start: [ 0.725, 0.25]
+          end: [ 0.725, 0.75]
+          radius: 0.1
       # create a label for defining the glowPlug
       - !ablate::domain::modifiers::CreateLabel
         region:
           name: glowPlugRegion
         function: !ablate::mathFunctions::geom::Cylinder
-          start: [ 0.02615, 0.012186]
-          end: [ 0.02615, 0.027686]
-          radius: 0.005
+          start: [ 0.25, 0.25]
+          end: [ 0.25, 0.75]
+          radius: 0.1
       - !ablate::domain::modifiers::SubtractLabel
         # cut the slabBurner and glow plug out of the flowRegion
         differenceRegion:
@@ -120,9 +122,9 @@ timestepper:
       state: &flowFieldState
         eos: *eos
         temperature:  !ablate::mathFunctions::geom::Sphere
-          center: [ .036,  0.01]
-          radius: 0.005
-          insideValues: 1500
+          center: [ 0.5,  0.5]
+          radius: 0.1
+          insideValues: 300
           outsideValues: 300
         pressure: 101325.0
         velocity: "0.0, 0.0"
@@ -288,14 +290,28 @@ solvers:
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
-        radiationInterval: 10
+        radiationInterval: 1
         radiation: !ablate::radiation::SurfaceRadiation
           id: surfaceflux
           region:
             name: flowRegion
-          rays: 50
-          properties: !ablate::eos::radiationProperties::Zimmer
-            eos: *eos
+          rays: 5
+          properties: !ablate::eos::radiationProperties::Constant
+            absorptivity: 0
           log: !ablate::monitors::logs::StdOut
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
+        #  - !ablate::radiation::VolumeRadiation
+        #    id: radiationSolver
+        #    region:
+        #      name: flowRegion
+        #    interval: 100
+        #    radiation: !ablate::radiation::Radiation
+        #      id: radiation
+        #      region:
+        #        name: flowRegion
+        #      rays: 15
+        #      properties: !ablate::eos::radiationProperties::Zimmer
+        #        eos: *eos
+      #      log: !ablate::monitors::logs::StdOut
+#        name: radlog
