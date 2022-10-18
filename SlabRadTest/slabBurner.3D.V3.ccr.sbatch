@@ -1,7 +1,7 @@
 #!/bin/sh
 #SBATCH --partition=general-compute --qos=general-compute
 #SBATCH --time=24:00:00
-#SBATCH --nodes=24
+#SBATCH --nodes=512
 #SBATCH --ntasks-per-node=16
 ##SBATCH --constraint=IB
 #SBATCH --mem=256000
@@ -44,7 +44,7 @@ mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
 export TITLE=slabRadTest
-export FACES=100,20,20
+export FACES=560,80,80
 export UPWIND=leastsquares
 
 srun -n $NPROCS /projects/academic/chrest/owenmylo/ablateOpt/ablate --input /panasas/scratch/grp-chrest/owenmylo/ablateInputs/SlabRadTest/slabBurner.3D.V3.yaml

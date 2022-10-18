@@ -1,26 +1,25 @@
-# Removed the added heat flux and changed to start time to 0.05 seconds
+# increase in reflection factor
 ---
 environment:
   title: _3dSlabBurner
-  tagDirectory: true
+  tagDirectory: false
 arguments:
   outputAuxVector: true
 timestepper:
-  io:
-    !ablate::io::Hdf5MultiFileSerializer
-    interval: 0
   arguments:
     ts_type: rk
     ts_max_time: 1
-    ts_max_steps: 4
+    ts_max_steps: 200000000
     ts_dt: 1.0e-10
     ts_adapt_monitor: ""
-    ts_adapt_safety: 0.9
+    ts_adapt_safety: 0.75
+  io: !ablate::io::Hdf5MultiFileSerializer
+    interval: 100
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 80,15,15 ]
-    lower: [ 0.0, 0.0, -0.0127 ]
-    upper: [ 0.165354, 0.027686, 0.0127 ]
+    faces: [560,80,80]
+    lower: [ 0.0, 0.0, -0.0127]
+    upper: [ 0.165354, 0.027686, 0.0127]
     simplex: false
     options:
       dm_plex_hash_location: true
@@ -118,10 +117,10 @@ timestepper:
     - !ablate::finiteVolume::fieldFunctions::Euler
       state: &flowFieldState
         eos: *eos
-        temperature: !ablate::mathFunctions::geom::Sphere
+        temperature:  !ablate::mathFunctions::geom::Sphere
           center: [ .036,  0.01, 0.0 ]
           radius: 0.005
-          insideValues: 300
+          insideValues: 1500
           outsideValues: 300
         pressure: 101325.0
         velocity: "0.0, 0.0, 0.0"
@@ -209,9 +208,11 @@ solvers:
           massFractionsFuel: *fuelMassFrac
           massFractionsOxidizer: *oxMassFrac
       - !ablate::monitors::TurbFlowStats
-        fields: [ velocity, temperature ]
+        fields: [velocity, temperature]
         eos: *eos
-        interval: 25
+        interval: !ablate::io::interval::DelayInterval
+          interval: 25
+          minimumSimulationTime: .02 #about 2 flow throughs
     additionalProcesses:
       - !ablate::finiteVolume::processes::PressureGradientScaling
         &pgs
@@ -235,7 +236,7 @@ solvers:
       - !ablate::boundarySolver::lodi::Inlet
         eos: *eos
         pgs: *pgs
-        velocity: "min(17.071563410242785, t*17.071563410242785/.05) , 0.0, 0.0"
+        velocity: "min(14.96274499, t*14.96274499/.01) , 0.0, 0.0"
   - !ablate::boundarySolver::BoundarySolver
     id: outlet
     region:
@@ -247,7 +248,7 @@ solvers:
       - !ablate::boundarySolver::lodi::OpenBoundary
         referencePressure: 101325.0
         maxAcousticsLength: 0.165354
-        reflectFactor: .15
+        reflectFactor: 1.5
         pgs: *pgs
         eos: *eos
   - !ablate::boundarySolver::BoundarySolver
@@ -273,7 +274,7 @@ solvers:
         eos: *eos
         pgs: *pgs
   - !ablate::boundarySolver::BoundarySolver
-    id: slabBoundary
+    id: slab boundary
     region:
       name: slabBurnerBoundaryCells
     fieldBoundary:
@@ -294,20 +295,5 @@ solvers:
           properties: !ablate::eos::radiationProperties::Zimmer
             eos: *eos
           log: !ablate::monitors::logs::StdOut
-            name: surfaceradlog
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
-#  - !ablate::radiation::VolumeRadiation
-#    id: radiationSolver
-#    region:
-#      name: flowRegion
-#    interval: 10
-#    radiation: !ablate::radiation::RaySharingRadiation
-#      id: radiation
-#      region:
-#        name: flowRegion
-#      rays: 25
-#      properties: !ablate::eos::radiationProperties::Zimmer
-#        eos: *eos
-#      log: !ablate::monitors::logs::StdOut
-#        name: radlog

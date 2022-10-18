@@ -3,7 +3,7 @@
 #SBATCH --qos=ped3
 #SBATCH --clusters=faculty
 #SBATCH --time=72:00:00
-#SBATCH --nodes=1
+#SBATCH --nodes=3
 #SBATCH --ntasks-per-node=12
 #SBATCH --job-name="slbBurn_noVol"
 #SBATCH --mail-user=owenmylo@buffalo.edu
@@ -45,8 +45,8 @@ export TEST_MPI_COMMAND=srun
 mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
-export TITLE=v0-336x48-1
-export FACES=336,48
+export TITLE=560x80-noVol
+export FACES=560,80
 export UPWIND=leastsquares
 
 # Run all tests

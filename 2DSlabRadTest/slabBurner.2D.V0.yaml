@@ -9,7 +9,7 @@ timestepper:
   arguments:
     ts_type: rk
     ts_max_time: 1
-    ts_max_steps: 10
+    ts_max_steps: 2000000000
     ts_dt: 1.0e-10
     ts_adapt_monitor: ""
     ts_adapt_safety: 0.75
@@ -17,7 +17,7 @@ timestepper:
     interval: 100
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [336,48]
+    faces: [560,80]
     lower: [ 0.0, 0.0]
     upper: [ 0.165354, 0.027686]
     simplex: false
@@ -303,7 +303,7 @@ solvers:
     id: radiationSolver
     region:
       name: flowRegion
-    interval: 1
+    interval: 10
     radiation: !ablate::radiation::Radiation
       id: radiation
       region:
