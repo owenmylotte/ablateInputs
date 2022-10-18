@@ -1,6 +1,6 @@
 #!/bin/sh
 #SBATCH --partition=general-compute --qos=general-compute
-#SBATCH --time=24:00:00
+#SBATCH --time=72:00:00
 #SBATCH --nodes=512
 #SBATCH --ntasks-per-node=16
 ##SBATCH --constraint=IB

@@ -122,7 +122,7 @@ timestepper:
         temperature:  !ablate::mathFunctions::geom::Sphere
           center: [ .036,  0.01]
           radius: 0.005
-          insideValues: 1500
+          insideValues: 300
           outsideValues: 300
         pressure: 101325.0
         velocity: "0.0, 0.0"
