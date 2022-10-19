@@ -1,10 +1,10 @@
 #!/bin/sh
-#SBATCH --partition=ped3
-#SBATCH --qos=ped3
-#SBATCH --clusters=faculty
+#SBATCH --partition=general-compute --qos=general-compute
 #SBATCH --time=72:00:00
-#SBATCH --nodes=2
-#SBATCH --ntasks-per-node=12
+#SBATCH --nodes=28
+#SBATCH --ntasks-per-node=16
+##SBATCH --constraint=IB
+#SBATCH --mem=256000
 #SBATCH --job-name="slbBurn_fullRad"
 #SBATCH --mail-user=owenmylo@buffalo.edu
 #SBATCH --mail-type=ALL
