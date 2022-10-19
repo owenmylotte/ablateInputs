@@ -8,7 +8,6 @@
 #SBATCH --job-name="slbBurn_fullRad"
 #SBATCH --mail-user=owenmylo@buffalo.edu
 #SBATCH --mail-type=ALL
-#SBATCH --exclusive
 
 # Print the current environment
 echo "SLURM_JOBID="$SLURM_JOBID
