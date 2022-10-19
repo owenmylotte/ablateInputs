@@ -1,13 +1,14 @@
 #!/bin/sh
-#SBATCH --partition=general-compute --qos=general-compute
+#SBATCH --partition=ped3
+#SBATCH --qos=ped3
+#SBATCH --clusters=faculty
 #SBATCH --time=72:00:00
-#SBATCH --nodes=8
-#SBATCH --ntasks-per-node=56
-##SBATCH --constraint=IB
-#SBATCH --mem=256000
-#SBATCH --job-name="slbBurn_noVol"
-#SBATCH --mail-user=owenmylo@buffalo.edu
+#SBATCH --nodes=6
+#SBATCH --ntasks-per-node=12
+#SBATCH --job-name="slbBurn"
+#SBATCH --mail-user=mtmcgurn@buffalo.edu
 #SBATCH --mail-type=ALL
+#SBATCH --exclusive
 
 # Print the current environment
 echo "SLURM_JOBID="$SLURM_JOBID
