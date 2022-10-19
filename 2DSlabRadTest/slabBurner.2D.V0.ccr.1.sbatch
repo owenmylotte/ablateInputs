@@ -1,8 +1,8 @@
 #!/bin/sh
 #SBATCH --partition=general-compute --qos=general-compute
 #SBATCH --time=72:00:00
-#SBATCH --nodes=28
-#SBATCH --ntasks-per-node=16
+#SBATCH --nodes=8
+#SBATCH --ntasks-per-node=56
 ##SBATCH --constraint=IB
 #SBATCH --mem=256000
 #SBATCH --job-name="slbBurn_fullRad"
