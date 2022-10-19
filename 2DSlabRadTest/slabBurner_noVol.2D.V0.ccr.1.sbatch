@@ -1,18 +1,14 @@
 #!/bin/sh
-#SBATCH --partition=scavenger
-#SBATCH --qos=scavenger
-##SBATCH --partition=general-compute
-##SBATCH --qos=supporters
-#SBATCH --account=chrest
+#SBATCH --partition=ped3
+#SBATCH --qos=ped3
+#SBATCH --clusters=faculty
 #SBATCH --time=72:00:00
-#SBATCH --nodes=20
-#SBATCH --ntasks-per-node=56
-#SBATCH --constraint=IB
+#SBATCH --nodes=6
+#SBATCH --ntasks-per-node=12
 #SBATCH --job-name="slbBurn_noVol"
 #SBATCH --mail-user=owenmylo@buffalo.edu
 #SBATCH --mail-type=ALL
 #SBATCH --exclusive
-#SBATCH --requeue
 
 # Print the current environment
 echo "SLURM_JOBID="$SLURM_JOBID
