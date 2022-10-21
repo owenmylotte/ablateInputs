@@ -1,14 +1,18 @@
 #!/bin/sh
-#SBATCH --partition=ped3
-#SBATCH --qos=ped3
-#SBATCH --clusters=faculty
+#SBATCH --partition=scavenger
+#SBATCH --qos=scavenger
+##SBATCH --partition=general-compute
+##SBATCH --qos=supporters
+#SBATCH --account=chrest
 #SBATCH --time=72:00:00
-#SBATCH --nodes=3
-#SBATCH --ntasks-per-node=12
-#SBATCH --job-name="slbBurn_noRad"
+#SBATCH --nodes=4
+#SBATCH --ntasks-per-node=56
+#SBATCH --constraint=IB
+#SBATCH --job-name="22GslbBurn_noVol"
 #SBATCH --mail-user=owenmylo@buffalo.edu
 #SBATCH --mail-type=ALL
 #SBATCH --exclusive
+#SBATCH --requeue
 
 # Print the current environment
 echo "SLURM_JOBID="$SLURM_JOBID
@@ -45,14 +49,14 @@ export TEST_MPI_COMMAND=srun
 mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
-export TITLE=560x80-noRad
+export TITLE=560x80-noVol
 export FACES=560,80
 export UPWIND=leastsquares
 
 # Run all tests
 echo "Start Time " `date +%s`
 srun -n $SLURM_NPROCS  /projects/academic/chrest/owenmylo/ablateOpt/ablate \
-  --input /panasas/scratch/grp-chrest/owenmylo/ablateInputs/2DSlabRadTest/slabBurner_noRad.2D.V0.yaml \
+  --input /panasas/scratch/grp-chrest/owenmylo/ablateInputs/2DSlabRadTest/22GslabBurner_noVol.2D.V0.yaml \
    -yaml::environment::title $TITLE \
    -yaml::timestepper::domain::faces [$FACES] \
    -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND

@@ -5,7 +5,7 @@
 ##SBATCH --qos=supporters
 #SBATCH --account=chrest
 #SBATCH --time=72:00:00
-#SBATCH --nodes=2
+#SBATCH --nodes=4
 #SBATCH --ntasks-per-node=56
 #SBATCH --constraint=IB
 #SBATCH --job-name="6GslbBurn_noVol"

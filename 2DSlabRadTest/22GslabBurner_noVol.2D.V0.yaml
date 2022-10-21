@@ -121,11 +121,11 @@ timestepper:
         eos: *eos
         temperature:  !ablate::mathFunctions::geom::Sphere
           center: [ .036,  0.01]
-          radius: 0.005
+          radius: 0.001
           insideValues: 1500
           outsideValues: 300
         pressure: 101325.0
-        velocity: "0.0, 0.0"
+        velocity: "14.96274499, 0.0"
         massFractions: !ablate::finiteVolume::fieldFunctions::MassFractions
           &oxMassFrac
           eos: *eos
@@ -183,6 +183,24 @@ timestepper:
       region:
         name: slabBurnerBoundaryCells
       state: *fuelFieldState
+
+    - !ablate::finiteVolume::fieldFunctions::Euler
+      region:
+        name: allWallBoundaryRegion
+      state: &flowFieldState
+        eos: *eos
+        temperature: 300
+        pressure: 101325.0
+        velocity: "0.0, 0.0"
+        massFractions: !ablate::finiteVolume::fieldFunctions::MassFractions
+          &oxMassFrac
+          eos: *eos
+          values:
+            - fieldName: O2
+              field: 1.0
+    - !ablate::finiteVolume::fieldFunctions::DensityMassFractions
+      state: *flowFieldState
+
 solvers:
   - !ablate::finiteVolume::CompressibleFlowSolver
     id: flowField
@@ -232,7 +250,7 @@ solvers:
       - !ablate::boundarySolver::lodi::Inlet
         eos: *eos
         pgs: *pgs
-        velocity: "min(14.96274499, t*14.96274499/.01) , 0.0"
+        velocity: "14.96274499"
   - !ablate::boundarySolver::BoundarySolver
     id: outlet
     region:
