@@ -3,8 +3,8 @@
 #SBATCH --qos=ped3
 #SBATCH --clusters=faculty
 #SBATCH --time=72:00:00
-#SBATCH --nodes=2
-#SBATCH --ntasks-per-node=12
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=40
 #SBATCH --job-name="slbBurn_noRad"
 #SBATCH --mail-user=owenmylo@buffalo.edu
 #SBATCH --mail-type=ALL
