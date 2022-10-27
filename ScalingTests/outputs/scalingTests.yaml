@@ -1,20 +1,17 @@
 ---
-name: exampleFileGen.
+name: scalingTests2D.
 enumerations:
   - !enumerator::enumerations::List
     name: processes
     values: [ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
   - !enumerator::enumerations::List
     name: faces
-    values: [ 15, 20, 25, 30, 50, 80]
+    values: [ "[105, 15]", "[140, 20]", "[175, 25]", "[210, 30]", "[350, 50]", "[560, 80]"]
   - !enumerator::enumerations::List
     name: rays
     values: [ 10, 25, 50, 200]
-  - !enumerator::enumerations::List
-    name: dims
-    values: [ 2, 3]
 generator:
   !enumerator::generators::FileTemplateGenerator
-  path: scalingTests.sbatch
+  path: ../scalingTests.sbatch
 reporters:
   - !enumerator::reporters::StreamReporter

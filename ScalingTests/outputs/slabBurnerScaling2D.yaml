@@ -288,7 +288,7 @@ solvers:
         eos: *eos
         pgs: *pgs
   - !ablate::boundarySolver::BoundarySolver
-    id: slab boundary
+    id: slabBoundary
     region:
       name: slabBurnerBoundaryCells
     fieldBoundary:

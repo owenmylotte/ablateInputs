@@ -10,14 +10,14 @@
 #SBATCH --mail-type=ALL
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=Scaling_{{dims}}_{{rays}}_{{processes}}_{{faces}}
+#SBATCH --output=Scaling2D_{{rays}}_{{processes}}_{{faces}}
 
 ##### Load Required modules
 # gcc
 module load mkl/2019.0
 module load valgrind/3.16.1
 module load gcc/10.2.1
-module load  cmake/3.21.1
+module load cmake/3.21.1
 
 # Load PETSC ENV
 export PETSC_DIR="/g/g20/mylotte1/petsc"
@@ -31,17 +31,17 @@ export PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
 mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
-export TITLE=Scaling_{{dims}}_{{rays}}_{{processes}}_{{faces}}
-export FACES= %faces% * %7%, faces
+#export TITLE=Scaling2D_{{rays}}_{{processes}}_{{faces}}
+#export FACES= %faces% * %7%, faces
 export UPWIND=leastsquares
 
 ##### Launch parallel job using srun
 srun -n{{processes}} /g/g20/mylotte1/ablateOpt/ablate \
-	--input /p/lustre1/mylotte1/ablateInputs/ScalingTests/slabBurnerScaling.yaml \
-	-yaml::environment::title $TITLE \
-	-yaml::timestepper::domain::faces [$FACES] \
-	-yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND
-   -log_view :Scaling_{{dims}}_{{rays}}_{{processes}}_{{faces}}.xml:ascii_xml
+  --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/slabBurnerScaling2D.yaml \
+  -yaml::environment::title Scaling2D_{{rays}}_{{processes}}_{{faces}} \
+  -yaml::timestepper::domain::faces {{faces}} \
+  -yaml::solvers::slabBoundary::processes::radiation::rays {{rays}} \
+  -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
+  -log_view :Scaling2D_{{rays}}_{{processes}}_{{faces}}.xml:ascii_xml
 
-
-echo "End Time " `date +%s`
+echo "End Time " $(date +%s)
