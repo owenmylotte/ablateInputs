@@ -7,7 +7,7 @@ from os.path import exists
 # Set up options that must be defined by the user
 # Define the arrays that contain the options which were used
 processes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
-faces = ["[105, 15]", "[149, 21]", "[210, 30]", "[297, 24]", "[420, 60]", "[594, 85]", "[840, 120]"]
+faces = ["[105,15]", "[149,21]", "[210,30]", "[297,24]", "[420,60]", "[594,85]", "[840,120]"]
 rays = [10, 25, 50, 200]
 dims = "2D"
 
@@ -81,9 +81,13 @@ plt.savefig('scalingStrong' + dims, dpi=1500, bbox_inches='tight')
 plt.show()
 
 # Weak scaling analysis
+weakInit = np.zeros([len(processes) + len(faces), len(processes) * len(faces)])
+for i in range(-(len(processes)), len(faces)):
+    weakInit[(i+len(processes)), :] = np.diag(initTime[0, :, :], k=i)
+
 # Strong scaling analysis
 plt.figure(figsize=(6, 4), num=1)
-plt.title("Initialization Strong Scaling", pad=1)
+plt.title("Initialization Weak Scaling", pad=1)
 for i in range(len(faces)):
     plt.loglog(processes, initTime[0, :, i], linewidth=1, marker='.')
 plt.yticks(fontsize=10)

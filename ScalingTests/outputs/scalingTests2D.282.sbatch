@@ -5,12 +5,12 @@
 #SBATCH -n 32
 #SBATCH --use-min-nodes
 #SBATCH -J slabV3
-#SBATCH -t 24:00:00
+#SBATCH -t 6:00:00
 #SBATCH -p pbatch
 #SBATCH --mail-type=ALL
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=Scaling2D_25_32_[105, 15]
+#SBATCH --output=Scaling2D_25_32_[105,15]
 
 ##### Load Required modules
 # gcc
@@ -31,17 +31,15 @@ export PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
 mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
-#export TITLE=Scaling2D_25_32_[105, 15]
-#export FACES= %faces% * %7%, faces
 export UPWIND=leastsquares
 
 ##### Launch parallel job using srun
 srun -n32 /g/g20/mylotte1/ablateOpt/ablate \
   --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/slabBurnerScaling2D.yaml \
-  -yaml::environment::title Scaling2D_25_32_[105, 15] \
-  -yaml::timestepper::domain::faces [105, 15] \
+  -yaml::environment::title Scaling2D_25_32_[105,15] \
+  -yaml::timestepper::domain::faces [105,15] \
   -yaml::solvers::slabBoundary::processes::radiation::rays 25 \
   -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
-  -log_view :Scaling2D_25_32_[105, 15].xml:ascii_xml
+  -log_view :Scaling2D_25_32_[105,15].xml:ascii_xml
 
 echo "End Time " $(date +%s)

@@ -5,7 +5,7 @@
 #SBATCH -n {{processes}}
 #SBATCH --use-min-nodes
 #SBATCH -J slabV3
-#SBATCH -t 24:00:00
+#SBATCH -t 6:00:00
 #SBATCH -p pbatch
 #SBATCH --mail-type=ALL
 #SBATCH -A sunyb
@@ -31,8 +31,6 @@ export PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
 mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
-#export TITLE=Scaling2D_{{rays}}_{{processes}}_{{faces}}
-#export FACES= %faces% * %7%, faces
 export UPWIND=leastsquares
 
 ##### Launch parallel job using srun
