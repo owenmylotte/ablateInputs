@@ -38,7 +38,7 @@ srun -n{{processes}} /g/g20/mylotte1/ablateOpt/ablate \
   --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/slabBurnerScaling2D.yaml \
   -yaml::environment::title Scaling2D_{{rays}}_{{processes}}_{{faces}} \
   -yaml::timestepper::domain::faces {{faces}} \
-  -yaml::solvers::slabBoundary::processes::radiation::rays {{rays}} \
+  -yaml::solvers::[5]::processes::[0]::radiation::rays {{rays}} \
   -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
   -log_view :Scaling2D_{{rays}}_{{processes}}_{{faces}}.xml:ascii_xml
 
