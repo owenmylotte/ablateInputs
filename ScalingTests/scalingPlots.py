@@ -1,4 +1,3 @@
-import xml.dom.minidom as xml  # for parsing xml
 import xml.etree.ElementTree as ET
 import numpy as np  # for matrix manipulation
 import matplotlib.pyplot as plt  # for plotting
@@ -8,56 +7,89 @@ from os.path import exists
 # Set up options that must be defined by the user
 # Define the arrays that contain the options which were used
 processes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
-faces = ["[105, 15]", "[140, 20]", "[175, 25]", "[210, 30]", "[350, 50]", "[560, 80]"]
+faces = ["[105, 15]", "[149, 21]", "[210, 30]", "[297, 24]", "[420, 60]", "[594, 85]", "[840, 120]"]
 rays = [10, 25, 50, 200]
-# dims = ["2D", "3D"]
+dims = "2D"
 
 # Template path: "outputs/Scaling2D_30_16_[105, 15].xml"
-basePath = "outputs/scalingTests2D"
+basePath = "outputs/scalingTests"
 initName = "Radiation Initialization"
 solveName = "Radiation Solve"
 
 # Define an iterator which stores input parameters and iterates through all combinations of the options
 options = itertools.product(rays, processes, faces)
 
-# Code that should remain constant
-# Create arrays which the parsed information will be stored inside
+# Problem size doubles for each increase
+cells = np.array([[105, 15], [149, 21], [210, 30], [297, 24], [420, 60], [594, 85], [840, 120]])
+cellsize = np.ones([2, np.shape(cells)[0]])
+for n in range(np.shape(cellsize)[0]):
+    for i in range(np.shape(cells)[0]):
+        for j in range(np.shape(cells)[1]):
+            cellsize[n, i] *= cells[i, j]
+            if n == 1:
+                cellsize[n, i] *= cells[i, 1]
+
+# Create arrays which the parsed information will be stored inside: Whatever information is desired
 initTime = np.zeros((len(rays), len(processes), len(faces)))
 solveTime = np.zeros((len(rays), len(processes), len(faces)))
 
-# Iterate through the arrays to get the scaling information out of the xml files
-# for i in options:
+# Iterate through the arrays to get information out of the xml files
 for r in range(len(rays)):
     for p in range(len(processes)):
         for f in range(len(faces)):
             # Create strings which represent the file names of the outputs
-            # ray, proc, face = i  # Get the unique identifier
-            path = basePath + "_" + str(rays[r]) + "_" + str(processes[p]) + "_" + str(faces[f]) + ".xml"  # File path
-            path = "outputs/scalingTests2D_10_1_[105, 15].xml" # Hack for testing
-            if exists(path):
-                # doc = xml.parse(path)  # Get the specified file as an output
-                tree = ET.parse(path) # create element tree object
-                root = tree.getroot() # get root element
-                # iterate news items
-                for item in root.findall('./petscroot/timertree/event'):
-                    # iterate child elements of item
-                    for child in item:
-                        if child.name == '{http://search.yahoo.com/mrss/}content':
-                            news['media'] = child.attrib['url']
+            path = basePath + dims + "_" + str(rays[r]) + "_" + str(processes[p]) + "_" + str(
+                faces[f]) + ".xml"  # File path
+            path = "outputs/scalingTests2D_10_1_[105, 15].xml"  # TODO Hack for testing
+            if exists(path):  # Make sure not to try accessing a path that doesn't exist
+                tree = ET.parse(path)  # Create element tree object
+                root = tree.getroot()  # Get root element
+                # Iterate items (the type of event that contains the data)
+                for item in root.findall('./petscroot/selftimertable/event'):
+                    # Get the specific name of the event that is desired
+                    #    Get the sub-value that is desired out of the event
+                    if item.find("name").text == "Radiation Initialization":
+                        initTime[r, p, f] = item.find('time/avgvalue').text
+                    if item.find("name").text == "Radiation Solve":
+                        solveTime[r, p, f] = item.find('time/avgvalue').text
 
-                    # append news dictionary to news items list
-                    items.append(news)
-
-                initTime[r, p, f] = #doc.getElementsByTagName(initName)  # Get the information out of the xml file
-                solveTime[r, p, f] = #doc.getElementsByTagName(solveName)  # Get the desired information out of the xml file
-
-# After the values have been stored, they can be plotted
+d = 0
+# Static scaling analysis
 plt.figure(figsize=(6, 4), num=1)
 plt.title("Initialization Static Scaling", pad=1)
-plt.plot(initTime[0, 0, :], linewidth=1)
+for i in range(len(processes)):
+    plt.loglog(cellsize[d, :], initTime[0, i, :], linewidth=1, marker='.')
 plt.yticks(fontsize=10)
 plt.xticks(fontsize=10)
 plt.xlabel(r'Time $[s]$', fontsize=10)
 plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
-plt.savefig('scalingTests', dpi=1500, bbox_inches='tight')
+plt.legend(processes, loc="upper left")
+plt.savefig('scalingStatic' + dims, dpi=1500, bbox_inches='tight')
+plt.show()
+
+# Strong scaling analysis
+plt.figure(figsize=(6, 4), num=1)
+plt.title("Initialization Strong Scaling", pad=1)
+for i in range(len(faces)):
+    plt.loglog(processes, initTime[0, :, i], linewidth=1, marker='.')
+plt.yticks(fontsize=10)
+plt.xticks(fontsize=10)
+plt.xlabel(r'Processes $[s]$', fontsize=10)
+plt.ylabel(r'Time $[s]$', fontsize=10)
+plt.legend(faces, loc="upper left")
+plt.savefig('scalingStrong' + dims, dpi=1500, bbox_inches='tight')
+plt.show()
+
+# Weak scaling analysis
+# Strong scaling analysis
+plt.figure(figsize=(6, 4), num=1)
+plt.title("Initialization Strong Scaling", pad=1)
+for i in range(len(faces)):
+    plt.loglog(processes, initTime[0, :, i], linewidth=1, marker='.')
+plt.yticks(fontsize=10)
+plt.xticks(fontsize=10)
+plt.xlabel(r'Processes $[s]$', fontsize=10)
+plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
+plt.legend(faces, loc="upper left")
+plt.savefig('scalingWeak' + dims, dpi=1500, bbox_inches='tight')
 plt.show()
