@@ -7,7 +7,7 @@
 #SBATCH -J slabV3
 #SBATCH -t 6:00:00
 #SBATCH -p pbatch
-#SBATCH --mail-type=ALL
+#SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
 #SBATCH --output=Scaling2D_25_32_[420,60]

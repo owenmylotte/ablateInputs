@@ -7,12 +7,12 @@ from os.path import exists
 # Set up options that must be defined by the user
 # Define the arrays that contain the options which were used
 processes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
-faces = ["[105,15]", "[149,21]", "[210,30]", "[297,24]", "[420,60]", "[594,85]", "[840,120]"]
+faces = ["[105,15]", "[149,21]", "[210,30]", "[297,42]", "[420,60]", "[594,85]", "[840,120]"]
 rays = [10, 25, 50, 200]
 dims = "2D"
 
 # Template path: "outputs/Scaling2D_30_16_[105, 15].xml"
-basePath = "outputs/scalingTests"
+basePath = "outputs/Scaling"
 initName = "Radiation Initialization"
 solveName = "Radiation Solve"
 
@@ -20,7 +20,7 @@ solveName = "Radiation Solve"
 options = itertools.product(rays, processes, faces)
 
 # Problem size doubles for each increase
-cells = np.array([[105, 15], [149, 21], [210, 30], [297, 24], [420, 60], [594, 85], [840, 120]])
+cells = np.array([[105, 15], [149, 21], [210, 30], [297, 42], [420, 60], [594, 85], [840, 120]])
 cellsize = np.ones([2, np.shape(cells)[0]])
 for n in range(np.shape(cellsize)[0]):
     for i in range(np.shape(cells)[0]):
@@ -40,7 +40,7 @@ for r in range(len(rays)):
             # Create strings which represent the file names of the outputs
             path = basePath + dims + "_" + str(rays[r]) + "_" + str(processes[p]) + "_" + str(
                 faces[f]) + ".xml"  # File path
-            path = "outputs/scalingTests2D_10_1_[105, 15].xml"  # TODO Hack for testing
+            # path = "outputs/scalingTests2D_10_1_[105, 15].xml"  # Hack for testing
             if exists(path):  # Make sure not to try accessing a path that doesn't exist
                 tree = ET.parse(path)  # Create element tree object
                 root = tree.getroot()  # Get root element
@@ -49,51 +49,112 @@ for r in range(len(rays)):
                     # Get the specific name of the event that is desired
                     #    Get the sub-value that is desired out of the event
                     if item.find("name").text == "Radiation Initialization":
-                        initTime[r, p, f] = item.find('time/avgvalue').text
+                        if not item.find('time/avgvalue') is None:
+                            initTime[r, p, f] = item.find('time/avgvalue').text
                     if item.find("name").text == "Radiation Solve":
-                        solveTime[r, p, f] = item.find('time/avgvalue').text
+                        if not item.find('time/avgvalue') is None:
+                            solveTime[r, p, f] = item.find('time/avgvalue').text
+            if initTime[r, p, f] == 0:
+                initTime[r, p, f] = float("nan")
+            if solveTime[r, p, f] == 0:
+                solveTime[r, p, f] = float("nan")
+
+processes = np.asarray(processes)
+faces = np.asarray(faces)
+rays = np.asarray(rays)
 
 d = 0
-# Static scaling analysis
-plt.figure(figsize=(6, 4), num=1)
-plt.title("Initialization Static Scaling", pad=1)
-for i in range(len(processes)):
-    plt.loglog(cellsize[d, :], initTime[0, i, :], linewidth=1, marker='.')
-plt.yticks(fontsize=10)
-plt.xticks(fontsize=10)
-plt.xlabel(r'Time $[s]$', fontsize=10)
-plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
-plt.legend(processes, loc="upper left")
-plt.savefig('scalingStatic' + dims, dpi=1500, bbox_inches='tight')
-plt.show()
+# # Initialization static scaling analysis
+# plt.figure(figsize=(6, 4), num=1)
+# plt.title("Initialization Static Scaling", pad=1)
+# for n in range(len(rays)):
+#     for i in range(len(processes)):
+#         mask = np.isfinite(initTime[n, i, :])
+#         x = cellsize[d, :]
+#         y = initTime[n, i, :]
+#         plt.loglog(x[mask], y[mask], linewidth=1, marker='.')
+# plt.yticks(fontsize=10)
+# plt.xticks(fontsize=10)
+# plt.xlabel(r'Time $[s]$', fontsize=10)
+# plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
+# plt.legend(processes, loc="upper left")
+# plt.savefig('initScalingStatic' + dims, dpi=1500, bbox_inches='tight')
+# plt.show()
 
-# Strong scaling analysis
+# Initialization Strong scaling analysis
 plt.figure(figsize=(6, 4), num=1)
 plt.title("Initialization Strong Scaling", pad=1)
-for i in range(len(faces)):
-    plt.loglog(processes, initTime[0, :, i], linewidth=1, marker='.')
+for n in range(len(rays)):
+    for i in range(len(faces)):
+        mask = np.isfinite(initTime[n, :, i])
+        x = processes
+        y = initTime[n, :, i]
+
+        # Bring the lowest available index to the line to normalize the scaling plot * (ideal / lowest available index)
+        first = np.argmax(mask)
+
+        plt.loglog(x[mask], (processes[first] * y[first]) / y[mask], linewidth=1, marker='.')
+plt.plot(processes, processes, linewidth=1, c="black", linestyle="--")
 plt.yticks(fontsize=10)
 plt.xticks(fontsize=10)
 plt.xlabel(r'Processes $[s]$', fontsize=10)
 plt.ylabel(r'Time $[s]$', fontsize=10)
-plt.legend(faces, loc="upper left")
-plt.savefig('scalingStrong' + dims, dpi=1500, bbox_inches='tight')
+# plt.legend(faces, loc="upper left")
+plt.savefig('initScalingStrong' + dims, dpi=1500, bbox_inches='tight')
 plt.show()
 
-# Weak scaling analysis
-weakInit = np.zeros([len(processes) + len(faces), len(processes) * len(faces)])
-for i in range(-(len(processes)), len(faces)):
-    weakInit[(i+len(processes)), :] = np.diag(initTime[0, :, :], k=i)
+# # Initialization Weak scaling analysis
+# weakInit = np.zeros([len(processes) + len(faces), len(processes) * len(faces)])
+# for i in range(-(len(processes)), len(faces)):
+#     weakInit[(i+len(processes)), :] = np.diag(initTime[0, :, :], k=i)
+#
+# plt.figure(figsize=(6, 4), num=1)
+# plt.title("Initialization Weak Scaling", pad=1)
+# for i in range(len(faces)):
+#     plt.loglog(processes, initTime[0, :, i], linewidth=1, marker='.')
+# plt.yticks(fontsize=10)
+# plt.xticks(fontsize=10)
+# plt.xlabel(r'Processes $[s]$', fontsize=10)
+# plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
+# plt.legend(faces, loc="upper left")
+# plt.savefig('scalingWeak' + dims, dpi=1500, bbox_inches='tight')
+# plt.show()
 
-# Strong scaling analysis
+# Initialization static scaling analysis
+# plt.figure(figsize=(6, 4), num=1)
+# plt.title("Solve Static Scaling", pad=1)
+# for n in range(len(rays)):
+#     for i in range(len(processes)):
+#         mask = np.isfinite(solveTime[n, i, :])
+#         x = cellsize[d, :]
+#         y = solveTime[n, i, :]
+#         plt.loglog(x[mask], y[mask], linewidth=1, marker='.')
+# plt.yticks(fontsize=10)
+# plt.xticks(fontsize=10)
+# plt.xlabel(r'Time $[s]$', fontsize=10)
+# plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
+# plt.legend(processes, loc="upper left")
+# plt.savefig('solveScalingStatic' + dims, dpi=1500, bbox_inches='tight')
+# plt.show()
+
+# Initialization Strong scaling analysis
 plt.figure(figsize=(6, 4), num=1)
-plt.title("Initialization Weak Scaling", pad=1)
-for i in range(len(faces)):
-    plt.loglog(processes, initTime[0, :, i], linewidth=1, marker='.')
+plt.title("Solve Strong Scaling", pad=1)
+for n in range(len(rays)):
+    for i in range(len(faces)):
+        mask = np.isfinite(solveTime[n, :, i])
+        x = processes
+        y = solveTime[n, :, i]
+
+        # Bring the lowest available index to the line to normalize the scaling plot * (ideal / lowest available index)
+        first = np.argmax(mask)
+
+        plt.loglog(x[mask], (processes[first] * y[first]) / y[mask], linewidth=1, marker='.')
+plt.plot(processes, processes, linewidth=1, c="black", linestyle="--")
 plt.yticks(fontsize=10)
 plt.xticks(fontsize=10)
 plt.xlabel(r'Processes $[s]$', fontsize=10)
-plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
-plt.legend(faces, loc="upper left")
-plt.savefig('scalingWeak' + dims, dpi=1500, bbox_inches='tight')
+plt.ylabel(r'Time $[s]$', fontsize=10)
+# plt.legend(faces, loc="upper left")
+plt.savefig('solveScalingStrong' + dims, dpi=1500, bbox_inches='tight')
 plt.show()

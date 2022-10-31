@@ -7,10 +7,10 @@
 #SBATCH -J slabV3
 #SBATCH -t 6:00:00
 #SBATCH -p pbatch
-#SBATCH --mail-type=ALL
+#SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=Scaling2D_25_2_[297,24]
+#SBATCH --output=Scaling2D_25_2_[297,42]
 
 ##### Load Required modules
 # gcc
@@ -36,10 +36,10 @@ export UPWIND=leastsquares
 ##### Launch parallel job using srun
 srun -n2 /g/g20/mylotte1/ablateOpt/ablate \
   --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/slabBurnerScaling2D.yaml \
-  -yaml::environment::title Scaling2D_25_2_[297,24] \
-  -yaml::timestepper::domain::faces [297,24] \
+  -yaml::environment::title Scaling2D_25_2_[297,42] \
+  -yaml::timestepper::domain::faces [297,42] \
   -yaml::solvers::[5]::processes::[0]::radiation::rays 25 \
   -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
-  -log_view :Scaling2D_25_2_[297,24].xml:ascii_xml
+  -log_view :Scaling2D_25_2_[297,42].xml:ascii_xml
 
 echo "End Time " $(date +%s)
