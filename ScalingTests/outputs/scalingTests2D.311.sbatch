@@ -5,7 +5,7 @@
 #SBATCH -n 32
 #SBATCH --use-min-nodes
 #SBATCH -J slabV3
-#SBATCH -t 6:00:00
+#SBATCH -t 24:00:00
 #SBATCH -p pbatch
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb

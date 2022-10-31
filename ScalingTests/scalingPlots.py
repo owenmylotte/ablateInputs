@@ -5,6 +5,11 @@ import itertools
 from os.path import exists
 
 # Set up options that must be defined by the user
+colorarray = ["darkgrey", "grey", "burlywood", "brown", "firebrick", "darkorange", "gold", "yellowgreen",
+              "green", "mediumaquamarine", "mediumturquoise", "powderblue", "mediumpurple", "mediumorchid",
+              "deeppink"]
+markerarray = [".", "1", "P", "*"]
+
 # Define the arrays that contain the options which were used
 processes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
 faces = ["[105,15]", "[149,21]", "[210,30]", "[297,42]", "[420,60]", "[594,85]", "[840,120]"]
@@ -64,22 +69,22 @@ faces = np.asarray(faces)
 rays = np.asarray(rays)
 
 d = 0
-# # Initialization static scaling analysis
-# plt.figure(figsize=(6, 4), num=1)
-# plt.title("Initialization Static Scaling", pad=1)
-# for n in range(len(rays)):
-#     for i in range(len(processes)):
-#         mask = np.isfinite(initTime[n, i, :])
-#         x = cellsize[d, :]
-#         y = initTime[n, i, :]
-#         plt.loglog(x[mask], y[mask], linewidth=1, marker='.')
-# plt.yticks(fontsize=10)
-# plt.xticks(fontsize=10)
-# plt.xlabel(r'Time $[s]$', fontsize=10)
-# plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
+# Initialization static scaling analysis
+plt.figure(figsize=(6, 4), num=1)
+plt.title("Initialization Static Scaling", pad=1)
+for n in range(len(rays)):
+    for i in range(len(processes)):
+        mask = np.isfinite(initTime[n, i, :])
+        x = cellsize[d, :]
+        y = cellsize[d, :] / initTime[n, i, :]
+        plt.loglog(x[mask], y[mask], linewidth=1, marker=markerarray[n], c=colorarray[i])
+plt.yticks(fontsize=10)
+plt.xticks(fontsize=10)
+plt.xlabel(r'DOF $[cells]$', fontsize=10)
+plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
 # plt.legend(processes, loc="upper left")
-# plt.savefig('initScalingStatic' + dims, dpi=1500, bbox_inches='tight')
-# plt.show()
+plt.savefig('initScalingStatic' + dims, dpi=1500, bbox_inches='tight')
+plt.show()
 
 # Initialization Strong scaling analysis
 plt.figure(figsize=(6, 4), num=1)
@@ -93,12 +98,13 @@ for n in range(len(rays)):
         # Bring the lowest available index to the line to normalize the scaling plot * (ideal / lowest available index)
         first = np.argmax(mask)
 
-        plt.loglog(x[mask], (processes[first] * y[first]) / y[mask], linewidth=1, marker='.')
+        plt.loglog(x[mask], (processes[first] * y[first]) / y[mask], linewidth=1, marker=markerarray[n],
+                   c=colorarray[i])
 plt.plot(processes, processes, linewidth=1, c="black", linestyle="--")
 plt.yticks(fontsize=10)
 plt.xticks(fontsize=10)
-plt.xlabel(r'Processes $[s]$', fontsize=10)
-plt.ylabel(r'Time $[s]$', fontsize=10)
+plt.xlabel(r'Processes', fontsize=10)
+plt.ylabel(r'Speedup', fontsize=10)
 # plt.legend(faces, loc="upper left")
 plt.savefig('initScalingStrong' + dims, dpi=1500, bbox_inches='tight')
 plt.show()
@@ -120,22 +126,23 @@ plt.show()
 # plt.savefig('scalingWeak' + dims, dpi=1500, bbox_inches='tight')
 # plt.show()
 
-# Initialization static scaling analysis
-# plt.figure(figsize=(6, 4), num=1)
-# plt.title("Solve Static Scaling", pad=1)
-# for n in range(len(rays)):
-#     for i in range(len(processes)):
-#         mask = np.isfinite(solveTime[n, i, :])
-#         x = cellsize[d, :]
-#         y = solveTime[n, i, :]
-#         plt.loglog(x[mask], y[mask], linewidth=1, marker='.')
-# plt.yticks(fontsize=10)
-# plt.xticks(fontsize=10)
-# plt.xlabel(r'Time $[s]$', fontsize=10)
-# plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
-# plt.legend(processes, loc="upper left")
-# plt.savefig('solveScalingStatic' + dims, dpi=1500, bbox_inches='tight')
-# plt.show()
+# Solve static scaling analysis
+plt.figure(figsize=(6, 4), num=1)
+plt.title("Solve Static Scaling", pad=1)
+for n in range(len(rays)):
+    for i in range(len(processes)):
+        mask = np.isfinite(solveTime[n, i, :])
+        x = cellsize[d, :]
+        y = cellsize[d, :] / solveTime[n, i, :]
+        plt.loglog(x[mask], y[mask], linewidth=1, marker=markerarray[n],
+                   c=colorarray[i])  # TODO: Rays by marker style, p-size by line color
+plt.yticks(fontsize=10)
+plt.xticks(fontsize=10)
+plt.xlabel(r'DOF $[cells]$', fontsize=10)
+plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
+# plt.legend(processes, loc="upper left")  # TODO: Legend should show line color and marker style meaning
+plt.savefig('solveScalingStatic' + dims, dpi=1500, bbox_inches='tight')
+plt.show()
 
 # Initialization Strong scaling analysis
 plt.figure(figsize=(6, 4), num=1)
@@ -149,12 +156,13 @@ for n in range(len(rays)):
         # Bring the lowest available index to the line to normalize the scaling plot * (ideal / lowest available index)
         first = np.argmax(mask)
 
-        plt.loglog(x[mask], (processes[first] * y[first]) / y[mask], linewidth=1, marker='.')
+        plt.loglog(x[mask], (processes[first] * y[first]) / y[mask], linewidth=1, marker=markerarray[n],
+                   c=colorarray[i])
 plt.plot(processes, processes, linewidth=1, c="black", linestyle="--")
 plt.yticks(fontsize=10)
 plt.xticks(fontsize=10)
-plt.xlabel(r'Processes $[s]$', fontsize=10)
-plt.ylabel(r'Time $[s]$', fontsize=10)
+plt.xlabel(r'Processes', fontsize=10)
+plt.ylabel(r'Speedup', fontsize=10)
 # plt.legend(faces, loc="upper left")
 plt.savefig('solveScalingStrong' + dims, dpi=1500, bbox_inches='tight')
 plt.show()
