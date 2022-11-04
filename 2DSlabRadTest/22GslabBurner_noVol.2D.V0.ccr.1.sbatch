@@ -1,11 +1,11 @@
 #!/bin/sh
 #SBATCH --partition=general-compute --qos=general-compute
 #SBATCH --time=72:00:00
-#SBATCH --nodes=2
+#SBATCH --nodes=4
 #SBATCH --ntasks-per-node=56
 ##SBATCH --constraint=IB
 #SBATCH --mem=256000
-#SBATCH --job-name="22GslbBurn_noVol"
+#SBATCH --job-name="22GslbBurn_noVol_Comparison0"
 #SBATCH --mail-user=owenmylo@buffalo.edu
 #SBATCH --mail-type=ALL
 

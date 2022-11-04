@@ -5,7 +5,7 @@
 #SBATCH --ntasks-per-node=56
 ##SBATCH --constraint=IB
 #SBATCH --mem=256000
-#SBATCH --job-name="22GslbBurn_noRad"
+#SBATCH --job-name="22GslbBurn_noRad_Comparison0"
 #SBATCH --mail-user=owenmylo@buffalo.edu
 #SBATCH --mail-type=ALL
 

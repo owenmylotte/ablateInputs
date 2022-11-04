@@ -1,7 +1,7 @@
 # increase in reflection factor
 ---
 environment:
-  title: _2dSlabBurner
+  title: _2dSlabBurner_noRad_Comparison0
   tagDirectory: true
 arguments:
   outputAuxVector: true
@@ -14,7 +14,7 @@ timestepper:
     ts_adapt_monitor: ""
     ts_adapt_safety: 0.75
   io: !ablate::io::Hdf5MultiFileSerializer
-    interval: 50
+    interval: 25
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
     faces: [560,80]
@@ -121,7 +121,7 @@ timestepper:
         eos: *eos
         temperature:  !ablate::mathFunctions::geom::Sphere
           center: [ .036,  0.01]
-          radius: 0.001
+          radius: 0.005
           insideValues: 1500
           outsideValues: 300
         pressure: 101325.0
@@ -173,7 +173,7 @@ timestepper:
         eos: *eos
         temperature: 2000.00
         pressure: 101325.0
-        velocity: "0.0, 00"
+        velocity: "0.0, 0.0"
         massFractions: !ablate::finiteVolume::fieldFunctions::MassFractions
           eos: *eos
           values:
@@ -250,7 +250,7 @@ solvers:
       - !ablate::boundarySolver::lodi::Inlet
         eos: *eos
         pgs: *pgs
-        velocity: "14.96274499"
+        velocity: "14.96274499, 0.0"
   - !ablate::boundarySolver::BoundarySolver
     id: outlet
     region:
@@ -300,14 +300,5 @@ solvers:
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
-#        radiationInterval: 10
-#        radiation: !ablate::radiation::SurfaceRadiation
-#          id: surfaceflux
-#          region:
-#            name: flowRegion
-#          rays: 50
-#          properties: !ablate::eos::radiationProperties::Zimmer
-#            eos: *eos
-#          log: !ablate::monitors::logs::StdOut
     monitors:
       - !ablate::monitors::BoundarySolverMonitor

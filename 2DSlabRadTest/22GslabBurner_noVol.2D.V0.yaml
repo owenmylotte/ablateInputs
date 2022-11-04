@@ -1,7 +1,7 @@
 # increase in reflection factor
 ---
 environment:
-  title: _2dSlabBurner
+  title: _2dSlabBurner_noVol_Comparison0
   tagDirectory: true
 arguments:
   outputAuxVector: true
@@ -250,7 +250,7 @@ solvers:
       - !ablate::boundarySolver::lodi::Inlet
         eos: *eos
         pgs: *pgs
-        velocity: "14.96274499"
+        velocity: "14.96274499, 0.0"
   - !ablate::boundarySolver::BoundarySolver
     id: outlet
     region:
