@@ -1,5 +1,5 @@
 ---
-name: scalingTests2D.
+name: scalingTests2DSharing.
 enumerations:
   - !enumerator::enumerations::List
     name: processes
