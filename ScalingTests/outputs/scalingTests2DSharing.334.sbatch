@@ -35,7 +35,7 @@ export UPWIND=leastsquares
 
 ##### Launch parallel job using srun
 srun -n4 /g/g20/mylotte1/ablateOpt/ablate \
-  --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/slabBurnerScaling2DSharing.yaml \
+  --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/outputs/slabBurnerScaling2DSharing.yaml \
   -yaml::environment::title Scaling2DSharing_50_4_[297,42] \
   -yaml::timestepper::domain::faces [297,42] \
   -yaml::solvers::[6]::radiation::rays 50 \
