@@ -1,14 +1,14 @@
 # increase in reflection factor
 ---
 environment:
-  title: _2dSlabBurner_fullRad_Comparison0
+  title: _2dSlabBurner
   tagDirectory: true
 arguments:
   outputAuxVector: true
 timestepper:
   arguments:
     ts_type: rk
-    ts_max_time: 2
+    ts_max_time: 1
     ts_max_steps: 2000000000
     ts_dt: 1.0e-10
     ts_adapt_monitor: ""
@@ -17,9 +17,9 @@ timestepper:
     interval: 100
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 105,15 ]
-    lower: [ 0.0, 0.0 ]
-    upper: [ 0.165354, 0.027686 ]
+    faces: [560,80]
+    lower: [ 0.0, 0.0]
+    upper: [ 0.165354, 0.027686]
     simplex: false
     options:
       dm_plex_hash_location: true
@@ -46,8 +46,8 @@ timestepper:
         region:
           name: glowPlugRegion
         function: !ablate::mathFunctions::geom::Cylinder
-          start: [ 0.02615, 0.012186 ]
-          end: [ 0.02615, 0.027686 ]
+          start: [ 0.02615, 0.012186]
+          end: [ 0.02615, 0.027686]
           radius: 0.00245
       - !ablate::domain::modifiers::SubtractLabel
         # cut the slabBurner and glow plug out of the flowRegion
@@ -119,13 +119,13 @@ timestepper:
     - !ablate::finiteVolume::fieldFunctions::Euler
       state: &flowFieldState
         eos: *eos
-        temperature: !ablate::mathFunctions::geom::Sphere
-          center: [ .036,  0.01 ]
+        temperature:  !ablate::mathFunctions::geom::Sphere
+          center: [ .036,  0.01]
           radius: 0.005
           insideValues: 1500
           outsideValues: 300
         pressure: 101325.0
-        velocity: "14.96274499, 0.0"
+        velocity: "3.985120454, 0.0"
         massFractions: !ablate::finiteVolume::fieldFunctions::MassFractions
           &oxMassFrac
           eos: *eos
@@ -200,6 +200,7 @@ timestepper:
               field: 1.0
     - !ablate::finiteVolume::fieldFunctions::DensityMassFractions
       state: *flowFieldState
+
 solvers:
   - !ablate::finiteVolume::CompressibleFlowSolver
     id: flowField
@@ -221,7 +222,7 @@ solvers:
           massFractionsFuel: *fuelMassFrac
           massFractionsOxidizer: *oxMassFrac
       - !ablate::monitors::TurbFlowStats
-        fields: [ velocity, temperature ]
+        fields: [velocity, temperature]
         eos: *eos
         interval: !ablate::io::interval::DelayInterval
           interval: 25
@@ -249,7 +250,7 @@ solvers:
       - !ablate::boundarySolver::lodi::Inlet
         eos: *eos
         pgs: *pgs
-        velocity: "14.96274499 , 0.0"
+        velocity: "3.985120454"
   - !ablate::boundarySolver::BoundarySolver
     id: outlet
     region:
@@ -299,28 +300,28 @@ solvers:
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
-#        radiationInterval: 10
-#        radiation: !ablate::radiation::SurfaceRadiation
-#          id: surfaceflux
-#          region:
-#            name: flowRegion
-#          rays: 250
-#          properties: !ablate::eos::radiationProperties::Zimmer
-#            eos: *eos
-#          log: !ablate::monitors::logs::StdOut
-#            name: surfacelog
+        radiationInterval: 10
+        radiation: !ablate::radiation::SurfaceRadiation
+          id: surfaceflux
+          region:
+            name: flowRegion
+          rays: 50
+          properties: !ablate::eos::radiationProperties::Zimmer
+            eos: *eos
+          log: !ablate::monitors::logs::StdOut
+            name: surfacefluxlog
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
   - !ablate::radiation::VolumeRadiation
     id: radiationSolver
     region:
       name: flowRegion
-    interval: 1
+    interval: 10
     radiation: !ablate::radiation::RaySharingRadiation
-      id: radiation
+      id: flameradiation
       region:
         name: flowRegion
-      rays: 100
+      rays: 25
       properties: !ablate::eos::radiationProperties::Zimmer
         eos: *eos
       log: !ablate::monitors::logs::StdOut

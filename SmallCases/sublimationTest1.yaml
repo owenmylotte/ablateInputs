@@ -162,7 +162,7 @@ solvers:
         transportModel: *transportModel
         eos: *eos
         massFractions: *fuelMassFrac
-        disablePressure: true
+        diffusionFlame: true
         radiationInterval: 1000
         radiation: !ablate::radiation::Radiation
             id: surfaceflux
