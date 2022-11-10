@@ -321,7 +321,7 @@ solvers:
       id: flameradiation
       region:
         name: flowRegion
-      rays: 25
+      rays: 10
       properties: !ablate::eos::radiationProperties::Zimmer
         eos: *eos
       log: !ablate::monitors::logs::StdOut

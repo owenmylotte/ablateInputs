@@ -17,7 +17,7 @@ timestepper:
     interval: 100
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [560,80]
+    faces: [105,15]
     lower: [ 0.0, 0.0]
     upper: [ 0.165354, 0.027686]
     simplex: false
@@ -40,7 +40,7 @@ timestepper:
         region:
           name: slabBurnerRegion
         function: !ablate::mathFunctions::geom::Surface
-          path: ../geom/slabBurner.v1.stp
+          path: ../../geom/slabBurner.v1.stp
       # create a label for defining the glowPlug
       - !ablate::domain::modifiers::CreateLabel
         region:
@@ -104,7 +104,7 @@ timestepper:
     fields:
       - !ablate::finiteVolume::CompressibleFlowFields
         eos: !ablate::eos::TChem  &eos
-          mechFile: ../mechanisms/gri30.yaml
+          mechFile: ../../mechanisms/gri30.yaml
         conservedFieldOptions:
           petscfv_type: upwind
         region:
