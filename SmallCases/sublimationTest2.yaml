@@ -19,7 +19,7 @@ timestepper:
     simplex: false
     options:
       dm_refine: 0
-      dm_plex_hash_location: false
+      dm_plex_hash_location: true
       dm_partition_view: true
       #      dm_label_view: "ghost"
     preModifiers:
@@ -171,22 +171,22 @@ solvers:
           id: surfaceflux
           region:
             name: flowRegion
-          rays: 100
+          rays: 500
           properties: !ablate::eos::radiationProperties::Zimmer
             eos: *eos
           log: !ablate::monitors::logs::StdOut
             name: surfaceradlog
-#  - !ablate::radiation::VolumeRadiation
-#    id: radiationSolver
-#    region:
-#      name: flowRegion
-#    interval: 5
-#    radiation: !ablate::radiation::RaySharingRadiation
-#      id: radiation
-#      region:
-#        name: flowRegion
-#      rays: 25
-#      properties: !ablate::eos::radiationProperties::Zimmer
-#        eos: *eos
-#      log: !ablate::monitors::logs::StdOut
-#        name: radlog
+  - !ablate::radiation::VolumeRadiation
+    id: radiationSolver
+    region:
+      name: flowRegion
+    interval: 5
+    radiation: !ablate::radiation::Radiation
+      id: radiation
+      region:
+        name: flowRegion
+      rays: 250
+      properties: !ablate::eos::radiationProperties::Zimmer
+        eos: *eos
+      log: !ablate::monitors::logs::StdOut
+        name: radlog

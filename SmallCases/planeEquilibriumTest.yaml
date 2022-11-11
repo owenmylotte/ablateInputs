@@ -76,8 +76,6 @@ solvers:
       id: radiation
       region:
         name: interiorCells
-      fieldBoundary:
-        name: boundaryCells
       rays: 500
       properties: !ablate::eos::radiationProperties::Constant
         absorptivity: 1
