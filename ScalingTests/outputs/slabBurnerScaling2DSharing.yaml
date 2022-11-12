@@ -2,7 +2,7 @@
 ---
 environment:
   title: _2dSlabBurner
-  tagDirectory: false
+  tagDirectory: true
 arguments:
   outputAuxVector: true
 timestepper:
