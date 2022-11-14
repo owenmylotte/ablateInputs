@@ -1,0 +1,17 @@
+---
+name: sphericalEquilibriumScalingTests.
+enumerations:
+  - !enumerator::enumerations::List
+    name: processes
+    values: [ 1, 4, 16, 64, 256, 1024, 4096, 16384]
+  - !enumerator::enumerations::List
+    name: faces
+    values: [ 0, 2, 4, 6, 8, 10, 12, 14 ]
+  - !enumerator::enumerations::List
+    name: rays
+    values: [ 15, 50, 250]
+generator:
+  !enumerator::generators::FileTemplateGenerator
+  path: sphericalEquilibriumScalingTests.sbatch
+reporters:
+  - !enumerator::reporters::StreamReporter

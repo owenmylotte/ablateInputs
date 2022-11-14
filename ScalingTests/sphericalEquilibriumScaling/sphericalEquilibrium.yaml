@@ -1,0 +1,143 @@
+# Radiative equilibrium problem for testing the coupling of the radiation solver with the
+# energy equation. This serves as verification for the radiation solver.
+---
+environment:
+  title: _SphRadEq_5.0m
+  tagDirectory: true
+arguments:
+  dm_plex_gmsh_use_regions: true
+  outputAuxVector: true
+timestepper:
+  # setup default controls for the time stepper
+  arguments:
+    ts_type: rk
+    ts_max_time: 1.0E6
+    ts_max_steps: 10000000000
+    ts_dt: 1.0E-10
+    ts_adapt_monitor: ""
+    ts_adapt_safety: 0.75
+  # io controls how often the results are saved to a file for visualization and restart
+  io: !ablate::io::Hdf5MultiFileSerializer
+    #  results are outputted every 0.001 seconds of real simulation time
+    interval: 100 #!ablate::io::interval::SimulationTimeInterval 0.001
+  # load in a mesh file
+  domain: !ablate::domain::MeshFile
+    name: flowRegionMesh
+    path: ../geom/R1_5.0m.msh
+    # Options to be applied to the volumetric geometry
+    options:
+      dm_refine: 0
+      dm_plex_check_all: true
+      dm_partition_view: true
+      dm_plex_hash_location: true
+      dm_distribute_overlap: 0
+    modifiers:
+      # label the vertices of regions with all faces labeled
+      - !ablate::domain::modifiers::CompleteLabel
+        region:
+          name: R1
+      - !ablate::domain::modifiers::CompleteLabel
+        region:
+          name: R2
+      # extrude all boundaries to add needed ghost cells for the boundary solver
+      - !ablate::domain::modifiers::ExtrudeLabel
+        # extrude the boundary cells marked
+        regions:
+          - &R1
+            name: R1
+            value: 8
+          - &R2
+            name: R2
+            value: 9
+        # mark all the resulting boundary faces with boundaryFaces label
+        boundaryRegion:
+          name: BoundaryFaces
+        # tag the original mesh as the flow region
+        originalRegion:
+          name: flowRegion
+        # tag the new boundary cells for easy boundary condition specifications
+        extrudedRegion:
+          name: BoundaryCells
+      # if using mpi, this modifier distributes cells
+      - !ablate::domain::modifiers::DistributeWithGhostCells
+        ghostCellDepth: 3
+      - !ablate::domain::modifiers::FvmCheck
+        region:
+          name: flowRegion
+        expectedFaceCount: 6
+        expectedNodeCount: 8
+      # the DmViewFromOptions "modifier" does not modify the dm but outputs. Used to examine dm for errors
+    #      - !ablate::monitors::DmViewFromOptions
+    #        options: ascii
+    #      - !ablate::monitors::DmViewFromOptions
+    #        options: ascii::ascii_info_detail
+    #      - !ablate::monitors::DmViewFromOptions
+    #        options: ":$OutputDirectory/mesh.tex:ascii_latex"
+    #       the $OutputDirectory is a special keyword that gets parsed by ablate to update to the output directory
+    fields:
+      - !ablate::finiteVolume::CompressibleFlowFields
+        eos: !ablate::eos::PerfectGas &eos
+          parameters:
+            gamma: 1.4
+            Rgas: 287.0
+        name: domain
+  initialization:
+    - !ablate::finiteVolume::fieldFunctions::Euler
+      region:
+        name: flowRegion
+      state: &initFlowState
+        eos: *eos
+        pressure: 1.0
+        temperature: 1500
+        velocity: "0, 0, 0"
+    - !ablate::finiteVolume::fieldFunctions::Euler
+      region: *R1
+      state: &R1State
+        eos: *eos
+        temperature: 2000.0
+        pressure: 1.0
+        velocity: "0, 0, 0"
+    - !ablate::finiteVolume::fieldFunctions::Euler
+      region: *R2
+      state: &R2State
+        eos: *eos
+        temperature: 1000.0
+        pressure: 1.0
+        velocity: "0, 0, 0"
+solvers:
+  - !ablate::finiteVolume::CompressibleFlowSolver
+    id: vortexFlowField
+    region:
+      name: flowRegion
+    parameters:
+      cfl: 0.25
+    monitors:
+      - !ablate::monitors::MaxMinAverage
+        field: euler
+    eos: *eos
+    computePhysicsTimeStep: true
+  - !ablate::radiation::VolumeRadiation
+    id: radiationSolver
+    region:
+      name: flowRegion
+    interval: 1
+    radiation: !ablate::radiation::RaySharingRadiation
+      id: flameradiation
+      region:
+        name: flowRegion
+      rays: 200
+      properties: !ablate::eos::radiationProperties::Constant
+        absorptivity: 1
+      log: !ablate::monitors::logs::StdOut
+        name: raysharinglog
+  # use a boundary solver to update the cells in the wallBoundaryCells region to represent standard wall
+  - !ablate::boundarySolver::DebugBoundarySolver
+    id: sphereBoundary
+    region:
+      name: BoundaryCells
+    fieldBoundary:
+      name: BoundaryFaces
+    mergeFaces: true
+    processes:
+      - !ablate::boundarySolver::lodi::IsothermalWall
+        eos: *eos
