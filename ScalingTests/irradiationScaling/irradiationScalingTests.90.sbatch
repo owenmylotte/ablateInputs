@@ -2,15 +2,15 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -n {{processes}}
+#SBATCH -n 2
 #SBATCH --use-min-nodes
-#SBATCH -J spherical
-#SBATCH -t 24:00:00
+#SBATCH -J irradiation
+#SBATCH -t 12:00:00
 #SBATCH -p pbatch
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=sphericalEquilibriumScalingTests_{{rays}}_{{processes}}_{{faces}}
+#SBATCH --output=irradiationScalingTests_15_2_[200]
 
 ##### Load Required modules
 # gcc
@@ -34,12 +34,12 @@ cd tmp_$SLURM_JOBID
 export UPWIND=leastsquares
 
 ##### Launch parallel job using srun
-srun -n{{processes}} /g/g20/mylotte1/ablateOpt/ablate \
-  --input ../sphericalEquilibriumScaling/sphericalEquilibrium.yaml \
-  -yaml::environment::title sphericalEquilibriumScalingTests_{{rays}}_{{processes}}_{{faces}} \
-  -yaml::timestepper::domain::options::dm_refine {{faces}} \
-  -yaml::solvers::[1]::radiation::rays {{rays}} \
+srun -n2 /g/g20/mylotte1/ablateOpt/ablate \
+  --input ../irradiationScaling/irradiation.yaml \
+  -yaml::environment::title irradiationScalingTests_15_2_[200] \
+  -yaml::timestepper::domain::faces [200] \
+  -yaml::solvers::[2]::radiation::rays 15 \
   -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
-  -log_view :sphericalEquilibriumScalingTests_{{rays}}_{{processes}}_{{faces}}.xml:ascii_xml
+  -log_view :irradiationScalingTests_15_2_[200].xml:ascii_xml
 
 echo "End Time " $(date +%s)
