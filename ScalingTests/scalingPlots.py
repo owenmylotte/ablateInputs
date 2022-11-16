@@ -18,7 +18,7 @@ dtheta = 180 / rays
 dims = " 2D Non-Sharing"
 
 # Template path: "outputs/Scaling2D_30_16_[105, 15].xml"
-basePath = "outputs/Scaling"
+basePath = "xmlFiles/Scaling"
 initName = "Radiation Initialization"
 solveName = "Radiation Solve"
 

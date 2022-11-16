@@ -26,7 +26,7 @@ timestepper:
     path: ../../geom/R1_5.0m.msh
     # Options to be applied to the volumetric geometry
     options:
-      dm_refine: 0
+      dm_refine: 3
       dm_plex_check_all: true
       dm_partition_view: true
       dm_plex_hash_location: true

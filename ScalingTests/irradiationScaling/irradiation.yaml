@@ -12,7 +12,7 @@ timestepper:
     ts_dt: 1.0E-12
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 1000 ]
+    faces: [ 10 ]
     lower: [ -0.01 ]
     upper: [ 0.01 ]
     simplex: false
