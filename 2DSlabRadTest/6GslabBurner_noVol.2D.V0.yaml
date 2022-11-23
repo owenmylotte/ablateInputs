@@ -276,17 +276,6 @@ solvers:
       - !ablate::boundarySolver::lodi::IsothermalWall
         eos: *eos
         pgs: *pgs
-  #  - !ablate::boundarySolver::BoundarySolver
-  #    id: glowPlug
-  #    region:
-  #      name: glowPlugBoundaryCells
-  #    fieldBoundary:
-  #      name: glowPlugBoundaryFaces
-  #    mergeFaces: true
-  #    processes:
-  #      - !ablate::boundarySolver::lodi::IsothermalWall
-  #        eos: *eos
-  #        pgs: *pgs
   - !ablate::boundarySolver::BoundarySolver
     id: slab boundary
     region:
@@ -300,7 +289,7 @@ solvers:
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
-        radiationInterval: 10
+        radiationInterval: 0
         radiation: !ablate::radiation::SurfaceRadiation
           id: surfaceflux
           region:

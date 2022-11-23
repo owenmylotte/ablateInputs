@@ -11,9 +11,9 @@ timestepper:
     ts_max_time: 1
     ts_max_steps: 2000000000
     ts_dt: 1.0e-10
-    ts_adapt_dt_max: 1.0e-8
+    #    ts_adapt_dt_max: 1.0e-8
     ts_adapt_monitor: ""
-    ts_adapt_safety: 0.25
+    ts_adapt_safety: 0.9
   io: !ablate::io::Hdf5MultiFileSerializer
     interval: 100
   domain: !ablate::domain::BoxMeshBoundaryCells
@@ -301,7 +301,7 @@ solvers:
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
-        radiationInterval: 10
+        radiationInterval: 0
         radiation: !ablate::radiation::SurfaceRadiation
           id: surfaceflux
           region:
@@ -309,15 +309,15 @@ solvers:
           rays: 200
           properties: !ablate::eos::radiationProperties::Zimmer
             eos: *eos
-    #          log: !ablate::monitors::logs::StdOut
-    #            name: surfacefluxlog
-    monitors:
-      - !ablate::monitors::BoundarySolverMonitor
+#          log: !ablate::monitors::logs::StdOut
+#            name: surfacefluxlog
+        monitors:
+          - !ablate::monitors::BoundarySolverMonitor
   - !ablate::radiation::VolumeRadiation
     id: radiationSolver
     region:
       name: flowRegion
-    interval: 10
+    interval: 0
     radiation: !ablate::radiation::RaySharingRadiation
       id: flameradiation
       region:

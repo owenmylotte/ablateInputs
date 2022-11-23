@@ -15,7 +15,7 @@ processes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 1638
 faces = ["[105,15]", "[149,21]", "[210,30]", "[297,42]", "[420,60]", "[594,85]", "[840,120]"]
 rays = np.array([10, 25, 50, 250])
 dtheta = 180 / rays
-dims = " 2D Non-Sharing"
+dims = " 2D Sharing"
 
 # Template path: "outputs/Scaling2D_30_16_[105, 15].xml"
 basePath = "xmlFiles/Scaling"
@@ -44,7 +44,7 @@ for r in range(len(rays)):
     for p in range(len(processes)):
         for f in range(len(faces)):
             # Create strings which represent the file names of the outputs
-            path = basePath + "2D" + "_" + str(rays[r]) + "_" + str(processes[p]) + "_" + str(
+            path = basePath + "2DSharing" + "_" + str(rays[r]) + "_" + str(processes[p]) + "_" + str(
                 faces[f]) + ".xml"  # File path
             # path = "outputs/scalingTests2D_10_1_[105, 15].xml"  # Hack for testing
             if exists(path):  # Make sure not to try accessing a path that doesn't exist
