@@ -13,12 +13,12 @@ timestepper:
     ts_dt: 1.0e-10
     #    ts_adapt_dt_max: 1.0e-8
     ts_adapt_monitor: ""
-    ts_adapt_safety: 0.9
+    ts_adapt_safety: 0.25
   io: !ablate::io::Hdf5MultiFileSerializer
-    interval: 100
+    interval: 0
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 560,80 ]
+    faces: [ 105,15 ]
     lower: [ 0.0, 0.0 ]
     upper: [ 0.165354, 0.027686 ]
     simplex: false
@@ -306,7 +306,7 @@ solvers:
           id: surfaceflux
           region:
             name: flowRegion
-          rays: 200
+          rays: 2
           properties: !ablate::eos::radiationProperties::Zimmer
             eos: *eos
 #          log: !ablate::monitors::logs::StdOut
@@ -322,7 +322,7 @@ solvers:
       id: flameradiation
       region:
         name: flowRegion
-      rays: 200
+      rays: 2
       properties: !ablate::eos::radiationProperties::Zimmer
         eos: *eos
 #      log: !ablate::monitors::logs::StdOut
