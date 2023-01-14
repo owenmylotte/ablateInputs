@@ -9,15 +9,15 @@ timestepper:
   arguments:
     ts_type: rk
     ts_max_time: 1
-    ts_max_steps: 2000000000
+    ts_max_steps: 100000000000000
     ts_dt: 1.0e-10
     ts_adapt_monitor: ""
     ts_adapt_safety: 0.75
   io: !ablate::io::Hdf5MultiFileSerializer
-    interval: 100
+    interval: 0
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 105, 15 ]
+    faces: [ 245, 35 ]
     lower: [ 0.0, 0.0 ]
     upper: [ 0.165354, 0.027686 ]
     simplex: false
@@ -216,11 +216,11 @@ solvers:
         interval: 25
       - !ablate::monitors::PhysicsTimeStep
         interval: 25
-      - !ablate::monitors::MixtureFractionMonitor
-        mixtureFractionCalculator: !ablate::chemistry::MixtureFractionCalculator
-          eos: *eos
-          massFractionsFuel: *fuelMassFrac
-          massFractionsOxidizer: *oxMassFrac
+      #      - !ablate::monitors::MixtureFractionMonitor
+      #        mixtureFractionCalculator: !ablate::chemistry::MixtureFractionCalculator
+      #          eos: *eos
+      #          massFractionsFuel: *fuelMassFrac
+      #          massFractionsOxidizer: *oxMassFrac
       - !ablate::monitors::TurbFlowStats
         fields: [ velocity, temperature ]
         eos: *eos
@@ -235,7 +235,7 @@ solvers:
         maxAlphaAllowed: 100.0
         domainLength: 0.165354
         log: !ablate::monitors::logs::StdOut
-      - !ablate::finiteVolume::processes::TChemReactions
+      - !ablate::finiteVolume::processes::Chemistry
         eos: *eos
     fluxCalculator: !ablate::finiteVolume::fluxCalculator::AusmpUp
       pgs: *pgs
@@ -290,11 +290,12 @@ solvers:
         eos: *eos
         massFractions: *fuelMassFrac
         radiationInterval: 10
+        #        emissivity: 1
         radiation: !ablate::radiation::SurfaceRadiation
           id: surfaceflux
           region:
             name: flowRegion
-          rays: 50
+          rays: 5
           properties: !ablate::eos::radiationProperties::Zimmer
             eos: *eos
     #          log: !ablate::monitors::logs::StdOut

@@ -300,7 +300,7 @@ solvers:
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
-        radiationInterval: 1
+        radiationInterval: 0
         radiation: !ablate::radiation::SurfaceRadiation
           id: surfaceflux
           region:
