@@ -2,7 +2,7 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -n 256
+#SBATCH -n 8192
 #SBATCH --use-min-nodes
 #SBATCH -J slabRadSF
 #SBATCH -t 00:45:00
@@ -10,7 +10,7 @@
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=slabRadSF2D_10_256_[560,80,80]
+#SBATCH --output=slabRadSF2D_10_8192_[560,80,80]
 
 ##### Load Required modules
 # gcc
@@ -34,12 +34,12 @@ cd tmp_$SLURM_JOBID
 export UPWIND=leastsquares
 
 ##### Launch parallel job using srun
-srun -n256 /g/g20/mylotte1/ablateOpt/ablate \
+srun -n8192 /g/g20/mylotte1/ablateOpt/ablate \
   --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/slabRadSF2DScaling/slabRadSF2D.yaml \
-  -yaml::environment::title slabRadSF2D_10_256_[560,80,80] \
+  -yaml::environment::title slabRadSF2D_10_8192_[560,80,80] \
   -yaml::timestepper::domain::faces [560,80,80] \
   -yaml::solvers::[4]::processes::[0]::radiation::rays 10 \
   -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
-  -log_view :slabRadSF2D_10_256_[560,80,80].xml:ascii_xml
+  -log_view :slabRadSF2D_10_8192_[560,80,80].xml:ascii_xml
 
 echo "End Time " $(date +%s)

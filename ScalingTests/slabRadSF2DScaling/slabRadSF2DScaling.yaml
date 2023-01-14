@@ -3,10 +3,10 @@ name: slabRadSF2DScaling.
 enumerations:
   - !enumerator::enumerations::List
     name: processes
-    values: [ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
+    values: [ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]
   - !enumerator::enumerations::List
     name: faces
-    values: ["[297,42]"]
+    values: ["[560,80,80]"]
   - !enumerator::enumerations::List
     name: rays
     values: [10]

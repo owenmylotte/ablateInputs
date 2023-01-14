@@ -9,7 +9,7 @@ timestepper:
   arguments:
     ts_type: rk
     ts_max_time: 1
-    ts_max_steps: 100000000000000
+    ts_max_steps: 10
     ts_dt: 1.0e-10
     ts_adapt_monitor: ""
     ts_adapt_safety: 0.75
@@ -17,9 +17,9 @@ timestepper:
     interval: 0
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 105, 15 ]
-    lower: [ 0.0, 0.0 ]
-    upper: [ 0.165354, 0.027686 ]
+    faces: [ 840, 120, 120 ]
+    lower: [ 0.0, 0.0, -0.0127 ]
+    upper: [ 0.165354, 0.027686, 0.0127 ]
     simplex: false
     options:
       dm_plex_hash_location: true
@@ -120,7 +120,7 @@ timestepper:
       state: &flowFieldState
         eos: *eos
         temperature: !ablate::mathFunctions::geom::Sphere
-          center: [ .036,  0.01 ]
+          center: [ .036,  0.01, 0.0 ]
           radius: 0.005
           insideValues: 1500
           outsideValues: 300
@@ -191,7 +191,7 @@ timestepper:
         eos: *eos
         temperature: 300
         pressure: 101325.0
-        velocity: "0.0, 0.0"
+        velocity: "0.0, 0.0, 0.0"
         other: !ablate::finiteVolume::fieldFunctions::MassFractions
           &oxMassFrac
           eos: *eos

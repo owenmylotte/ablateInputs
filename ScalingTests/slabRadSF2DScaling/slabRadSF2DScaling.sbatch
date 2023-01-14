@@ -5,7 +5,7 @@
 #SBATCH -n {{processes}}
 #SBATCH --use-min-nodes
 #SBATCH -J slabRadSF
-#SBATCH -t 00:30:00
+#SBATCH -t 00:45:00
 #SBATCH -p pbatch
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
