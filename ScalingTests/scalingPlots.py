@@ -12,15 +12,15 @@ markerarray = [".", "1", "P", "*"]
 
 # Define the arrays that contain the options which were used
 processes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384]
-faces = ["[105,15]", "[149,21]", "[210,30]", "[297,42]", "[420,60]", "[594,85]", "[840,120]"]
-rays = np.array([10, 25, 50, 250])
+faces = ["[105,15]", "[149,21]", "[210,30]", "[297,42,42]", "[420,60]", "[594,85]", "[840,120]"]
+rays = np.array([5, 10, 25, 50])
 dtheta = 180 / rays
-dims = " 2D Sharing"
+dims = " 3D"
 
 # Template path: "outputs/Scaling2D_30_16_[105, 15].xml"
-basePath = "xmlFiles/Scaling"
-initName = "Radiation Initialization"
-solveName = "Radiation Solve"
+basePath = "slabRadSF2DScaling/scalingSFOutputs/"
+initName = "Radiation::Initialize"
+solveName = "Radiation::EvaluateGains"
 
 # Define an iterator which stores input parameters and iterates through all combinations of the options
 options = itertools.product(rays, processes, faces)
@@ -44,7 +44,7 @@ for r in range(len(rays)):
     for p in range(len(processes)):
         for f in range(len(faces)):
             # Create strings which represent the file names of the outputs
-            path = basePath + "2DSharing" + "_" + str(rays[r]) + "_" + str(processes[p]) + "_" + str(
+            path = basePath + "slabRadSF2D" + "_" + str(rays[r]) + "_" + str(processes[p]) + "_" + str(
                 faces[f]) + ".xml"  # File path
             # path = "outputs/scalingTests2D_10_1_[105, 15].xml"  # Hack for testing
             if exists(path):  # Make sure not to try accessing a path that doesn't exist
@@ -54,12 +54,12 @@ for r in range(len(rays)):
                 for item in root.findall('./petscroot/selftimertable/event'):
                     # Get the specific name of the event that is desired
                     #    Get the sub-value that is desired out of the event
-                    if item.find("name").text == "Radiation Initialization":
-                        if not item.find('time/avgvalue') is None:
-                            initTime[r, p, f] = item.find('time/avgvalue').text
-                    if item.find("name").text == "Radiation Solve":
-                        if not item.find('time/avgvalue') is None:
-                            solveTime[r, p, f] = item.find('time/avgvalue').text
+                    if item.find("name").text == initName:
+                        if not item.find('time/maxvalue') is None:
+                            initTime[r, p, f] = item.find('time/maxvalue').text
+                    if item.find("name").text == solveName:
+                        if not item.find('time/maxvalue') is None:
+                            solveTime[r, p, f] = item.find('time/maxvalue').text
             if initTime[r, p, f] == 0:
                 initTime[r, p, f] = float("nan")
             if solveTime[r, p, f] == 0:
@@ -75,23 +75,23 @@ handles += [f("s", colorarray[i]) for i in range(len(colorarray))]
 
 d = 0
 # Initialization static scaling analysis
-plt.figure(figsize=(10, 6), num=1)
-plt.title("Initialization Static Scaling" + dims, pad=1)
-for n in range(len(rays)):
-    for i in range(len(processes)):
-        mask = np.isfinite(initTime[n, i, :])
-        x = cellsize[d, :]
-        y = cellsize[d, :] / initTime[n, i, :]
-        plt.loglog(x[mask], y[mask], linewidth=1, marker=markerarray[n], c=colorarray[i])
-plt.yticks(fontsize=10)
-plt.xticks(fontsize=10)
-plt.xlabel(r'DOF $[cells]$', fontsize=10)
-plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
-labels = dtheta
-labels = np.append(labels, processes)
-plt.legend(handles, labels, loc="upper left")
-plt.savefig('initScalingStatic' + dims, dpi=1500, bbox_inches='tight')
-plt.show()
+# plt.figure(figsize=(10, 6), num=1)
+# plt.title("Initialization Static Scaling" + dims, pad=1)
+# for n in range(len(rays)):
+#     for i in range(len(processes)):
+#         mask = np.isfinite(initTime[n, i, :])
+#         x = cellsize[d, :]
+#         y = cellsize[d, :] / initTime[n, i, :]
+#         plt.loglog(x[mask], y[mask], linewidth=1, marker=markerarray[n], c=colorarray[i])
+# plt.yticks(fontsize=10)
+# plt.xticks(fontsize=10)
+# plt.xlabel(r'DOF $[cells]$', fontsize=10)
+# plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
+# labels = dtheta
+# labels = np.append(labels, processes)
+# plt.legend(handles, labels, loc="upper left")
+# plt.savefig('initScalingStatic' + dims, dpi=1500, bbox_inches='tight')
+# plt.show()
 
 # Initialization Strong scaling analysis
 plt.figure(figsize=(10, 6), num=2)
@@ -152,24 +152,24 @@ plt.show()
 
 
 # Solve static scaling analysis
-plt.figure(figsize=(10, 6), num=3)
-plt.title("Solve Static Scaling" + dims, pad=1)
-for n in range(len(rays)):
-    for i in range(len(processes)):
-        mask = np.isfinite(solveTime[n, i, :])
-        x = cellsize[d, :]
-        y = cellsize[d, :] / solveTime[n, i, :]
-        plt.loglog(x[mask], y[mask], linewidth=1, marker=markerarray[n],
-                   c=colorarray[i])
-plt.yticks(fontsize=10)
-plt.xticks(fontsize=10)
-plt.xlabel(r'DOF $[cells]$', fontsize=10)
-plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
-labels = dtheta
-labels = np.append(labels, processes)
-plt.legend(handles, labels, loc="upper left")
-plt.savefig('solveScalingStatic' + dims, dpi=1500, bbox_inches='tight')
-plt.show()
+# plt.figure(figsize=(10, 6), num=3)
+# plt.title("Solve Static Scaling" + dims, pad=1)
+# for n in range(len(rays)):
+#     for i in range(len(processes)):
+#         mask = np.isfinite(solveTime[n, i, :])
+#         x = cellsize[d, :]
+#         y = cellsize[d, :] / solveTime[n, i, :]
+#         plt.loglog(x[mask], y[mask], linewidth=1, marker=markerarray[n],
+#                    c=colorarray[i])
+# plt.yticks(fontsize=10)
+# plt.xticks(fontsize=10)
+# plt.xlabel(r'DOF $[cells]$', fontsize=10)
+# plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
+# labels = dtheta
+# labels = np.append(labels, processes)
+# plt.legend(handles, labels, loc="upper left")
+# plt.savefig('solveScalingStatic' + dims, dpi=1500, bbox_inches='tight')
+# plt.show()
 
 # Initialization Strong scaling analysis
 plt.figure(figsize=(10, 6), num=4)

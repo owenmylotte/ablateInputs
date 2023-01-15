@@ -2,15 +2,14 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -n {{processes}}
-#SBATCH --use-min-nodes
+#SBATCH -N 32
 #SBATCH -J slabRadSF
-#SBATCH -t 05:00:00
+#SBATCH -t 03:00:00
 #SBATCH -p pbatch
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=slabRadSF2D_{{rays}}_{{processes}}_{{faces}}
+#SBATCH --output=slabRadSF2D_5_32_[297,42,42]
 
 ##### Load Required modules
 # gcc
@@ -34,12 +33,12 @@ cd tmp_$SLURM_JOBID
 export UPWIND=leastsquares
 
 ##### Launch parallel job using srun
-srun -n{{processes}} /g/g20/mylotte1/ablateOpt/ablate \
+srun -n32 /g/g20/mylotte1/ablateOpt/ablate \
   --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/slabRadSF2DScaling/slabRadSF2D.yaml \
-  -yaml::environment::title slabRadSF2D_{{rays}}_{{processes}}_{{faces}} \
-  -yaml::timestepper::domain::faces {{faces}} \
-  -yaml::solvers::[4]::processes::[0]::radiation::rays {{rays}} \
+  -yaml::environment::title slabRadSF2D_5_32_[297,42,42] \
+  -yaml::timestepper::domain::faces [297,42,42] \
+  -yaml::solvers::[4]::processes::[0]::radiation::rays 5 \
   -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
-  -log_view :slabRadSF2D_{{rays}}_{{processes}}_{{faces}}.xml:ascii_xml
+  -log_view :slabRadSF2D_5_32_[297,42,42].xml:ascii_xml
 
 echo "End Time " $(date +%s)
