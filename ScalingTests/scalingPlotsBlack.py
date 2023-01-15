@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt  # for plotting
 import itertools
 from os.path import exists
 
+plt.rcParams["font.family"] = "Noto Serif CJK JP"
+
 # Set up options that must be defined by the user
-colorarray = ["black", "grey", "firebrick", "lightcoral", "darkorange", "goldenrod", "yellow", "yellowgreen",
+colorarray = ["black", "grey", "black", "black", "darkorange", "goldenrod", "yellow", "yellowgreen",
               "green", "lightgreen", "teal", "powderblue", "darkorchid", "violet",
               "palevioletred"]
 markerarray = [".", "1", "P", "*"]
@@ -94,7 +96,7 @@ d = 0
 # plt.show()
 
 # Initialization Strong scaling analysis
-plt.figure(figsize=(10, 6), num=2)
+plt.figure(figsize=(6, 4), num=2)
 # plt.title("Initialization Strong Scaling" + dims, pad=1)
 for n in range(len(rays)):
     for i in range(len(faces)):
@@ -108,14 +110,14 @@ for n in range(len(rays)):
         plt.loglog(x[mask], (processes[first] * y[first]) / y[mask], linewidth=1, marker=markerarray[n],
                    c=colorarray[i])
 plt.plot(processes, processes, linewidth=1, c="black", linestyle="--")
-plt.yticks(fontsize=10)
-plt.xticks(fontsize=10)
+plt.yticks(fontsize=7)
+plt.xticks(fontsize=7)
 plt.xlabel(r'MPI Processes', fontsize=10)
 plt.ylabel(r'Speedup', fontsize=10)
 labels = dtheta
 labels = np.append(labels, faces)
-plt.legend(handles, labels, loc="upper left")
-plt.savefig('initScalingStrong' + dims, dpi=1500, bbox_inches='tight')
+# plt.legend(handles, labels, loc="upper left")
+plt.savefig('initScalingStrongBlack' + dims, dpi=1500, bbox_inches='tight')
 plt.show()
 
 # Initialization Weak scaling analysis
@@ -172,7 +174,7 @@ plt.show()
 # plt.show()
 
 # Initialization Strong scaling analysis
-plt.figure(figsize=(10, 6), num=4)
+plt.figure(figsize=(6, 4), num=4)
 # plt.title("Solve Strong Scaling" + dims, pad=1)
 for n in range(len(rays)):
     for i in range(len(faces)):
@@ -186,12 +188,12 @@ for n in range(len(rays)):
         plt.loglog(x[mask], (processes[first] * y[first]) / y[mask], linewidth=1, marker=markerarray[n],
                    c=colorarray[i])
 plt.plot(processes, processes, linewidth=1, c="black", linestyle="--")
-plt.yticks(fontsize=10)
-plt.xticks(fontsize=10)
+plt.yticks(fontsize=7)
+plt.xticks(fontsize=7)
 plt.xlabel(r'MPI Processes', fontsize=10)
 plt.ylabel(r'Speedup', fontsize=10)
 labels = dtheta
 labels = np.append(labels, faces)
-plt.legend(handles, labels, loc="upper left")
-plt.savefig('solveScalingStrong' + dims, dpi=1500, bbox_inches='tight')
+# plt.legend(handles, labels, loc="upper left")
+plt.savefig('solveScalingStrongBlack' + dims, dpi=1500, bbox_inches='tight')
 plt.show()
