@@ -2,10 +2,9 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -n 2
-#SBATCH --use-min-nodes
+#SBATCH -N 2
 #SBATCH -J slabRadSF
-#SBATCH -t 05:00:00
+#SBATCH -t 24:00:00
 #SBATCH -p pbatch
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
