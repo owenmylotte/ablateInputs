@@ -1,4 +1,4 @@
-import xml.etree.ElementTree as ET
+import xml.etree.cElementTree as ET
 import numpy as np  # for matrix manipulation
 import matplotlib.pyplot as plt  # for plotting
 import itertools
@@ -6,21 +6,28 @@ from os.path import exists
 
 plt.rcParams["font.family"] = "Noto Serif CJK JP"
 
+
+def findNext(item, nameArray, i):
+    if item.find("name").text == nameArray[i]:
+        if not item.find('time/maxvalue') is None:
+            initTime[r, p, f] = item.find('time/maxvalue').text
+
+
 # Set up options that must be defined by the user
-colorarray = ["black", "grey", "black", "black", "darkorange", "goldenrod", "yellow", "yellowgreen",
+colorarray = ["black", "grey", "blue", "black", "darkorange", "goldenrod", "yellow", "yellowgreen",
               "green", "lightgreen", "teal", "powderblue", "darkorchid", "violet",
               "palevioletred"]
 markerarray = [".", "1", "P", "*"]
 
 # Define the arrays that contain the options which were used
 processes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]
-faces = ["[105,15]", "[149,21]", "[297,42]", "[297,42,42]", "[420,60]", "[594,85]", "[840,120]"] #[210,30]
+faces = ["[105,15]", "[149,21]", "[297,42]", "[297,42,42]", "[420,60]", "[594,85]", "[840,120]"]  # [210,30]
 rays = np.array([5, 10, 25, 50])
 dtheta = 180 / rays
 dims = " 3D"
 
 # Template path: "outputs/Scaling2D_30_16_[105, 15].xml"
-basePath = "slabRadSF2DScaling/scalingSFOutputs/"
+basePath = "slabRadSF2DScaling/newSlabRadSFScaling/"
 initName = "Radiation::Initialize"
 solveName = "Radiation::EvaluateGains"
 
@@ -51,17 +58,21 @@ for r in range(len(rays)):
             # path = "outputs/scalingTests2D_10_1_[105, 15].xml"  # Hack for testing
             if exists(path):  # Make sure not to try accessing a path that doesn't exist
                 tree = ET.parse(path)  # Create element tree object
-                root = tree.getroot()  # Get root element
+                # root = tree.getroot()  # Get root element
                 # Iterate items (the type of event that contains the data)
-                for item in root.findall('./petscroot/selftimertable/event'):
-                    # Get the specific name of the event that is desired
-                    #    Get the sub-value that is desired out of the event
-                    if item.find("name").text == initName:
-                        if not item.find('time/maxvalue') is None:
-                            initTime[r, p, f] = item.find('time/maxvalue').text
-                    if item.find("name").text == solveName:
-                        if not item.find('time/maxvalue') is None:
-                            solveTime[r, p, f] = item.find('time/maxvalue').text
+                item = tree.find(
+                    "./petscroot/timertree/event[name='timeStepper::Initialize']/events/event[name='Domain::Initialize']/events/event[name='Radiation::Initialize']")
+                if not item.find('time/value') is None:
+                    initTime[r, p, f] = item.find('time/value').text
+                if not item.find('time/avgvalue') is None:
+                    initTime[r, p, f] = item.find('time/maxvalue').text
+                item = tree.find(
+                    "./petscroot/timertree/event[name='timeStepper::Solve']/events/event[name='TSStep']/events/event[name='TSFunctionEval']/events/event[name='SolverComputeRHSFunction::PreRHSFunction']/events/event[name='BoundarySolver::PreRHSFunction']/events/event[name='Radiation::EvaluateGains']")
+                # item = tree.find("./petscroot/timertree/event[name='timeStepper::Solve']/events/event[name='TSStep']/events/event[name='TSFunctionEval']/events/event[name='SolverComputeRHSFunction::PreRHSFunction']/events/event[name='BoundarySolver::PreRHSFunction']/events/event[name='Radiation::EvaluateGains']")
+                if not item.find('time/value') is None:
+                    solveTime[r, p, f] = item.find('time/value').text
+                if not item.find('time/avgvalue') is None:
+                    solveTime[r, p, f] = item.find('time/maxvalue').text
             if initTime[r, p, f] == 0:
                 initTime[r, p, f] = float("nan")
             if solveTime[r, p, f] == 0:
@@ -97,7 +108,7 @@ d = 0
 
 # Initialization Strong scaling analysis
 plt.figure(figsize=(6, 4), num=2)
-# plt.title("Initialization Strong Scaling" + dims, pad=1)
+plt.title("Initialization Strong Scaling" + dims, pad=1)
 for n in range(len(rays)):
     for i in range(len(faces)):
         mask = np.isfinite(initTime[n, :, i])
@@ -175,7 +186,7 @@ plt.show()
 
 # Initialization Strong scaling analysis
 plt.figure(figsize=(6, 4), num=4)
-# plt.title("Solve Strong Scaling" + dims, pad=1)
+plt.title("Solve Strong Scaling" + dims, pad=1)
 for n in range(len(rays)):
     for i in range(len(faces)):
         mask = np.isfinite(solveTime[n, :, i])
