@@ -14,9 +14,9 @@ def findNext(item, nameArray, i):
 
 
 # Set up options that must be defined by the user
-colorarray = ["black", "grey", "blue", "black", "darkorange", "goldenrod", "yellow", "yellowgreen",
-              "green", "lightgreen", "teal", "powderblue", "darkorchid", "violet",
-              "palevioletred"]
+colorarray = ["o", "s", "o", "s", ".", ".", ".", ".",
+              ".", ".", ".", ".", ".", ".",
+              "."]
 markerarray = [".", "1", "P", "*"]
 
 # Define the arrays that contain the options which were used
@@ -24,7 +24,7 @@ processes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 1638
 faces = ["[105,15]", "[149,21]", "[297,42]", "[297,42,42]", "[420,60]", "[594,85]", "[840,120]"]  # [210,30]
 rays = np.array([5, 10, 25, 50])
 dtheta = 180 / rays
-dims = " 3D"
+dims = ""
 
 # Template path: "outputs/Scaling2D_30_16_[105, 15].xml"
 basePath = "slabRadSF2DScaling/newSlabRadSFScaling/"
@@ -84,7 +84,7 @@ rays = np.asarray(rays)
 
 f = lambda m, c: plt.plot([], [], marker=m, color=c, ls="none")[0]
 handles = [f(markerarray[i], "k") for i in range(len(markerarray))]
-handles += [f("s", colorarray[i]) for i in range(len(colorarray))]
+handles += [f("s", "black") for i in range(len(colorarray))]
 
 d = 0
 # Initialization static scaling analysis
@@ -118,8 +118,8 @@ for n in range(len(rays)):
         # Bring the lowest available index to the line to normalize the scaling plot * (ideal / lowest available index)
         first = np.argmax(mask)
 
-        plt.loglog(x[mask], (processes[first] * y[first]) / y[mask], linewidth=1, marker=markerarray[n],
-                   c=colorarray[i])
+        plt.loglog(x[mask], (processes[first] * y[first]) / y[mask], linewidth=1, marker=colorarray[i],
+                   c="black", markersize=4)
 plt.plot(processes, processes, linewidth=1, c="black", linestyle="--")
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
@@ -127,7 +127,7 @@ plt.xlabel(r'MPI Processes', fontsize=10)
 plt.ylabel(r'Speedup', fontsize=10)
 labels = dtheta
 labels = np.append(labels, faces)
-# plt.legend(handles, labels, loc="upper left")
+plt.legend(["2D", "3D"], loc="upper left")
 plt.savefig('initScalingStrongBlack' + dims, dpi=1500, bbox_inches='tight')
 plt.show()
 
@@ -196,8 +196,8 @@ for n in range(len(rays)):
         # Bring the lowest available index to the line to normalize the scaling plot * (ideal / lowest available index)
         first = np.argmax(mask)
 
-        plt.loglog(x[mask], (processes[first] * y[first]) / y[mask], linewidth=1, marker=markerarray[n],
-                   c=colorarray[i])
+        plt.loglog(x[mask], (processes[first] * y[first]) / y[mask], linewidth=1, marker=colorarray[i],
+                   c="black", markersize=4)
 plt.plot(processes, processes, linewidth=1, c="black", linestyle="--")
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
@@ -205,6 +205,6 @@ plt.xlabel(r'MPI Processes', fontsize=10)
 plt.ylabel(r'Speedup', fontsize=10)
 labels = dtheta
 labels = np.append(labels, faces)
-# plt.legend(handles, labels, loc="upper left")
+plt.legend(["2D", "3D"], loc="upper left")
 plt.savefig('solveScalingStrongBlack' + dims, dpi=1500, bbox_inches='tight')
 plt.show()

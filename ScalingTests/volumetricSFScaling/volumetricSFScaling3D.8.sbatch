@@ -2,7 +2,7 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -n 32
+#SBATCH -N 8
 #SBATCH --use-min-nodes
 #SBATCH -J slabRadSF
 #SBATCH -t 05:00:00
