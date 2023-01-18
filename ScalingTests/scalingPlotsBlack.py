@@ -24,10 +24,11 @@ processes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 1638
 faces = ["[105,15]", "[149,21]", "[297,42]", "[297,42,42]", "[420,60]", "[594,85]", "[840,120]"]  # [210,30]
 rays = np.array([5, 10, 25, 50])
 dtheta = 180 / rays
-dims = ""
+dims = "_vol"
 
 # Template path: "outputs/Scaling2D_30_16_[105, 15].xml"
-basePath = "slabRadSF2DScaling/newSlabRadSFScaling/"
+# basePath = "slabRadSF2DScaling/newSlabRadSFScaling/"
+basePath = "volumetricSFScaling/volumetricScalingData/"
 initName = "Radiation::Initialize"
 solveName = "Radiation::EvaluateGains"
 
@@ -53,7 +54,7 @@ for r in range(len(rays)):
     for p in range(len(processes)):
         for f in range(len(faces)):
             # Create strings which represent the file names of the outputs
-            path = basePath + "slabRadSF2D" + "_" + str(rays[r]) + "_" + str(processes[p]) + "_" + str(
+            path = basePath + "volumetricSFScaling" + "_" + str(rays[r]) + "_" + str(processes[p]) + "_" + str(
                 faces[f]) + ".xml"  # File path
             # path = "outputs/scalingTests2D_10_1_[105, 15].xml"  # Hack for testing
             if exists(path):  # Make sure not to try accessing a path that doesn't exist
@@ -67,7 +68,9 @@ for r in range(len(rays)):
                 if not item.find('time/avgvalue') is None:
                     initTime[r, p, f] = item.find('time/maxvalue').text
                 item = tree.find(
-                    "./petscroot/timertree/event[name='timeStepper::Solve']/events/event[name='TSStep']/events/event[name='TSFunctionEval']/events/event[name='SolverComputeRHSFunction::PreRHSFunction']/events/event[name='BoundarySolver::PreRHSFunction']/events/event[name='Radiation::EvaluateGains']")
+                    "./petscroot/timertree/event[name='timeStepper::Solve']/events/event[name='TSStep']/events/event[name='TSFunctionEval']/events/event[name='SolverComputeRHSFunction::PreRHSFunction']/events/event[name='Radiation::EvaluateGains']")
+                # item = tree.find(
+                #     "./petscroot/timertree/event[name='timeStepper::Solve']/events/event[name='TSStep']/events/event[name='TSFunctionEval']/events/event[name='SolverComputeRHSFunction::PreRHSFunction']/events/event[name='BoundarySolver::PreRHSFunction']/events/event[name='Radiation::EvaluateGains']")
                 # item = tree.find("./petscroot/timertree/event[name='timeStepper::Solve']/events/event[name='TSStep']/events/event[name='TSFunctionEval']/events/event[name='SolverComputeRHSFunction::PreRHSFunction']/events/event[name='BoundarySolver::PreRHSFunction']/events/event[name='Radiation::EvaluateGains']")
                 if not item.find('time/value') is None:
                     solveTime[r, p, f] = item.find('time/value').text
@@ -108,7 +111,7 @@ d = 0
 
 # Initialization Strong scaling analysis
 plt.figure(figsize=(6, 4), num=2)
-plt.title("Initialization Strong Scaling" + dims, pad=1)
+# plt.title("Initialization Strong Scaling" + dims, pad=1)
 for n in range(len(rays)):
     for i in range(len(faces)):
         mask = np.isfinite(initTime[n, :, i])
@@ -186,7 +189,7 @@ plt.show()
 
 # Initialization Strong scaling analysis
 plt.figure(figsize=(6, 4), num=4)
-plt.title("Solve Strong Scaling" + dims, pad=1)
+# plt.title("Solve Strong Scaling" + dims, pad=1)
 for n in range(len(rays)):
     for i in range(len(faces)):
         mask = np.isfinite(solveTime[n, :, i])
