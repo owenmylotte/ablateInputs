@@ -304,8 +304,8 @@ solvers:
     #          properties: !ablate::eos::radiationProperties::Zimmer
     #            eos: *eos
     #    #          log: !ablate::monitors::logs::StdOut
-    monitors:
-      - !ablate::monitors::BoundarySolverMonitor
+  #    monitors:
+  #      - !ablate::monitors::BoundarySolverMonitor
   - !ablate::radiation::VolumeRadiation
     id: radiationSolver
     region:
