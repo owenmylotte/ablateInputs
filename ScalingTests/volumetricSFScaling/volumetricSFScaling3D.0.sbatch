@@ -5,7 +5,7 @@
 #SBATCH -n 1
 #SBATCH --use-min-nodes
 #SBATCH -J slabRadSF
-#SBATCH -t 24:00:00
+#SBATCH -t 05:00:00
 #SBATCH -p pbatch
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
@@ -38,7 +38,7 @@ srun -n1 /g/g20/mylotte1/ablateOpt/ablate \
   --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/volumetricSFScaling/volumetricSF3D.yaml \
   -yaml::environment::title volumetricSFScaling_5_1_[297,42,42] \
   -yaml::timestepper::domain::faces [297,42,42] \
-  -yaml::solvers::[5]::radiation::rays 5 \
+  -yaml::solvers::[4]::radiation::rays 5 \
   -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
   -log_view :volumetricSFScaling_5_1_[297,42,42].xml:ascii_xml
 

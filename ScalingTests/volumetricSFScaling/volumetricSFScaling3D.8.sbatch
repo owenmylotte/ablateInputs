@@ -2,7 +2,7 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -N 8
+#SBATCH -n 32
 #SBATCH --use-min-nodes
 #SBATCH -J slabRadSF
 #SBATCH -t 05:00:00
@@ -38,7 +38,7 @@ srun -n32 /g/g20/mylotte1/ablateOpt/ablate \
   --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/volumetricSFScaling/volumetricSF3D.yaml \
   -yaml::environment::title volumetricSFScaling_5_32_[297,42,42] \
   -yaml::timestepper::domain::faces [297,42,42] \
-  -yaml::solvers::[5]::radiation::rays 5 \
+  -yaml::solvers::[4]::radiation::rays 5 \
   -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
   -log_view :volumetricSFScaling_5_32_[297,42,42].xml:ascii_xml
 
