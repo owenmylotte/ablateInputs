@@ -35,6 +35,8 @@ timestepper:
         regions:
           - name: boundaryCellsTop
           - name: boundaryCellsBottom
+          - name: boundaryCellsFront
+          - name: boundaryCellsBack
       # create a label for the slab burner
       #      - !ablate::domain::modifiers::CreateLabel
       #        region:
