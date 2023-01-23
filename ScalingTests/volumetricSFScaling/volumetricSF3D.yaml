@@ -17,7 +17,7 @@ timestepper:
     interval: 0
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 840, 120, 120 ]
+    faces: [ 105, 15, 15 ]
     lower: [ 0.0, 0.0, -0.0127 ]
     upper: [ 0.165354, 0.027686, 0.0127 ]
     simplex: false
@@ -273,7 +273,7 @@ solvers:
   - !ablate::boundarySolver::BoundarySolver
     id: walls
     region:
-      name: wallBoundaryRegion
+      name: allWallBoundaryRegion
     fieldBoundary:
       name: boundaryFaces
     mergeFaces: true

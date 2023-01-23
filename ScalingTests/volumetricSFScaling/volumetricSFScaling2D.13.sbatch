@@ -35,7 +35,7 @@ export UPWIND=leastsquares
 
 ##### Launch parallel job using srun
 srun -n64 /g/g20/mylotte1/ablateOpt/ablate \
-  --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/volumetricSFScaling/volumetricSF3D.yaml \
+  --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/volumetricSFScaling/volumetricSF2D.yaml \
   -yaml::environment::title volumetricSFScaling_5_64_[297,42] \
   -yaml::timestepper::domain::faces [297,42] \
   -yaml::solvers::[4]::radiation::rays 5 \
