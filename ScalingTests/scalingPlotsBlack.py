@@ -28,7 +28,7 @@ dims = "_vol"
 
 # Template path: "outputs/Scaling2D_30_16_[105, 15].xml"
 # basePath = "slabRadSF2DScaling/newSlabRadSFScaling/"
-basePath = "volumetricSFScaling/volumetricScalingData/"
+basePath = "volumetricSFScaling/anotherOne/"
 initName = "Radiation::Initialize"
 solveName = "Radiation::EvaluateGains"
 
@@ -55,27 +55,15 @@ for r in range(len(rays)):
         for f in range(len(faces)):
             # Create strings which represent the file names of the outputs
             path = basePath + "volumetricSFScaling" + "_" + str(rays[r]) + "_" + str(processes[p]) + "_" + str(
-                faces[f]) + ".xml"  # File path
-            # path = "outputs/scalingTests2D_10_1_[105, 15].xml"  # Hack for testing
-            if exists(path):  # Make sure not to try accessing a path that doesn't exist
-                tree = ET.parse(path)  # Create element tree object
-                # root = tree.getroot()  # Get root element
-                # Iterate items (the type of event that contains the data)
-                item = tree.find(
-                    "./petscroot/timertree/event[name='timeStepper::Initialize']/events/event[name='Domain::Initialize']/events/event[name='Radiation::Initialize']")
-                if not item.find('time/value') is None:
-                    initTime[r, p, f] = item.find('time/value').text
-                if not item.find('time/avgvalue') is None:
-                    initTime[r, p, f] = item.find('time/maxvalue').text
-                item = tree.find(
-                    "./petscroot/timertree/event[name='timeStepper::Solve']/events/event[name='TSStep']/events/event[name='TSFunctionEval']/events/event[name='SolverComputeRHSFunction::PreRHSFunction']/events/event[name='Radiation::EvaluateGains']")
-                # item = tree.find(
-                #     "./petscroot/timertree/event[name='timeStepper::Solve']/events/event[name='TSStep']/events/event[name='TSFunctionEval']/events/event[name='SolverComputeRHSFunction::PreRHSFunction']/events/event[name='BoundarySolver::PreRHSFunction']/events/event[name='Radiation::EvaluateGains']")
-                # item = tree.find("./petscroot/timertree/event[name='timeStepper::Solve']/events/event[name='TSStep']/events/event[name='TSFunctionEval']/events/event[name='SolverComputeRHSFunction::PreRHSFunction']/events/event[name='BoundarySolver::PreRHSFunction']/events/event[name='Radiation::EvaluateGains']")
-                if not item.find('time/value') is None:
-                    solveTime[r, p, f] = item.find('time/value').text
-                if not item.find('time/avgvalue') is None:
-                    solveTime[r, p, f] = item.find('time/maxvalue').text
+                faces[f]) + ".csv"  # File path
+            data = np.loadtxt(path, delimiter=",")
+            lines = len(data)  # Get the length of the csv
+
+            for i in range(lines):  # Iterate through all the lines in the csv
+                if (data[i, 0] == "Main Stage") and (data[i, 1] == "Radiation::EvaluateGains") and (data[i, 4] > initTime[r, p, f]):  # Check that the current line is both a "Main Stage" and the event that we want to track
+                    initTime[r, p, f] = data[i, 4]  # If it is, then write the value in column index 4 of that line
+
+            # If the time is never written then the filter code below should still take care of it just fine.
             if initTime[r, p, f] == 0:
                 initTime[r, p, f] = float("nan")
             if solveTime[r, p, f] == 0:
@@ -209,5 +197,5 @@ plt.ylabel(r'Speedup', fontsize=10)
 labels = dtheta
 labels = np.append(labels, faces)
 plt.legend(["2D", "3D"], loc="upper left")
-plt.savefig('solveScalingStrongBlack' + dims, dpi=1500, bbox_inches='tight')
-plt.show()
+# plt.savefig('solveScalingStrongBlack' + dims, dpi=1500, bbox_inches='tight')
+# plt.show()

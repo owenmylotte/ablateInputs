@@ -2,9 +2,10 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -N 2
+#SBATCH -n 2
+#SBATCH --use-min-nodes
 #SBATCH -J slabRadSF
-#SBATCH -t 05:00:00
+#SBATCH -t 18:00:00
 #SBATCH -p pbatch
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
@@ -39,6 +40,6 @@ srun -n2 /g/g20/mylotte1/ablateOpt/ablate \
   -yaml::timestepper::domain::faces [297,42,42] \
   -yaml::solvers::[4]::radiation::rays 5 \
   -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
-  -log_view :volumetricSFScaling_5_2_[297,42,42].xml:ascii_xml
+  -log_view :volumetricSFScaling_5_2_[297,42,42].csv:ascii_csv
 
 echo "End Time " $(date +%s)

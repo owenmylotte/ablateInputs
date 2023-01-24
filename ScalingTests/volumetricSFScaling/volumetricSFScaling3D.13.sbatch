@@ -40,6 +40,6 @@ srun -n64 /g/g20/mylotte1/ablateOpt/ablate \
   -yaml::timestepper::domain::faces [297,42,42] \
   -yaml::solvers::[4]::radiation::rays 5 \
   -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
-  -log_view :volumetricSFScaling_5_64_[297,42,42].xml:ascii_xml
+  -log_view :volumetricSFScaling_5_64_[297,42,42].csv:ascii_csv
 
 echo "End Time " $(date +%s)
