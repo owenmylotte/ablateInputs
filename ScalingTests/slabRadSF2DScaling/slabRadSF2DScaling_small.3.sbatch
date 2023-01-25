@@ -39,6 +39,6 @@ srun -n32 /g/g20/mylotte1/ablateOpt/ablate \
   -yaml::timestepper::domain::faces [297,42,42] \
   -yaml::solvers::[4]::processes::[0]::radiation::rays 5 \
   -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
-  -log_view :slabRadSF2D_5_32_[297,42,42].xml:ascii_xml
+  -log_view :slabRadSF2D_5_32_[297,42,42].csv:ascii_csv
 
 echo "End Time " $(date +%s)

@@ -28,9 +28,9 @@ dims = "_vol"
 
 # Template path: "outputs/Scaling2D_30_16_[105, 15].xml"
 # basePath = "slabRadSF2DScaling/newSlabRadSFScaling/"
-basePath = "volumetricSFScaling/anotherOne/"
-initName = "Radiation::Initialize"
-solveName = "Radiation::EvaluateGains"
+basePath = "csvFiles/"
+initName = b"Radiation::Initialize"
+solveName = b"Radiation::EvaluateGains"
 
 # Define an iterator which stores input parameters and iterates through all combinations of the options
 options = itertools.product(rays, processes, faces)
@@ -51,23 +51,31 @@ solveTime = np.zeros((len(rays), len(processes), len(faces)))
 
 # Iterate through the arrays to get information out of the xml files
 for r in range(len(rays)):
+
     for p in range(len(processes)):
         for f in range(len(faces)):
             # Create strings which represent the file names of the outputs
             path = basePath + "volumetricSFScaling" + "_" + str(rays[r]) + "_" + str(processes[p]) + "_" + str(
                 faces[f]) + ".csv"  # File path
-            data = np.loadtxt(path, delimiter=",")
-            lines = len(data)  # Get the length of the csv
+            dtypes = {'names': ('stage', 'name', 'time'),
+                      'formats': ('S30', 'S30', 'f4')}
 
-            for i in range(lines):  # Iterate through all the lines in the csv
-                if (data[i, 0] == "Main Stage") and (data[i, 1] == "Radiation::EvaluateGains") and (data[i, 4] > initTime[r, p, f]):  # Check that the current line is both a "Main Stage" and the event that we want to track
-                    initTime[r, p, f] = data[i, 4]  # If it is, then write the value in column index 4 of that line
+            if exists(path):
+                data = np.loadtxt(path, delimiter=",", dtype=dtypes, skiprows=1, usecols=(0, 1, 4))
+                lines = len(data)  # Get the length of the csv
+
+                for i in range(lines):  # Iterate through all the lines in the csv
+                    if (data[i][1] == solveName) and (data[i][2] > solveTime[r, p, f]):  # Check current line
+                        solveTime[r, p, f] = data[i][2]  # If it is, then write the value in column index 4 of that line
+                for i in range(lines):  # Iterate through all the lines in the csv
+                    if (data[i][1] == initName) and (data[i][2] > initTime[r, p, f]):  # Check current line
+                        initTime[r, p, f] = data[i][2]  # If it is, then write the value in column index 4 of that line
 
             # If the time is never written then the filter code below should still take care of it just fine.
-            if initTime[r, p, f] == 0:
-                initTime[r, p, f] = float("nan")
-            if solveTime[r, p, f] == 0:
-                solveTime[r, p, f] = float("nan")
+        if initTime[r, p, f] == 0:
+            initTime[r, p, f] = float("nan")
+        if solveTime[r, p, f] == 0:
+            solveTime[r, p, f] = float("nan")
 
 processes = np.asarray(processes)
 faces = np.asarray(faces)
@@ -197,5 +205,5 @@ plt.ylabel(r'Speedup', fontsize=10)
 labels = dtheta
 labels = np.append(labels, faces)
 plt.legend(["2D", "3D"], loc="upper left")
-# plt.savefig('solveScalingStrongBlack' + dims, dpi=1500, bbox_inches='tight')
-# plt.show()
+plt.savefig('solveScalingStrongBlack' + dims, dpi=1500, bbox_inches='tight')
+plt.show()
