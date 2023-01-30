@@ -38,7 +38,6 @@ srun -n2048 /g/g20/mylotte1/ablateOpt/ablate \
   --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/volumetricSFScaling/volumetricSF3D.yaml \
   -yaml::environment::title volumetricSFScaling_5_2048_[297,42,42] \
   -yaml::timestepper::domain::faces [297,42,42] \
-  -yaml::solvers::[4]::radiation::rays 5 \
   -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
   -log_view :volumetricSFScaling_5_2048_[297,42,42].csv:ascii_csv
 

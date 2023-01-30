@@ -27,7 +27,7 @@ dtheta = 180 / rays
 dims = "_vol"
 
 # Template path: "outputs/Scaling2D_30_16_[105, 15].xml"
-# basePath = "slabRadSF2DScaling/newSlabRadSFScaling/"
+# basePath = "slabRadSF2DScaling/scalingCsv/csvFiles/"
 basePath = "csvFiles/"
 initName = b"Radiation::Initialize"
 solveName = b"Radiation::EvaluateGains"
@@ -51,7 +51,6 @@ solveTime = np.zeros((len(rays), len(processes), len(faces)))
 
 # Iterate through the arrays to get information out of the xml files
 for r in range(len(rays)):
-
     for p in range(len(processes)):
         for f in range(len(faces)):
             # Create strings which represent the file names of the outputs
