@@ -17,7 +17,7 @@ timestepper:
     interval: 0
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 297, 42, 42 ]
+    faces: [ 105, 15, 15 ]
     lower: [ 0.0, 0.0, -0.0127 ]
     upper: [ 0.165354, 0.027686, 0.0127 ]
     simplex: false
@@ -107,6 +107,9 @@ timestepper:
       - !ablate::finiteVolume::CompressibleFlowFields
         eos: !ablate::eos::TChem  &eos
           mechFile: ../../mechanisms/gri30.yaml
+          options:
+            # set a minimum temperature for the chemical kinetics ode integration
+            thresholdTemperature: 560
         conservedFieldOptions:
           petscfv_type: upwind
         region:
@@ -127,7 +130,7 @@ timestepper:
           insideValues: 1500
           outsideValues: 300
         pressure: 101325.0
-        velocity: "3.985120454, 0.0"
+        velocity: "3.985120454, 0.0, 0.0"
         other: !ablate::finiteVolume::fieldFunctions::MassFractions
           &oxMassFrac
           eos: *eos
@@ -185,23 +188,23 @@ timestepper:
     #      region:
     #        name: slabBurnerBoundaryCells
     #      state: *fuelFieldState
-
-    - !ablate::finiteVolume::fieldFunctions::Euler
-      region:
-        name: allWallBoundaryRegion
-      state: &flowFieldState
-        eos: *eos
-        temperature: 300
-        pressure: 101325.0
-        velocity: "0.0, 0.0, 0.0"
-        other: !ablate::finiteVolume::fieldFunctions::MassFractions
-          &oxMassFrac
-          eos: *eos
-          values:
-            - fieldName: O2
-              field: 1.0
-    - !ablate::finiteVolume::fieldFunctions::DensityMassFractions
-      state: *flowFieldState
+#
+#    - !ablate::finiteVolume::fieldFunctions::Euler
+#      region:
+#        name: allWallBoundaryRegion
+#      state: &flowFieldState
+#        eos: *eos
+#        temperature: 300
+#        pressure: 101325.0
+#        velocity: "0.0, 0.0, 0.0"
+#        other: !ablate::finiteVolume::fieldFunctions::MassFractions
+#          &oxMassFrac
+#          eos: *eos
+#          values:
+#            - fieldName: O2
+#              field: 1.0
+#    - !ablate::finiteVolume::fieldFunctions::DensityMassFractions
+#      state: *flowFieldState
 
 solvers:
   - !ablate::finiteVolume::CompressibleFlowSolver
