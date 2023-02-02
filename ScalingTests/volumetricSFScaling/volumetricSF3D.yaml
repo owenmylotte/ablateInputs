@@ -99,10 +99,6 @@ timestepper:
       #          - name: slabBurnerBoundaryFaces
       #        incompleteLabel: true
       - !ablate::domain::modifiers::GhostBoundaryCells
-      # the DmViewFromOptions should output once with full mesh/dm details
-      - !ablate::monitors::DmViewFromOptions
-        scope: initial
-        options: ascii::ascii_info_detail
     fields:
       - !ablate::finiteVolume::CompressibleFlowFields
         eos: !ablate::eos::TChem  &eos
@@ -132,7 +128,6 @@ timestepper:
         pressure: 101325.0
         velocity: "3.985120454, 0.0, 0.0"
         other: !ablate::finiteVolume::fieldFunctions::MassFractions
-          &oxMassFrac
           eos: *eos
           values:
             - fieldName: O2
