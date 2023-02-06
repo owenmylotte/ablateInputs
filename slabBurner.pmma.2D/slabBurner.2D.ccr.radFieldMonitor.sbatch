@@ -7,8 +7,7 @@
 #SBATCH --time=72:00:00
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=56
-#SBATCH --constraint=IB
-#SBATCH --job-name="slbBurn"
+#SBATCH --job-name="slbBurn_radMonitor"
 #SBATCH --mail-user=owenmylo@buffalo.edu
 #SBATCH --mail-type=ALL
 #SBATCH --exclusive

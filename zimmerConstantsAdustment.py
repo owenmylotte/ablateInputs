@@ -80,25 +80,42 @@ for n in range(length):
     #     kappa[n] += pCO[n] * zKappaCO[n]
 
 # Now get the emission of the gas based on an arbitrary path length
-pL = 0.05  # Partial pressure times the path length through the gas. Assume 1 atm and 1 meter.
+pL = 0.01  # Partial pressure times the path length through the gas. Assume 1 atm and 1 meter.
 zEpsH2O = 1 - np.exp(-zKappaH2O * pL)
 zEpsCO2 = 1 - np.exp(-zKappaCO2 * pL)
 zEpsCH4 = 1 - np.exp(-zKappaCH4 * pL)
 zEpsCO = 1 - np.exp(-zKappaCO * pL)
 
+temperatureRel = temperature / 1400
+
 # This is the code for the sum of weighted gray gas constants model with MMA
+wKappaCH4 = np.array([1.6352E-1, 1.7250E1, 1.2668E2, 2.3385])
+wKappaCO2 = np.zeros([length])
 wKappaH2O = np.zeros(length)
-wKappaCO2 = np.zeros(length)
-wKappaCH4 = np.zeros(length)
 wKappaCO = np.zeros(length)
 
-aH2O = max()
+bCH4 = np.array([[-2.5429E-1, 1.8623, -1.0442, -1.4615, 1.5196, -3.7806E-1],
+                 [-1.4355E-1, 1.2361, -2.5390, 2.2398, -9.2219E-1, 1.4638E-1],
+                 [-1.2161E-2, 2.7405E-1, -7.3582E-1, 7.7714E-1, -3.6778E-1, 6.5290E-2],
+                 [-2.4021E-1, 1.8795, -3.2156, 2.2964, -7.3711E-1, 8.5605E-2]])
+
+# aCH4 = np.array([])
+
+# The model also needs a transparent portion such that the sum of the temperature weights is 1. This is simply omitted.
+wEpsCH4 = np.zeros(length)
+aCH4 = np.zeros(length)
+
+for j in range(4):
+    for n in range(6):
+        bSum = 0
+        bSum += bCH4[j][n] * pow(temperatureRel, n)
+    aCH4 = np.maximum((bSum * pow(temperatureRel, n)), aCH4)
+    wEpsCH4 += aCH4 * (1 - np.exp(-wKappaCH4[j] * pL))
 
 # Calculate the a[j] temperature factor
 
-wEpsH2O = a[j](T) * (1 - np.exp(-wKappaH2O * pL))
 wEpsCO2 = np.zeros(length)
-wEpsCH4 = np.zeros(length)
+wEpsH2O = np.zeros(length)
 wEpsCO = np.zeros(length)
 
 wA = 0
@@ -117,13 +134,15 @@ plt.semilogy(temperature, zEpsCO2, c='grey', linewidth=1)
 plt.semilogy(temperature, zEpsCH4, c='red', linewidth=1)
 plt.semilogy(temperature, zEpsCO, c='green', linewidth=1)
 
+# plt.semilogy(temperature, wEpsCH4, c='red', linewidth=1, linestyle="--")
+
 # plt.semilogy(temperature, kappa, c='black', linewidth=1)
 
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
 plt.xlabel('Temperature [K]', fontsize=10)
 plt.ylabel('Emissivity', fontsize=10)
-plt.legend(["Z H2O", "Z CO2", "Z CH4", "Z CO"], loc="upper right", fontsize=7)
+plt.legend(["Zimmer H2O", "Zimmer CO2", "Zimmer CH4", "Zimmer CO", "WSGG CH4"], loc="upper right", fontsize=7)
 # plt.ylim(1E-1, 1E5)
 # plt.xlim(0, 2500)
 # plt.savefig('PlatesIrradiation_Convergence', dpi=1000, bbox_inches='tight')
