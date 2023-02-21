@@ -1,6 +1,6 @@
 ---
 environment:
-  title: _slabBurner.pmma.2D.22G.rad.soot
+  title: _slabBurner.pmma.3D.22G.virtualTCP
   tagDirectory: false
 arguments:
   outputAuxVector: true
@@ -16,9 +16,9 @@ timestepper:
     interval: 250
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [186,40]
-    lower: [ 0.0, 0.0]
-    upper: [ 0.1, 0.0254]
+    faces: [186,40,40]
+    lower: [ 0.0, 0.0, -0.0127]
+    upper: [ 0.1, 0.0254, 0.0127]
     simplex: false
     options:
       dm_plex_hash_location: true
@@ -42,6 +42,8 @@ timestepper:
         regions:
           - name: boundaryCellsTop
           - name: boundaryCellsBottom
+          - name: boundaryCellsFront
+          - name: boundaryCellsBack
       # create a label for the slab burner
       - !ablate::domain::modifiers::CreateLabel
         region:
@@ -280,6 +282,21 @@ solvers:
         solidDensity: 1190.0 #density of pmma used to output reg rate
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
+      - !ablate::monitors::RadiationFlux
+        id: virtualTCP
+        region:
+          name: boundaryCellsFront
+        radiation:
+          - !<!ablate::radiation::OrthogonalRadiation>
+            id: tcpTracer
+            region:
+              name: flowRegion
+            properties: !ablate::eos::radiationProperties::SootSpectrumAbsorption
+              eos: *eos
+              wavelengths:
+                - 650E-9 # Red wavelength
+                - 532E-9 # Greem wavelength
+                - 470E-9 # Blue wavelength
   - !ablate::radiation::VolumeRadiation
     id: radiationSolver
     region:
