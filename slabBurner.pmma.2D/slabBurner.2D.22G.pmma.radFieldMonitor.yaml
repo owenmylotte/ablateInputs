@@ -1,7 +1,7 @@
 ---
 environment:
   title: _slabBurner.pmma.2D.22G
-  tagDirectory: false
+  tagDirectory: true
 arguments:
   outputAuxVector: true
 timestepper:

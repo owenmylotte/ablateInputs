@@ -27,8 +27,8 @@ dtheta = 180 / rays
 dims = "_vol"
 
 # Template path: "outputs/Scaling2D_30_16_[105, 15].xml"
-# basePath = "slabRadSF2DScaling/scalingCsv/csvFiles/"
-basePath = "csvFiles/"
+basePath = "slabRadSF2DScaling/scalingCsv/volumetricCsv/"
+# basePath = "csvFiles/"
 initName = b"Radiation::Initialize"
 solveName = b"Radiation::EvaluateGains"
 

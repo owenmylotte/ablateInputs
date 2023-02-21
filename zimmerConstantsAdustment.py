@@ -80,7 +80,7 @@ for n in range(length):
     #     kappa[n] += pCO[n] * zKappaCO[n]
 
 # Now get the emission of the gas based on an arbitrary path length
-pL = 0.01  # Partial pressure times the path length through the gas. Assume 1 atm and 1 meter.
+pL = 1  # Partial pressure times the path length through the gas. Assume 1 atm and 1 meter.
 zEpsH2O = 1 - np.exp(-zKappaH2O * pL)
 zEpsCO2 = 1 - np.exp(-zKappaCO2 * pL)
 zEpsCH4 = 1 - np.exp(-zKappaCH4 * pL)
@@ -92,12 +92,17 @@ temperatureRel = temperature / 1400
 wKappaCH4 = np.array([1.6352E-1, 1.7250E1, 1.2668E2, 2.3385])
 wKappaCO2 = np.zeros([length])
 wKappaH2O = np.zeros(length)
-wKappaCO = np.zeros(length)
+wKappaCO = np.array([1.792E-1, 1.2953E1, 1.29E2, 1.7918])
 
 bCH4 = np.array([[-2.5429E-1, 1.8623, -1.0442, -1.4615, 1.5196, -3.7806E-1],
                  [-1.4355E-1, 1.2361, -2.5390, 2.2398, -9.2219E-1, 1.4638E-1],
                  [-1.2161E-2, 2.7405E-1, -7.3582E-1, 7.7714E-1, -3.6778E-1, 6.5290E-2],
                  [-2.4021E-1, 1.8795, -3.2156, 2.2964, -7.3711E-1, 8.5605E-2]])
+
+bCO = np.array([[-5.3582E-3, -1.4397E-3, 4.0604E-1, -5.7254E-1, 2.8282E-1, -4.7820E-2],
+                [1.2953E1, -5.7642E-2, 4.2020E-1, -4.2020E-1, 6.0302E-1, -2.2181E-1],
+                [-1.6152E-2, 1.2220E-1, -2.2207E-1, 1.7430E-1, -6.3464E-2, 8.8012E-3],
+                [-6.7961E-2, 4.2204E-1, -5.4894E-1, 2.8819E-1, -6.2318E-2, 3.7321E-3]])
 
 # aCH4 = np.array([])
 
@@ -105,25 +110,26 @@ bCH4 = np.array([[-2.5429E-1, 1.8623, -1.0442, -1.4615, 1.5196, -3.7806E-1],
 wEpsCH4 = np.zeros(length)
 aCH4 = np.zeros(length)
 
-for j in range(4):
-    for n in range(6):
-        bSum = 0
-        bSum += bCH4[j][n] * pow(temperatureRel, n)
-    aCH4 = np.maximum((bSum * pow(temperatureRel, n)), aCH4)
-    wEpsCH4 += aCH4 * (1 - np.exp(-wKappaCH4[j] * pL))
-
-# Calculate the a[j] temperature factor
-
-wEpsCO2 = np.zeros(length)
-wEpsH2O = np.zeros(length)
 wEpsCO = np.zeros(length)
+aCO = np.zeros(length)
 
-wA = 0
+
+def computeConsts(a, b, wEps, wKappa):
+    for j in range(4):
+        bSum = 0
+        for n in range(6):
+            bSum += b[j][n] * pow(temperatureRel, n)
+        a = np.maximum(bSum, a)
+        wEps += a * (1 - np.exp(-wKappa[j] * pL))
+
+
+computeConsts(aCH4, bCH4, wEpsCH4, wKappaCH4)
+computeConsts(aCO, bCO, wEpsCO, wKappaCO)
 
 # These are the plots
 
 plt.figure(figsize=(6, 4), num=2)
-plt.title("Absorption Constants", pad=1, fontsize=10)  # TITLE HERE
+plt.title("Absorption Properties", pad=1, fontsize=10)  # TITLE HERE
 # plt.plot(temperature, kappaH2O, c='blue', linewidth=1)
 # plt.plot(temperature, kappaCO2, c='grey', linewidth=1)
 # plt.plot(temperature, kappaCH4, c='red', linewidth=1)
@@ -134,7 +140,8 @@ plt.semilogy(temperature, zEpsCO2, c='grey', linewidth=1)
 plt.semilogy(temperature, zEpsCH4, c='red', linewidth=1)
 plt.semilogy(temperature, zEpsCO, c='green', linewidth=1)
 
-# plt.semilogy(temperature, wEpsCH4, c='red', linewidth=1, linestyle="--")
+plt.semilogy(temperature, wEpsCH4, c='red', linewidth=1, linestyle="--")
+# plt.semilogy(temperature, wEpsCO, c='green', linewidth=1, linestyle="--")
 
 # plt.semilogy(temperature, kappa, c='black', linewidth=1)
 
@@ -142,7 +149,8 @@ plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
 plt.xlabel('Temperature [K]', fontsize=10)
 plt.ylabel('Emissivity', fontsize=10)
-plt.legend(["Zimmer H2O", "Zimmer CO2", "Zimmer CH4", "Zimmer CO", "WSGG CH4"], loc="upper right", fontsize=7)
+plt.legend(["Zimmer H2O", "Zimmer CO2", "Zimmer CH4", "Zimmer CO", "WSGG CH4", "WSGG CO"], loc="upper right",
+           fontsize=7)
 # plt.ylim(1E-1, 1E5)
 # plt.xlim(0, 2500)
 # plt.savefig('PlatesIrradiation_Convergence', dpi=1000, bbox_inches='tight')
