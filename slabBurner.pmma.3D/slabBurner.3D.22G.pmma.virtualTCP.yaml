@@ -212,14 +212,6 @@ solvers:
         log: !ablate::monitors::logs::StdOut
       - !ablate::finiteVolume::processes::Chemistry
         eos: *eos
-      - !ablate::finiteVolume::processes::RadiationLoss
-        eos: *eos
-        tInfinity: 300
-        properties: !ablate::eos::radiationProperties::Sum
-          - !ablate::eos::radiationProperties::Zimmer
-            eos: *eos
-          - !ablate::eos::radiationProperties::SootMeanAbsorption
-            eos: *eos
     fluxCalculator: !ablate::finiteVolume::fluxCalculator::AusmpUp
       pgs: *pgs
 
@@ -304,19 +296,19 @@ solvers:
         solidDensity: 1190.0 #density of pmma used to output reg rate
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
-#  - !ablate::radiation::VolumeRadiation
-#    id: radiationSolver
-#    region:
-#      name: flowRegion
-#    interval: 10
-#    radiation: !ablate::radiation::Radiation
-#      id: volRad
-#      region:
-#        name: flowRegion
-#      rays: 5
-#      properties: !ablate::eos::radiationProperties::Sum
-#        - !ablate::eos::radiationProperties::Zimmer
-#          eos: *eos
-#        - !ablate::eos::radiationProperties::SootMeanAbsorption
-#          eos: *eos
-#      log: !ablate::monitors::logs::StdOut
+  - !ablate::radiation::VolumeRadiation
+    id: radiationSolver
+    region:
+      name: flowRegion
+    interval: 10
+    radiation: !ablate::radiation::Radiation
+      id: volRad
+      region:
+        name: flowRegion
+      rays: 5
+      properties: !ablate::eos::radiationProperties::Sum
+        - !ablate::eos::radiationProperties::Zimmer
+          eos: *eos
+        - !ablate::eos::radiationProperties::SootMeanAbsorption
+          eos: *eos
+      log: !ablate::monitors::logs::StdOut
