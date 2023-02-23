@@ -2,7 +2,7 @@
 ---
 environment:
   title: _slabBurner.pmma.3D.6G.rad
-  tagDirectory: false
+  tagDirectory: true
 arguments:
   outputAuxVector: true
 timestepper:
@@ -18,7 +18,7 @@ timestepper:
     interval: 1000
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [186,40,40] 
+    faces: [105,15,15]
     lower: [ 0.0, 0.0, -0.0127]
     upper: [ 0.1, 0.0254, 0.0127]
     simplex: false
@@ -113,6 +113,13 @@ timestepper:
         subtrahendRegions:
           - name: slabBurnerBoundaryFaces
         incompleteLabel: true
+      - !ablate::domain::modifiers::TagLabelInterface
+        leftRegion:
+          name: flowRegion
+        rightRegion:
+          name: boundaryCellsFront
+        boundaryFaceRegion:
+          name: boundaryFacesFront
       - !ablate::domain::modifiers::GhostBoundaryCells
     fields:
       - !ablate::finiteVolume::CompressibleFlowFields
@@ -194,6 +201,18 @@ solvers:
       interval: !ablate::io::interval::DelayInterval
         interval: 25
         minimumSimulationTime: .02 #about 2 flow throughs
+    - !ablate::monitors::RadiationFlux
+      id: virtualTCP
+      region:
+        name: boundaryFacesFront
+      radiation:
+        - !ablate::radiation::OrthogonalRadiation
+          id: tcpTracer
+          region:
+            name: flowRegion
+          properties: !ablate::eos::radiationProperties::Zimmer
+            eos: *eos
+          log: !ablate::monitors::logs::StdOut
     additionalProcesses:
       - !ablate::finiteVolume::processes::PressureGradientScaling
         &pgs
