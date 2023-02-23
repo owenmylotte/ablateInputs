@@ -2,7 +2,7 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -N 20
+#SBATCH -N 6
 #SBATCH -J 22GvTCP
 #SBATCH -t 24:00:00
 #SBATCH -p pbatch
@@ -18,7 +18,7 @@ module load gcc/10.2.1
 module load  cmake/3.21.1 
 
 # Load PETSC ENV
-export PETSC_DIR="/p/lustre1/mylotte1/petsc"
+export PETSC_DIR="/g/g20/mylotte1/petsc"
 export PETSC_ARCH="arch-ablate-opt-gcc" # arch-ablate-debug or arch-ablate-opt
 export PKG_CONFIG_PATH="${PETSC_DIR}/${PETSC_ARCH}/lib/pkgconfig:$PKG_CONFIG_PATH"
 export HDF5_ROOT="${PETSC_DIR}/${PETSC_ARCH}"  
@@ -38,7 +38,7 @@ export FILE=/p/lustre1/mylotte1/ablateInputs/slabBurner.pmma.3D/slabBurner.3D.22
 # export FILE=/p/lustre2/ubchrest/ablateInputs/slabBurner.pmma.3D/slabBurner.3D.6G.pmma.radLoss.yaml
 
 ##### Launch parallel job using srun
-srun -n720 /p/lustre1/mylotte1/ablateOpt \
+srun -n191 /g/g20/mylotte1/ablateOpt/ablate \
    --input $FILE \
    -yaml::environment::title $TITLE \
    -yaml::timestepper::domain::faces [$FACES]
