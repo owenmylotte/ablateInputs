@@ -251,6 +251,11 @@ solvers:
         log: !ablate::monitors::logs::StdOut
       - !ablate::finiteVolume::processes::Chemistry
         eos: *eos
+      - !ablate::finiteVolume::processes::RadiationLoss
+        eos: *eos
+        tInfinity: 300
+        properties: !ablate::eos::radiationProperties::Zimmer
+          eos: *eos          
     transport: &transportModel !ablate::eos::transport::Sutherland
       eos: *eos
     fluxCalculator: !ablate::finiteVolume::fluxCalculator::AusmpUp
