@@ -8,7 +8,7 @@ timestepper:
   arguments:
     ts_type: rk
     ts_max_time: 1
-    ts_max_steps: 10000000
+    ts_max_steps: 1000000000
     ts_dt: 1.0e-10
     ts_adapt_safety: 1.0
     ts_adapt_type: physicsConstrained
@@ -200,7 +200,6 @@ solvers:
           properties: !ablate::eos::radiationProperties::SootSpectrumAbsorption
             eos: *eos
             wavelengths: [ 650.E-9, 532.E-9, 470.E-9 ] # Red wavelength, # Green wavelength, # Blue wavelength
-
           log: !ablate::monitors::logs::StdOut
     additionalProcesses:
       - !ablate::finiteVolume::processes::PressureGradientScaling
