@@ -285,7 +285,7 @@ solvers:
           id: surfaceflux
           region:
             name: flowRegion
-          rays: 5
+          rays: 25
           properties: !ablate::eos::radiationProperties::Sum
             - !ablate::eos::radiationProperties::Zimmer
               eos: *eos
@@ -305,7 +305,7 @@ solvers:
       id: volRad
       region:
         name: flowRegion
-      rays: 3
+      rays: 5
       properties: !ablate::eos::radiationProperties::Sum
         - !ablate::eos::radiationProperties::Zimmer
           eos: *eos
