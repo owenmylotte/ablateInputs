@@ -16,9 +16,9 @@ timestepper:
     interval: 250
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [186,40,40]
-    lower: [ 0.0, 0.0, -0.0127]
-    upper: [ 0.1, 0.0254, 0.0127]
+    faces: [ 186, 40, 40 ]
+    lower: [ 0.0, 0.0, -0.0127 ]
+    upper: [ 0.1, 0.0254, 0.0127 ]
     simplex: false
     options:
       dm_plex_hash_location: true
@@ -29,7 +29,7 @@ timestepper:
         start: 0.0
         end: 0.0254
         beta: 2.5
-        location:  0.006
+        location: 0.006
       # distribute the mesh across the mpi rank with ghost cells
       - !ablate::domain::modifiers::DistributeWithGhostCells
         ghostCellDepth: 2
@@ -49,17 +49,18 @@ timestepper:
           name: slabBurnerRegion
         function: !ablate::mathFunctions::geom::ConvexPolygon
           points:
-            - [0.007, -0.1]
-            - [0.007, 0]
-            - [0.0077, 0.0011]
-            - [0.0088, 0.0023]
-            - [0.0108, 0.0043]
-            - [0.0124, 0.0057]
-            - [0.0139, 0.0064]
-            - [0.0688, 0.0064]
-            - [0.0688, 0]
-            - [0.0688, -0.1]
+            - [ 0.007, -0.1 ]
+            - [ 0.007, 0 ]
+            - [ 0.0077, 0.0011 ]
+            - [ 0.0088, 0.0023 ]
+            - [ 0.0108, 0.0043 ]
+            - [ 0.0124, 0.0057 ]
+            - [ 0.0139, 0.0064 ]
+            - [ 0.0688, 0.0064 ]
+            - [ 0.0688, 0 ]
+            - [ 0.0688, -0.1 ]
           maxDistance: 0.004
+          # Create a region for the radiation heat flux monitor (monitors heat flux to the surface)
 
       - !ablate::domain::modifiers::SubtractLabel
         # cut the slabBurner out of the flowRegion
@@ -103,8 +104,34 @@ timestepper:
         subtrahendRegions:
           - name: slabBurnerBoundaryFaces
         incompleteLabel: true
+
+      - !ablate::domain::modifiers::CreateLabel
+        region:
+          name: heatFluxMonitorRegion
+        function: !ablate::mathFunctions::geom::Box
+          lower: [ 0 , 0.0064, -0.0127 ]
+          upper: [ 0.1, 0.0254, 0.0127 ]
+
+      - !ablate::domain::modifiers::SubtractLabel
+        # cut the slabBurner out of the flowRegion
+        differenceRegion:
+          name: lowerSlabRegion
+        minuendRegion:
+          name: interiorCells
+        subtrahendRegions:
+          - name: heatFluxMonitorRegion
+
+      - !ablate::domain::modifiers::TagLabelInterface
+        # define the boundary between the slab burner and flow
+        leftRegion:
+          name: heatFluxMonitorRegion
+        rightRegion:
+          name: lowerSlabRegion
+        boundaryFaceRegion:
+          name: heatFluxMonitorFaces
+
       - !ablate::domain::modifiers::GhostBoundaryCells
-          # the DmViewFromOptions should output once with full mesh/dm details
+      # the DmViewFromOptions should output once with full mesh/dm details
     fields:
       - !ablate::finiteVolume::CompressibleFlowFields
         eos: !ablate::eos::TChemSoot  &eos
@@ -127,10 +154,10 @@ timestepper:
     - !ablate::finiteVolume::fieldFunctions::Euler
       state: &flowFieldState
         eos: *eos
-        temperature:  !ablate::mathFunctions::geom::Sphere
-          center: [ 0.009,  0.007]
-          radius: 0.005
-          insideValues: 1673.15
+        temperature: !ablate::mathFunctions::geom::Sphere
+          center: [ 0.009,  0.007, 0 ]
+          radius: 0.0075
+          insideValues: 2500.0
           outsideValues: 300
         pressure: 101325.0
         velocity: "0.0, 0.0"
@@ -178,29 +205,57 @@ solvers:
     transport: &transportModel !ablate::eos::transport::Sutherland
       eos: *eos
     monitors:
-    - !ablate::monitors::TimeStepMonitor
-      interval: 25
-    - !ablate::monitors::PhysicsTimeStep
-      interval: 25
-    - !ablate::monitors::TurbFlowStats
-      fields: [velocity, temperature]
-      eos: *eos
-      interval: !ablate::io::interval::DelayInterval
+      - !ablate::monitors::TimeStepMonitor
         interval: 25
-        minimumSimulationTime: .02 #about 2 flow throughs
-    - !ablate::monitors::RadiationFlux
-      id: virtualTCP
-      region:
-        name: boundaryFacesFront
-      radiation:
-        - !ablate::radiation::OrthogonalRadiation
-          id: tcpTracer
-          region:
-            name: flowRegion
-          properties: !ablate::eos::radiationProperties::SootSpectrumAbsorption
-            eos: *eos
-            wavelengths: [ 650.E-9, 532.E-9, 470.E-9 ] # Red wavelength, # Green wavelength, # Blue wavelength
-          log: !ablate::monitors::logs::StdOut
+      - !ablate::monitors::PhysicsTimeStep
+        interval: 25
+      - !ablate::monitors::TurbFlowStats
+        fields: [ velocity, temperature ]
+        eos: *eos
+        interval: !ablate::io::interval::DelayInterval
+          interval: 25
+          minimumSimulationTime: .02 #about 2 flow throughs
+      - !ablate::monitors::RadiationFlux
+        id: slabFluxMonitor
+        region:
+          name: heatFluxMonitorFaces
+        radiation:
+          - !ablate::radiation::SurfaceRadiation
+            id: slabMonitorTracer
+            region:
+              name: heatFluxMonitorRegion
+            rays: 25
+            properties: !ablate::eos::radiationProperties::Sum
+              - !ablate::eos::radiationProperties::Zimmer
+                eos: *eos
+              - !ablate::eos::radiationProperties::SootMeanAbsorption
+                eos: *eos
+
+      - !ablate::monitors::RadiationFlux
+        id: virtualTCP
+        region:
+          name: boundaryFacesFront
+        radiation:
+          - !ablate::radiation::OrthogonalRadiation
+            id: tcpTracer
+            region:
+              name: flowRegion
+            properties: !ablate::eos::radiationProperties::SootSpectrumAbsorption
+              eos: *eos
+              wavelengths: [ 650.E-9, 532.E-9, 470.E-9 ] # Red wavelength, # Green wavelength, # Blue wavelength
+            log: !ablate::monitors::logs::StdOut
+      - !ablate::monitors::RadiationFlux
+        id: zimmerTracer
+        region:
+          name: boundaryFacesFront
+        radiation:
+          - !ablate::radiation::OrthogonalRadiation
+            id: zTracer
+            region:
+              name: flowRegion
+            properties: !ablate::eos::radiationProperties::Zimmer
+              eos: *eos
+            log: !ablate::monitors::logs::StdOut
     additionalProcesses:
       - !ablate::finiteVolume::processes::PressureGradientScaling
         &pgs
