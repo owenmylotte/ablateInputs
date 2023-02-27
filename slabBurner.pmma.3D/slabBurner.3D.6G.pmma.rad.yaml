@@ -2,7 +2,7 @@
 ---
 environment:
   title: _slabBurner.pmma.3D.6G.rad
-  tagDirectory: true
+  tagDirectory: false
 arguments:
   outputAuxVector: true
 timestepper:
@@ -18,7 +18,7 @@ timestepper:
     interval: 1000
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [105,15,15]
+    faces: [186,40,40] 
     lower: [ 0.0, 0.0, -0.0127]
     upper: [ 0.1, 0.0254, 0.0127]
     simplex: false
@@ -85,6 +85,13 @@ timestepper:
           name: interiorCells
         subtrahendRegions:
           - name: slabBurnerRegion
+      - !ablate::domain::modifiers::TagLabelInterface
+        leftRegion:
+          name: flowRegion
+        rightRegion:
+          name: boundaryCellsFront
+        boundaryFaceRegion:
+          name: boundaryFacesFront
       - !ablate::domain::modifiers::SubtractLabel
         # cut the slabBurner and glow plug out of the boundaryWalls
         differenceRegion:
@@ -113,13 +120,31 @@ timestepper:
         subtrahendRegions:
           - name: slabBurnerBoundaryFaces
         incompleteLabel: true
+      - !ablate::domain::modifiers::CreateLabel
+        region:
+          name: heatFluxMonitorRegion
+        function: !ablate::mathFunctions::geom::Box
+          lower: [ 0 , 0.0064, -0.0127 ]
+          upper: [ 0.1, 0.0254, 0.0127 ]
+
+      - !ablate::domain::modifiers::SubtractLabel
+        # cut the slabBurner out of the flowRegion
+        differenceRegion:
+          name: lowerSlabRegion
+        minuendRegion:
+          name: interiorCells
+        subtrahendRegions:
+          - name: heatFluxMonitorRegion
+
       - !ablate::domain::modifiers::TagLabelInterface
+        # define the boundary between the slab burner and flow
         leftRegion:
-          name: flowRegion
+          name: heatFluxMonitorRegion
         rightRegion:
-          name: boundaryCellsFront
+          name: lowerSlabRegion
         boundaryFaceRegion:
-          name: boundaryFacesFront
+          name: heatFluxMonitorFaces
+
       - !ablate::domain::modifiers::GhostBoundaryCells
     fields:
       - !ablate::finiteVolume::CompressibleFlowFields
@@ -202,17 +227,17 @@ solvers:
         interval: 25
         minimumSimulationTime: .02 #about 2 flow throughs
     - !ablate::monitors::RadiationFlux
-      id: virtualTCP
+      id: slabFluxMonitor
       region:
-        name: boundaryFacesFront
+        name: heatFluxMonitorFaces
       radiation:
-        - !ablate::radiation::OrthogonalRadiation
-          id: tcpTracer
+        - !ablate::radiation::SurfaceRadiation
+          id: slabMonitorTracer
           region:
-            name: flowRegion
+            name: heatFluxMonitorRegion
+          rays: 25
           properties: !ablate::eos::radiationProperties::Zimmer
-            eos: *eos
-          log: !ablate::monitors::logs::StdOut
+              eos: *eos
     additionalProcesses:
       - !ablate::finiteVolume::processes::PressureGradientScaling
         &pgs
@@ -298,11 +323,10 @@ solvers:
           id: surfaceflux
           region:
             name: flowRegion
-          rays: 6
+          rays: 25
           properties: !ablate::eos::radiationProperties::Zimmer
-            eos: *eos
-        emissivity: 0.91    
-    
+              eos: *eos
+        emissivity: 0.91
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
   - !ablate::radiation::VolumeRadiation
@@ -316,5 +340,6 @@ solvers:
         name: flowRegion
       rays: 5
       properties: !ablate::eos::radiationProperties::Zimmer
-        eos: *eos
+          eos: *eos
+
       
