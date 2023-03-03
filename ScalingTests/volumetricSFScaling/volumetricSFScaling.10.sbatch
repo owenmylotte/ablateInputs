@@ -28,15 +28,15 @@ dimensions["[297,42,42]"]="3D"
 dimensions["[594,85,85]"]="3D"
 
 ##### These lines are for Slurm
-#SBATCH -n {{processes}}
+#SBATCH -n 128
 #SBATCH --use-min-nodes
 #SBATCH -J radScale
-#SBATCH -t ${time[{{processes}}]}
+#SBATCH -t ${time[128]}
 #SBATCH -p pbatch
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=volumetricSF_{{rays}}_{{processes}}_{{faces}}
+#SBATCH --output=volumetricSF_5_128_[594,85,85]
 
 ##### Load Required modules
 # gcc
@@ -60,12 +60,12 @@ cd tmp_$SLURM_JOBID
 export UPWIND=leastsquares
 
 ##### Launch parallel job using srun
-srun -n{{processes}} /usr/workspace/mylotte1/ablateOpt/ablate \
-  --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/volumetricSFScaling/volumetricSF${dimensions[{{faces}}]}.yaml \
-  -yaml::environment::title volumetricSFScaling_{{rays}}_{{processes}}_{{faces}} \
-  -yaml::timestepper::domain::faces {{faces}} \
-  -yaml::solvers::[4]::radiation::rays {{rays}} \
+srun -n128 /usr/workspace/mylotte1/ablateOpt/ablate \
+  --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/volumetricSFScaling/volumetricSF${dimensions[[594,85,85]]}.yaml \
+  -yaml::environment::title volumetricSFScaling_5_128_[594,85,85] \
+  -yaml::timestepper::domain::faces [594,85,85] \
+  -yaml::solvers::[4]::radiation::rays 5 \
   -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
-  -log_view :volumetricSFScaling_{{rays}}_{{processes}}_{{faces}}.csv:ascii_csv
+  -log_view :volumetricSFScaling_5_128_[594,85,85].csv:ascii_csv
 
 echo "End Time " $(date +%s)
