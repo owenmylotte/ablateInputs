@@ -1,8 +1,37 @@
 #!/bin/bash
+#### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
+
+# Array for determining the allocated time of the job
+declare -A time # Replace this array with however much time it actually takes + margin
+time[1]="24:00:00"
+time[2]="24:00:00"
+time[4]="12:00:00"
+time[8]="12:00:00"
+time[16]="12:00:00"
+time[32]="08:00:00"
+time[64]="08:00:00"
+time[128]="08:00:00"
+time[256]="05:00:00"
+time[512]="05:00:00"
+time[1024]="05:00:00"
+time[2048]="05:00:00"
+time[4096]="05:00:00"
+time[8192]="05:00:00"
+time[16384]="05:00:00"
+time[32768]="05:00:00"
+
+# Array representing the dimensionality of the input file that should be called
+declare -A dimensions # Add entries for additional meshes as needed
+dimensions["[297,42]"]="2D"
+dimensions["[594,85]"]="2D"
+dimensions["[297,42,42]"]="3D"
+dimensions["[594,85,85]"]="3D"
+
+##### These lines are for Slurm
 #SBATCH -n 4096
-#SBATCH -N $(nnodes4096)
+#SBATCH --use-min-nodes
 #SBATCH -J radScale
-#SBATCH -t $(time4096)
+#SBATCH -t ${time[4096]}
 #SBATCH -p pbatch
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
@@ -32,7 +61,7 @@ export UPWIND=leastsquares
 
 ##### Launch parallel job using srun
 srun -n4096 /usr/workspace/mylotte1/ablateOpt/ablate \
-  --input $(inputfile[297,42,42]) \
+  --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/volumetricSFScaling/volumetricSF${dimensions[[297,42,42]]}.yaml \
   -yaml::environment::title volumetricSFScaling_5_4096_[297,42,42] \
   -yaml::timestepper::domain::faces [297,42,42] \
   -yaml::solvers::[4]::radiation::rays 5 \
