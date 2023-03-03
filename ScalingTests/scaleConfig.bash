@@ -1,0 +1,43 @@
+
+# Array for determining the allocated time of the job
+alias time1="24:00:00"
+alias time2="24:00:00"
+alias time4="12:00:00"
+alias time8="12:00:00"
+alias time16="12:00:00"
+alias time32="08:00:00"
+alias time64="08:00:00"
+alias time128="08:00:00"
+alias time256="05:00:00"
+alias time512="05:00:00"
+alias time1024="05:00:00"
+alias time2048="05:00:00"
+alias time4096="05:00:00"
+alias time8192="05:00:00"
+alias time16384="05:00:00"
+alias time32768="05:00:00"
+
+# Determine the number of nodes based on the number of processes so we don't run out of memory
+declare -A nnodes
+alias nnodes1="1"
+alias nnodes2="2"
+alias nnodes4="4"
+alias nnodes8="8"
+alias nnodes16="16"
+alias nnodes32="16"
+alias nnodes64="16"
+alias nnodes128="16"
+alias nnodes256="16"
+alias nnodes512="17"
+alias nnodes1024="29"
+alias nnodes2048="57"
+alias nnodes4096="114"
+alias nnodes8192="228"
+alias nnodes16384="456"
+alias nnodes32768="911"
+
+# Array representing the dimensionality of the input file that should be called
+alias inputfile[297,42]="/p/lustre1/mylotte1/ablateInputs/ScalingTests/volumetricSFScaling/volumetricSF2D.yaml"
+alias inputfile[594,85]="/p/lustre1/mylotte1/ablateInputs/ScalingTests/volumetricSFScaling/volumetricSF2D.yaml"
+alias inputfile[297,42,42]="/p/lustre1/mylotte1/ablateInputs/ScalingTests/volumetricSFScaling/volumetricSF3D.yaml"
+alias inputfile[594,85,85]="/p/lustre1/mylotte1/ablateInputs/ScalingTests/volumetricSFScaling/volumetricSF3D.yaml"
