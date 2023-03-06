@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH -n 1
-#SBATCH -N $(nnodes1)
+#SBATCH --use-min-nodes
 #SBATCH -J radScale
-#SBATCH -t $(time1)
+#SBATCH -t 05:00:00
 #SBATCH -p pbatch
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
@@ -32,7 +32,7 @@ export UPWIND=leastsquares
 
 ##### Launch parallel job using srun
 srun -n1 /usr/workspace/mylotte1/ablateOpt/ablate \
-  --input $(inputfile[297,42]) \
+  --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/volumetricSFScaling/volumetricSF2D.yaml \
   -yaml::environment::title volumetricSFScaling_5_1_[297,42] \
   -yaml::timestepper::domain::faces [297,42] \
   -yaml::solvers::[4]::radiation::rays 5 \
