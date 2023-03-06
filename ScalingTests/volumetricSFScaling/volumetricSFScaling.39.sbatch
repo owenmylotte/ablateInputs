@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH -n 32768
-#SBATCH -N $(nnodes32768)
+#SBATCH --use-min-nodes
 #SBATCH -J radScale
-#SBATCH -t $(time32768)
+#SBATCH -t 05:00:00
 #SBATCH -p pbatch
-#SBATCH --mail-type=NONE
+#SBATCH --mail-type=ALL
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
 #SBATCH --output=volumetricSF_5_32768_[594,85]

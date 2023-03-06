@@ -1,4 +1,5 @@
 #!/bin/bash
+source ../scaleConfig.bash
 #SBATCH -n {{processes}}
 #SBATCH -N $(nnodes{{processes}})
 #SBATCH -J radScale
