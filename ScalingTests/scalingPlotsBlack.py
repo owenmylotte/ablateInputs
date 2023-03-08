@@ -20,15 +20,16 @@ colorarray = ["o", "s", "o", "s", ".", ".", ".", ".",
 markerarray = [".", "1", "P", "*"]
 
 # Define the arrays that contain the options which were used
-processes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]
-faces = ["[105,15]", "[149,21]", "[297,42]", "[297,42,42]", "[420,60]", "[594,85]", "[840,120]"]  # [210,30]
+processes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]  # , 8192, 16384, 32768]
+faces = ["[105,15]", "[149,21]", "[297,42]"]  # , "[297,42,42]", "[420,60]", "[594,85]", "[594,85,85]",
+# "[840,120]"]  # [210,30]
 rays = np.array([5, 10, 25, 50])
 dtheta = 180 / rays
 dims = "_vol"
 
 # Template path: "outputs/Scaling2D_30_16_[105, 15].xml"
-basePath = "slabRadSF2DScaling/scalingCsv/volumetricCsv/"
-# basePath = "csvFiles/"
+# basePath = "slabRadSF2DScaling/scalingCsv/volumetricCsv/"
+basePath = "csvFiles/"
 initName = b"Radiation::Initialize"
 solveName = b"Radiation::EvaluateGains"
 
@@ -125,7 +126,7 @@ plt.xlabel(r'MPI Processes', fontsize=10)
 plt.ylabel(r'Speedup', fontsize=10)
 labels = dtheta
 labels = np.append(labels, faces)
-plt.legend(["2D", "3D"], loc="upper left")
+plt.legend(["2D"], loc="upper left")  # , "3D"
 plt.savefig('initScalingStrongBlack' + dims, dpi=1500, bbox_inches='tight')
 plt.show()
 
@@ -203,6 +204,6 @@ plt.xlabel(r'MPI Processes', fontsize=10)
 plt.ylabel(r'Speedup', fontsize=10)
 labels = dtheta
 labels = np.append(labels, faces)
-plt.legend(["2D", "3D"], loc="upper left")
+plt.legend(["2D"], loc="upper left")  # , "3D"
 plt.savefig('solveScalingStrongBlack' + dims, dpi=1500, bbox_inches='tight')
 plt.show()
