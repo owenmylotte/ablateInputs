@@ -2,7 +2,7 @@
 ---
 environment:
   title: _slabBurner.pmma.3D.22G.rad
-  tagDirectory: false
+  tagDirectory: true
 arguments:
   outputAuxVector: true
 timestepper:
@@ -15,10 +15,10 @@ timestepper:
     ts_adapt_safety: 0.95
     ts_adapt_type: physicsConstrained
   io: !ablate::io::Hdf5MultiFileSerializer
-    interval: 1000
+    interval: 0
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 186,40,40 ]
+    faces: [ 105,15,15 ]
     lower: [ 0.0, 0.0, -0.0127 ]
     upper: [ 0.1, 0.0254, 0.0127 ]
     simplex: false
@@ -183,7 +183,9 @@ timestepper:
           eos: *eos
           values:
             - fieldName: O2
-              field: 1.0
+              field: 0.9
+            - fieldName: CH4
+              field: 0.1
     - !ablate::finiteVolume::fieldFunctions::DensityMassFractions
       state: *flowFieldState
 
@@ -230,17 +232,17 @@ solvers:
           interval: 25
           minimumSimulationTime: .02 #about 2 flow throughs
       - !ablate::monitors::RadiationFlux
-        id: slabFluxMonitor
+        id: vTCPMonitor
         region:
-          name: heatFluxMonitorFaces
+          name: boundaryFacesFront
         radiation:
-          - !ablate::radiation::SurfaceRadiation
-            id: slabMonitorTracer
+          - !ablate::radiation::OrthogonalRadiation
+            id: tcpTracer
             region:
-              name: heatFluxMonitorRegion
-            rays: 25
+              name: flowRegion
             properties: !ablate::eos::radiationProperties::Zimmer
               eos: *eos
+            log: !ablate::monitors::logs::StdOut
     additionalProcesses:
       - !ablate::finiteVolume::processes::PressureGradientScaling
         &pgs
@@ -330,21 +332,10 @@ solvers:
           id: surfaceflux
           region:
             name: flowRegion
-          rays: 25
+          rays: 10
           properties: !ablate::eos::radiationProperties::Zimmer
             eos: *eos
+          log: !ablate::monitors::logs::StdOut
         emissivity: 0.91
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
-  - !ablate::radiation::VolumeRadiation
-    id: radiationSolver
-    region:
-      name: flowRegion
-    interval: 10
-    radiation: !ablate::radiation::Radiation
-      id: volRad
-      region:
-        name: flowRegion
-      rays: 5
-      properties: !ablate::eos::radiationProperties::Zimmer
-        eos: *eos

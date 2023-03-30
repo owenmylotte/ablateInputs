@@ -14,12 +14,8 @@ timestepper:
     ts_adapt_type: physicsConstrained
   io: !ablate::io::Hdf5MultiFileSerializer
     interval: 250
-  domain: !ablate::domain::BoxMeshBoundaryCells
-    name: simpleBoxField
-    faces: [186,40]
-    lower: [ 0.0, 0.0]
-    upper: [ 0.1, 0.0254]
-    simplex: false
+  domain: !ablate::domain::MeshFile
+    path: ../geom/GFG.msh
     options:
       dm_plex_hash_location: true
     preModifiers:
@@ -30,107 +26,35 @@ timestepper:
         end: 0.0254
         beta: 2.5
         location:  0.006
-    
+
       # distribute the mesh across the mpi rank with ghost cells
       - !ablate::domain::modifiers::DistributeWithGhostCells
         ghostCellDepth: 2
     postModifiers:
-      # merge all the walls to simplify setup
-      - !ablate::domain::modifiers::MergeLabels
-        mergedRegion:
-          name: allWallBoundaryRegion
+      - # GMsh/dm_plex_gmsh_use_regions creates individual labels with their separate values. By collapsing the labels to the default values
+        # this input file does not need to individually specify each one for boundary conditions
+        !ablate::domain::modifiers::CollapseLabels
         regions:
-          - name: boundaryCellsTop
-          - name: boundaryCellsBottom
-      # create a label for the slab burner
-      - !ablate::domain::modifiers::CreateLabel
-        region:
-          name: slabBurnerRegion
-        function: !ablate::mathFunctions::geom::ConvexPolygon
-          points:
-            - [0.007, -0.1]
-            - [0.007, 0]
-            - [0.0077, 0.0011]
-            - [0.0088, 0.0023]
-            - [0.0108, 0.0043]
-            - [0.0124, 0.0057]
-            - [0.0139, 0.0064]
-            - [0.0688, 0.0064]
-            - [0.0688, 0]
-            - [0.0688, -0.1]
-          maxDistance: 0.004  
-        
-      - !ablate::domain::modifiers::SubtractLabel
-        # cut the slabBurner out of the flowRegion
-        differenceRegion:
+          - name: inlet
+          - name: wall
+          - name: outlet
+          - name: main
+          - name: fuel
+      -  # use the newly collapsed labels to extrude the boundary.  Do not extrude the cell
+        !ablate::domain::modifiers::ExtrudeLabel
+        regions:
+          - name: inlet
+          - name: wall
+          - name: outlet
+        # mark all the resulting boundary faces with boundaryFaces label
+        boundaryRegion:
+          name: boundaryFaces
+        # tag the original mesh as the flow region
+        originalRegion:
           name: flowRegion
-        minuendRegion:
-          name: interiorCells
-        subtrahendRegions:
-          - name: slabBurnerRegion
-      - !ablate::domain::modifiers::SubtractLabel
-        # cut the slabBurner  out of the boundaryWalls
-        differenceRegion:
-          name: wallBoundaryRegion
-        minuendRegion:
-          name: allWallBoundaryRegion
-        subtrahendRegions:
-          - name: slabBurnerRegion
-      - !ablate::domain::modifiers::TagLabelInterface
-        # define the boundary between the slab burner and flow
-        leftRegion:
-          name: flowRegion
-        rightRegion:
-          name: slabBurnerRegion
-        boundaryFaceRegion:
-          name: slabBurnerBoundaryFaces
-        rightBoundaryCellRegion:
-          name: slabBurnerBoundaryCells
-      - !ablate::domain::modifiers::SubtractLabel
-        # remove the slabBurnerFace from the flowRegion
-        differenceRegion:
-          name: interiorFlowRegion
-        minuendRegion:
-          name: flowRegion
-        subtrahendRegions:
-          - name: slabBurnerBoundaryFaces
-        incompleteLabel: true
-
-      # Create a region for the flat plate heat flux monitor to operate on
-      - !ablate::domain::modifiers::CreateLabel
-        region:
-          name: heatFluxMonitorRegion
-        function: !ablate::mathFunctions::geom::Box
-          lower: [ 0 , 0.0064 ]
-          upper: [ 0.1, 0.0254 ]
-
-      - !ablate::domain::modifiers::SubtractLabel
-        # separates the regions above and below the slab
-        differenceRegion:
-          name: lowerSlabRegion
-        minuendRegion:
-          name: interiorCells
-        subtrahendRegions:
-          - name: heatFluxMonitorRegion
-
-      - !ablate::domain::modifiers::TagLabelInterface
-        # define the boundary between the upper and lower regions
-        leftRegion:
-          name: heatFluxMonitorRegion
-        rightRegion:
-          name: lowerSlabRegion
-        boundaryFaceRegion:
-          name: heatFluxMonitorFaces
-
-      - !ablate::domain::modifiers::TagLabelInterface
-        # define the boundary between the upper and lower regions
-        leftRegion:
-          name: flowRegion
-        rightRegion:
-          name: boundaryCellsFront
-        boundaryFaceRegion:
-          name: boundaryFacesFront
-
+        # tag the new boundary cells for easy boundary condition specifications
+        extrudedRegion:
+          name: boundaryCells
       - !ablate::domain::modifiers::GhostBoundaryCells
           # the DmViewFromOptions should output once with full mesh/dm details
     fields:
@@ -190,12 +114,12 @@ timestepper:
       region:
         name: slabBurnerBoundaryCells
       state: *fuelFieldState
-      
+
 solvers:
   - !ablate::finiteVolume::CompressibleFlowSolver
     id: flowField
     region:
-      name: interiorFlowRegion
+      name: main
     parameters:
       cfl: 0.45
     eos: *eos
@@ -212,23 +136,11 @@ solvers:
         massFractionsFuel: *fuelMassFrac
         massFractionsOxidizer: *oxMassFrac
     - !ablate::monitors::TurbFlowStats
-      fields: [velocity, temperature]  
+      fields: [velocity, temperature]
       eos: *eos
       interval: !ablate::io::interval::DelayInterval
         interval: 25
         minimumSimulationTime: .02 #about 2 flow throughs
-    - !ablate::monitors::RadiationFlux
-      id: slabFluxMonitor
-      region:
-        name: heatFluxMonitorFaces
-      radiation:
-        - !ablate::radiation::SurfaceRadiation
-          id: slabMonitorTracer
-          region:
-            name: heatFluxMonitorRegion
-          rays: 25
-          properties: !ablate::eos::radiationProperties::Zimmer
-            eos: *eos
     additionalProcesses:
       - !ablate::finiteVolume::processes::PressureGradientScaling
         &pgs
@@ -240,8 +152,8 @@ solvers:
       - !ablate::finiteVolume::processes::Chemistry
         eos: *eos
     fluxCalculator: !ablate::finiteVolume::fluxCalculator::AusmpUp
-      pgs: *pgs   
-    computePhysicsTimeStep: false        
+      pgs: *pgs
+    computePhysicsTimeStep: false
   - !ablate::boundarySolver::BoundarySolver
     id: inlet
     region:
@@ -285,7 +197,7 @@ solvers:
   - !ablate::boundarySolver::BoundarySolver
     id: walls
     region:
-      name: wallBoundaryRegion
+      name: wall
     fieldBoundary:
       name: boundaryFaces
     mergeFaces: true
@@ -311,23 +223,23 @@ solvers:
         radiation: !ablate::radiation::SurfaceRadiation
           id: surfaceflux
           region:
-            name: flowRegion
+            name: main
           rays: 25
           properties: !ablate::eos::radiationProperties::Zimmer
             eos: *eos
-        emissivity: 0.9  
-        solidDensity: 1190.0 #density of pmma used to output reg rate 
+        emissivity: 0.9
+        solidDensity: 1190.0 #density of pmma used to output reg rate
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
   - !ablate::radiation::VolumeRadiation
     id: radiationSolver
     region:
-      name: flowRegion
+      name: main
     interval: 10
     radiation: !ablate::radiation::Radiation
       id: volRad
       region:
-        name: flowRegion
+        name: main
       rays: 5
       properties: !ablate::eos::radiationProperties::Zimmer
         eos: *eos

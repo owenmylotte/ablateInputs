@@ -4,7 +4,7 @@
 ---
 environment:
   title: _slabBurner.pmma.3D.6G.rad
-  tagDirectory: false
+  tagDirectory: true
 arguments:
   outputAuxVector: true
 timestepper:
@@ -16,10 +16,10 @@ timestepper:
     ts_adapt_safety: 0.95
     ts_adapt_type: physicsConstrained
   io: !ablate::io::Hdf5MultiFileSerializer
-    interval: 1000
+    interval: 0
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 186,40,40 ]
+    faces: [ 105, 15, 15 ]
     lower: [ 0.0, 0.0, -0.0127 ]
     upper: [ 0.1, 0.0254, 0.0127 ]
     simplex: false
@@ -63,18 +63,18 @@ timestepper:
           name: slabBurnerRegion
         function: !ablate::mathFunctions::geom::ConvexPolygon
           points:
-            - [0.0132,-.1]
-            - [0.0132,0]
-            - [0.0173,0.0045]
-            - [0.0214,0.0069]
-            - [0.0258,0.0082]
-            - [0.0385,0.009]
-            - [0.0592,0.009]
-            - [0.0702,0.0087]
-            - [0.0722,0.0079]
-            - [0.0727,0.007]
-            - [0.0728,0]
-            - [0.0728,-.1]
+            - [ 0.0132,-.1 ]
+            - [ 0.0132,0 ]
+            - [ 0.0173,0.0045 ]
+            - [ 0.0214,0.0069 ]
+            - [ 0.0258,0.0082 ]
+            - [ 0.0385,0.009 ]
+            - [ 0.0592,0.009 ]
+            - [ 0.0702,0.0087 ]
+            - [ 0.0722,0.0079 ]
+            - [ 0.0727,0.007 ]
+            - [ 0.0728,0 ]
+            - [ 0.0728,-.1 ]
           maxDistance: 0.00401
 
       # create a label for defining the glowPlug
@@ -173,7 +173,7 @@ timestepper:
         eos: *eos
         temperature: !ablate::mathFunctions::geom::Sphere
           center: [ 0.0173,  0.005, 0.0 ]
-          radius: 0.005
+          radius: 0.0075
           insideValues: 1673.15
           outsideValues: 300
         pressure: 101325.0
@@ -183,7 +183,9 @@ timestepper:
           eos: *eos
           values:
             - fieldName: O2
-              field: 1.0
+              field: 0.999
+            - fieldName: C_solid
+              field: 0.001
     - !ablate::finiteVolume::fieldFunctions::DensityMassFractions
       state: *flowFieldState
 
@@ -220,37 +222,49 @@ solvers:
       cfl: 0.45
     eos: *eos
     transport: !ablate::eos::tChemSoot::SootSpeciesTransportModel
-      transport:  !ablate::eos::transport::Sutherland
+      transport: !ablate::eos::transport::Sutherland
         eos: *eos
     evTransport: !ablate::eos::tChemSoot::SootProgressTransportModel
-      transport:  !ablate::eos::transport::Sutherland
-        eos: *eos     
+      transport: !ablate::eos::transport::Sutherland
+        eos: *eos
     monitors:
       - !ablate::monitors::TimeStepMonitor
         interval: 25
-      - !ablate::monitors::MixtureFractionMonitor
-        mixtureFractionCalculator: !ablate::monitors::MixtureFractionCalculator
-          eos: *eos
-          massFractionsFuel: *fuelMassFrac
-          massFractionsOxidizer: *oxMassFrac
       - !ablate::monitors::TurbFlowStats
         fields: [ velocity, temperature ]
         eos: *eos
         interval: !ablate::io::interval::DelayInterval
           interval: 25
           minimumSimulationTime: .01 #about 1 flow throughs
-      - !ablate::monitors::RadiationFlux
-        id: slabFluxMonitor
-        region:
-          name: heatFluxMonitorFaces
-        radiation:
-          - !ablate::radiation::SurfaceRadiation
-            id: slabMonitorTracer
-            region:
-              name: heatFluxMonitorRegion
-            rays: 25
-            properties: !ablate::eos::radiationProperties::Zimmer
-              eos: *eos
+#      - !ablate::monitors::RadiationFlux
+#        id: slabFluxMonitor
+#        region:
+#          name: heatFluxMonitorFaces
+#        radiation:
+#          - !ablate::radiation::SurfaceRadiation
+#            id: slabMonitorTracer
+#            region:
+#              name: heatFluxMonitorRegion
+#            rays: 5
+#            properties: !ablate::eos::radiationProperties::Sum
+#              - !ablate::eos::radiationProperties::Zimmer
+#                eos: *eos
+#              - !ablate::eos::radiationProperties::SootMeanAbsorption
+#                eos: *eos
+#      - !ablate::monitors::RadiationFlux
+#        id: vTCPMonitor
+#        region:
+#          name: boundaryFacesFront
+#        radiation:
+#          - !ablate::radiation::OrthogonalRadiation
+#            id: tcpTracer
+#            region:
+#              name: interiorFlowRegion
+#            properties: !ablate::eos::radiationProperties::SootSpectrumProperties
+#              eos: *eos
+#              wavelengths: [ 650.0E-9, 532.0E-9, 470.0E-9 ] # Red wavelength, # Green wavelength, # Blue wavelength
+#              bandwidths: [ 10E-9, 10E-9 , 10E-9 ]
+#            log: !ablate::monitors::logs::StdOut
     additionalProcesses:
       - !ablate::finiteVolume::processes::PressureGradientScaling
         &pgs
@@ -324,37 +338,39 @@ solvers:
     processes:
       - !ablate::boundarySolver::physics::Sublimation
         latentHeatOfFusion: 840890
-        transportModel:  !ablate::eos::transport::Sutherland  
-            eos: *eos
+        transportModel: !ablate::eos::transport::Sutherland
+          eos: *eos
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
-        radiationInterval: 10
+        radiationInterval: 0
         radiation: !ablate::radiation::SurfaceRadiation
           id: surfaceflux
           region:
-            name: flowRegion
-          rays: 25
+            name: interiorFlowRegion
+          rays: 5
           properties: !ablate::eos::radiationProperties::Sum
             - !ablate::eos::radiationProperties::Zimmer
               eos: *eos
             - !ablate::eos::radiationProperties::SootMeanAbsorption
               eos: *eos
+          log: !ablate::monitors::logs::StdOut
         emissivity: 0.90
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
-  - !ablate::radiation::VolumeRadiation
-    id: radiationSolver
-    region:
-      name: flowRegion
-    interval: 10
-    radiation: !ablate::radiation::Radiation
-      id: volRad
-      region:
-        name: flowRegion
-      rays: 5
-      properties: !ablate::eos::radiationProperties::Sum
-        - !ablate::eos::radiationProperties::Zimmer
-          eos: *eos
-        - !ablate::eos::radiationProperties::SootMeanAbsorption
-          eos: *eos
+        #  - !ablate::radiation::VolumeRadiation
+        #    id: radiationSolver
+        #    region:
+        #      name: interiorFlowRegion
+        #    interval: 10
+        #    radiation: !ablate::radiation::Radiation
+        #      id: volRad
+        #      region:
+        #        name: interiorFlowRegion
+        #      rays: 5
+        #      properties: !ablate::eos::radiationProperties::Sum
+        #        - !ablate::eos::radiationProperties::Zimmer
+        #          eos: *eos
+        #        - !ablate::eos::radiationProperties::SootMeanAbsorption
+        #          eos: *eos
+      #      log: !ablate::monitors::logs::StdOut
