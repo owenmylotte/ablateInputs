@@ -8,8 +8,8 @@
 #SBATCH --nodes=10
 #SBATCH --ntasks-per-node=56
 #SBATCH --constraint=IB
-#SBATCH --job-name="slbBurn3D"
-#SBATCH --mail-user=mtmcgurn@buffalo.edu
+#SBATCH --job-name="vTCPTest"
+#SBATCH --mail-user=owenmylo@buffalo.edu
 #SBATCH --mail-type=ALL
 #SBATCH --exclusive
 #SBATCH --requeue
@@ -31,7 +31,7 @@ module load valgrind/3.14.0
 module load gdb/7.8
 
 # setup petsc
-export PETSC_DIR=/projects/academic/chrest/mtmcgurn/petsc  
+export PETSC_DIR=/projects/academic/chrest/owenmylo/petsc
 export PETSC_ARCH=arch-ablate-opt
 export PKG_CONFIG_PATH="${PETSC_DIR}/${PETSC_ARCH}/lib/pkgconfig:$PKG_CONFIG_PATH"
 
@@ -51,10 +51,10 @@ cd tmp_$SLURM_JOBID
 
 export TITLE=6G-186x40x40-pmma-rad-soot-$SLURM_JOBID
 export FACES=186,40,40
-export FILE=/panasas/scratch/grp-chrest/mtmcgurn/ablateInputs/slabBurner.pmma.3D/slabBurner.3D.6G.pmma.rad.soot.yaml
+export FILE=/panasas/scratch/grp-chrest/owenmylo/ablateInputs/slabBurner.pmma.3D/slabBurner.3D.6G.pmma.rad.soot.yaml
 
 # Run all tests
-srun -n $SLURM_NPROCS  /projects/academic/chrest/mtmcgurn/ablateOpt/ablate \
+srun -n $SLURM_NPROCS  /projects/academic/chrest/owenmylo/ablateOpt/ablate \
   --input $FILE \
    -yaml::environment::title $TITLE \
    -yaml::timestepper::domain::faces [$FACES]
