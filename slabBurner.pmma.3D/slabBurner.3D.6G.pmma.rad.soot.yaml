@@ -4,7 +4,7 @@
 ---
 environment:
   title: _slabBurner.pmma.3D.testingvTCP
-  tagDirectory: false
+  tagDirectory: true
 arguments:
   outputAuxVector: true
 timestepper:
@@ -69,6 +69,7 @@ timestepper:
             - [ 0.0829736,0.0086, 0 ]
             - [ 0.0829738,0, 0 ]
             - [ 0.0829738,-.1, 0 ]
+          maxDistance: 0.00401
 
       # create a label for defining the glowPlug
       - !ablate::domain::modifiers::SubtractLabel
@@ -234,21 +235,21 @@ solvers:
         interval: !ablate::io::interval::DelayInterval
           interval: 25
           minimumSimulationTime: .01 #about 1 flow throughs
-#      - !ablate::monitors::RadiationFlux
-#        id: slabFluxMonitor
-#        region:
-#          name: heatFluxMonitorFaces
-#        radiation:
-#          - !ablate::radiation::SurfaceRadiation
-#            id: slabMonitorTracer
-#            region:
-#              name: heatFluxMonitorRegion
-#            rays: 25
-#            properties: !ablate::eos::radiationProperties::Sum
-#              - !ablate::eos::radiationProperties::Zimmer
-#                eos: *eos
-#              - !ablate::eos::radiationProperties::SootMeanProperties
-#                eos: *eos
+      - !ablate::monitors::RadiationFlux
+        id: slabFluxMonitor
+        region:
+          name: heatFluxMonitorFaces
+        radiation:
+          - !ablate::radiation::SurfaceRadiation
+            id: slabMonitorTracer
+            region:
+              name: heatFluxMonitorRegion
+            rays: 25
+            properties: !ablate::eos::radiationProperties::Sum
+              - !ablate::eos::radiationProperties::Zimmer
+                eos: *eos
+              - !ablate::eos::radiationProperties::SootMeanProperties
+                eos: *eos
       - !ablate::monitors::RadiationFlux
         id: vTCPMonitor
         region:
