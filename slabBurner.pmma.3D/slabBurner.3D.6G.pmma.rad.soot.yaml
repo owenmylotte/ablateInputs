@@ -93,6 +93,13 @@ timestepper:
           name: boundaryCellsFront
         boundaryFaceRegion:
           name: boundaryFacesFront
+      - !ablate::domain::modifiers::TagLabelInterface
+        leftRegion:
+          name: interiorCells
+        rightRegion:
+          name: boundaryCellsTop
+        boundaryFaceRegion:
+          name: boundaryFacesTop
       - !ablate::domain::modifiers::SubtractLabel
         # cut the slabBurner and glow plug out of the boundaryWalls
         differenceRegion:
@@ -255,12 +262,26 @@ solvers:
               - !ablate::eos::radiationProperties::SootMeanProperties
                 eos: *eos
       - !ablate::monitors::RadiationFlux
-        id: vTCPMonitor
+        id: vTCPMonitor_front
         region:
           name: boundaryFacesFront
         radiation:
           - !ablate::radiation::OrthogonalRadiation
-            id: tcpTracer
+            id: tcpTracer_front
+            region:
+              name: interiorFlowRegion
+            properties: !ablate::eos::radiationProperties::SootSpectrumProperties
+              eos: *eos
+              wavelengths: [ 650.0E-9, 532.0E-9, 470.0E-9 ] # Red wavelength, # Green wavelength, # Blue wavelength
+              bandwidths: [ 10E-9, 10E-9 , 10E-9 ]
+            log: !ablate::monitors::logs::StdOut
+      - !ablate::monitors::RadiationFlux
+        id: vTCPMonitor_top
+        region:
+          name: boundaryFacesTop
+        radiation:
+          - !ablate::radiation::OrthogonalRadiation
+            id: tcpTracer_top
             region:
               name: interiorFlowRegion
             properties: !ablate::eos::radiationProperties::SootSpectrumProperties
