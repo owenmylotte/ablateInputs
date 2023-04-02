@@ -1,0 +1,249 @@
+# This input is setup to replicate the 2/21/2023 Sample 6G results found:
+# https://ubuffalo.sharepoint.com/teams/MAECHREST/Shared Documents/General/DesJardin/slab_burner/2023/../../../../../../../:f:/r/teams/MAECHREST/Shared%20Documents/General/DesJardin/slab_burner/2023/PMMA/02-21-23?csf=1&web=1&e=n0mkfZ
+
+---
+environment:
+  title: _hashTest
+  tagDirectory: true
+arguments:
+  outputAuxVector: true
+timestepper:
+  arguments:
+    ts_type: rk
+    ts_max_time: 1
+    ts_max_steps: 10000000
+    ts_dt: 1.0e-10
+    ts_adapt_safety: 0.95
+    ts_adapt_type: physicsConstrained
+  io: !ablate::io::Hdf5MultiFileSerializer
+    interval: 0
+  domain: !ablate::domain::BoxMeshBoundaryCells
+    name: simpleBoxField
+    faces: [ 105,15,15 ]
+    lower: [ 0.0, 0.0, -0.0127 ]
+    upper: [ 0.1, 0.0254, 0.0127 ]
+    simplex: false
+    options:
+      dm_plex_hash_location: true
+    preModifiers:
+      # cluster around the top of the slab
+#      - !ablate::domain::modifiers::OnePointClusteringMapper
+#        direction: 1
+#        start: 0.0
+#        end: 0.0254
+#        beta: 2.5
+#        location: 0.009
+#
+#        # cluster around the sides of the slab
+#      - !ablate::domain::modifiers::TwoPointClusteringMapper
+#        direction: 2
+#        start: 0
+#        end: 0.0127
+#        location: 0.0
+#        offset: 0.004
+#        beta: 2.5
+#        location: 0.006
+      # distribute the mesh across the mpi rank with ghost cells
+      - !ablate::domain::modifiers::DistributeWithGhostCells
+        ghostCellDepth: 1
+    postModifiers:
+      - !ablate::domain::modifiers::TagLabelInterface
+        leftRegion:
+          name: interiorCells
+        rightRegion:
+          name: boundaryCellsFront
+        boundaryFaceRegion:
+          name: boundaryFacesFront
+#      - !ablate::domain::modifiers::CreateLabel
+#        region:
+#          name: slabBurnerRegion
+#        function: !ablate::mathFunctions::geom::ConvexPolygon
+#          points:
+#            - [ 0.01746,-.1, 0 ]
+#            - [ 0.01746,0, 0 ]
+#            - [ 0.0263443,0.0086, 0 ]
+#            - [ 0.0829736,0.0086, 0 ]
+#            - [ 0.0829738,0, 0 ]
+#            - [ 0.0829738,-.1, 0 ]
+#          maxDistance: 0.00401
+      #      - !ablate::domain::modifiers::SubtractLabel
+#        # cut the slabBurner and glow plug out of the flowRegion
+#        differenceRegion:
+#          name: flowRegion
+#        minuendRegion:
+#          name: interiorCells
+#        subtrahendRegions:
+#          - name: slabBurnerRegion
+      - !ablate::domain::modifiers::GhostBoundaryCells
+    fields:
+      - !ablate::finiteVolume::CompressibleFlowFields
+        eos: !ablate::eos::TChemSoot  &eos
+          mechFile: ../mechanisms/MMAReduced.yaml
+          options:
+            # set a minimum temperature for the chemical kinetics ode integration
+            thresholdTemperature: 560
+        conservedFieldOptions:
+          petscfv_type: leastsquares
+          petsclimiter_type: vanleer
+        region:
+          name: domain
+      - !ablate::domain::FieldDescription
+        name: pressure
+        type: FV
+        location: aux
+        region:
+          name: domain
+  initialization:
+    - !ablate::finiteVolume::fieldFunctions::Euler
+      state: &flowFieldState
+        eos: *eos
+        temperature: !ablate::mathFunctions::geom::Sphere
+          center: [ 0.5,  0.5, 0.5 ]
+          radius: 0.1
+          insideValues: 1673.15
+          outsideValues: 300
+        pressure: 101325.0
+        velocity: "0.0, 0.0, 0.0"
+        other: !ablate::finiteVolume::fieldFunctions::MassFractions
+          &oxMassFrac
+          eos: *eos
+          values:
+            - fieldName: O2
+              field: 0.999
+            - fieldName: C_solid
+              field: 0.001
+    - !ablate::finiteVolume::fieldFunctions::DensityMassFractions
+      state: *flowFieldState
+
+    # Set the number density to zero
+    - fieldName: densityProgress
+      field: "0.0"
+
+solvers:
+  - !ablate::finiteVolume::CompressibleFlowSolver
+    id: flowField
+    region:
+      name: interiorCells
+    parameters:
+      cfl: 0.45
+    eos: *eos
+    transport: !ablate::eos::tChemSoot::SootSpeciesTransportModel
+      transport: !ablate::eos::transport::Sutherland
+        eos: *eos
+    evTransport: !ablate::eos::tChemSoot::SootProgressTransportModel
+      transport: !ablate::eos::transport::Sutherland
+        eos: *eos
+    monitors:
+      - !ablate::monitors::TimeStepMonitor
+        interval: 25
+#      - !ablate::monitors::RadiationFlux
+#        id: slabFluxMonitor
+#        region:
+#          name: heatFluxMonitorFaces
+#        radiation:
+#          - !ablate::radiation::SurfaceRadiation
+#            id: slabMonitorTracer
+#            region:
+#              name: heatFluxMonitorRegion
+#            rays: 25
+#            properties: !ablate::eos::radiationProperties::Sum
+#              - !ablate::eos::radiationProperties::Zimmer
+#                eos: *eos
+#              - !ablate::eos::radiationProperties::SootMeanProperties
+#                eos: *eos
+      - !ablate::monitors::RadiationFlux
+        id: vTCPMonitor
+        region:
+          name: boundaryFacesFront
+        radiation:
+          - !ablate::radiation::OrthogonalRadiation
+            id: tcpTracer
+            region:
+              name: interiorCells
+            properties: !ablate::eos::radiationProperties::SootSpectrumProperties
+              eos: *eos
+              wavelengths: [ 650.0E-9, 532.0E-9, 470.0E-9 ] # Red wavelength, # Green wavelength, # Blue wavelength
+              bandwidths: [ 10E-9, 10E-9 , 10E-9 ]
+            log: !ablate::monitors::logs::StdOut
+    additionalProcesses:
+      - !ablate::finiteVolume::processes::PressureGradientScaling
+        &pgs
+        eos: *eos
+        alphaInit: 5.0
+        maxAlphaAllowed: 100.0
+        domainLength: 0.165354
+        log: !ablate::monitors::logs::StdOut
+      - !ablate::finiteVolume::processes::Chemistry
+        eos: *eos
+      - !ablate::finiteVolume::processes::ThermophoreticDiffusion
+        transport: !ablate::eos::transport::Sutherland
+          eos: *eos
+    fluxCalculator: !ablate::finiteVolume::fluxCalculator::AusmpUp
+      pgs: *pgs
+
+  - !ablate::boundarySolver::BoundarySolver
+    id: walls
+    region:
+      name: boundaryCellsLeft
+    fieldBoundary:
+      name: boundaryFaces
+    mergeFaces: true
+    processes:
+      - !ablate::boundarySolver::lodi::IsothermalWall
+        eos: *eos
+        pgs: *pgs
+  - !ablate::boundarySolver::BoundarySolver
+    id: walls
+    region:
+      name: boundaryCellsRight
+    fieldBoundary:
+      name: boundaryFaces
+    mergeFaces: true
+    processes:
+      - !ablate::boundarySolver::lodi::IsothermalWall
+        eos: *eos
+        pgs: *pgs
+  - !ablate::boundarySolver::BoundarySolver
+    id: walls
+    region:
+      name: boundaryCellsTop
+    fieldBoundary:
+      name: boundaryFaces
+    mergeFaces: true
+    processes:
+      - !ablate::boundarySolver::lodi::IsothermalWall
+        eos: *eos
+        pgs: *pgs
+  - !ablate::boundarySolver::BoundarySolver
+    id: walls
+    region:
+      name: boundaryCellsBottom
+    fieldBoundary:
+      name: boundaryFaces
+    mergeFaces: true
+    processes:
+      - !ablate::boundarySolver::lodi::IsothermalWall
+        eos: *eos
+        pgs: *pgs
+  - !ablate::boundarySolver::BoundarySolver
+    id: walls
+    region:
+      name: boundaryCellsFront
+    fieldBoundary:
+      name: boundaryFaces
+    mergeFaces: true
+    processes:
+      - !ablate::boundarySolver::lodi::IsothermalWall
+        eos: *eos
+        pgs: *pgs
+  - !ablate::boundarySolver::BoundarySolver
+    id: walls
+    region:
+      name: boundaryCellsBack
+    fieldBoundary:
+      name: boundaryFaces
+    mergeFaces: true
+    processes:
+      - !ablate::boundarySolver::lodi::IsothermalWall
+        eos: *eos
+        pgs: *pgs

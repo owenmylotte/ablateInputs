@@ -4,7 +4,7 @@
 ##SBATCH --partition=general-compute
 ##SBATCH --qos=supporters
 #SBATCH --account=chrest
-#SBATCH --time=01:00:00
+#SBATCH --time=72:00:00
 #SBATCH --nodes=10
 #SBATCH --ntasks-per-node=56
 #SBATCH --constraint=IB

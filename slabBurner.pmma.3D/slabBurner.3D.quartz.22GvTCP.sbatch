@@ -2,13 +2,13 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -N 20
+#SBATCH -N 100
 #SBATCH -J 22GvTCP
 #SBATCH -t 24:00:00
 #SBATCH -p pbatch
 #SBATCH --mail-type=ALL
 #SBATCH -A sunyb
-#SBATCH --mail-user=mylotte1@buffalo.edu
+#SBATCH --mail-user=owenmylo@buffalo.edu
 
 ##### Load Required modules
 # gcc
@@ -29,16 +29,16 @@ export PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
 mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
-export TITLE=6G-186x40x40-pmma-rad-$SLURM_JOBID
+export TITLE=_slabBurner.pmma.3D.testingvTCP
 export FACES=186,40,40
-export FILE=/p/lustre1/mylotte1/ablateInputs/slabBurner.pmma.3D/slabBurner.3D.22G.pmma.virtualTCP.yaml
+export FILE=/p/lustre1/mylotte1/ablateInputs/slabBurner.pmma.3D/slabBurner.3D.6G.pmma.rad.soot.yaml
 
 # export TITLE=6G-186x40x40-pmma-radLoss-$SLURM_JOBID
 # export FACES=186,40,40
 # export FILE=/p/lustre2/ubchrest/ablateInputs/slabBurner.pmma.3D/slabBurner.3D.6G.pmma.radLoss.yaml
 
 ##### Launch parallel job using srun
-srun -n720 /p/lustre1/mylotte1/ablateOpt \
+srun -n3600 /p/lustre1/mylotte1/ablateOpt \
    --input $FILE \
    -yaml::environment::title $TITLE \
    -yaml::timestepper::domain::faces [$FACES]

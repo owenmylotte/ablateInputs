@@ -3,8 +3,8 @@
 
 ---
 environment:
-  title: _slabBurner.pmma.3D.6G.rad
-  tagDirectory: true
+  title: _slabBurner.pmma.3D.testingvTCP
+  tagDirectory: false
 arguments:
   outputAuxVector: true
 timestepper:
@@ -16,7 +16,7 @@ timestepper:
     ts_adapt_safety: 0.95
     ts_adapt_type: physicsConstrained
   io: !ablate::io::Hdf5MultiFileSerializer
-    interval: 25
+    interval: 250
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
     faces: [ 186,40,40 ]
@@ -81,7 +81,7 @@ timestepper:
           - name: slabBurnerRegion
       - !ablate::domain::modifiers::TagLabelInterface
         leftRegion:
-          name: flowRegion
+          name: interiorCells
         rightRegion:
           name: boundaryCellsFront
         boundaryFaceRegion:
