@@ -3,6 +3,7 @@ import numpy as np  # for matrix manipulation
 import matplotlib.pyplot as plt  # for plotting
 import itertools
 from os.path import exists
+from scipy.optimize import curve_fit
 
 plt.rcParams["font.family"] = "Noto Serif CJK JP"
 
@@ -11,6 +12,10 @@ def findNext(item, nameArray, i):
     if item.find("name").text == nameArray[i]:
         if not item.find('time/maxvalue') is None:
             initTime[r, p, f] = item.find('time/maxvalue').text
+
+
+def r_squared_func(y, y_fit):
+    return 1 - np.sum((y - y_fit) ** 2) / np.sum((y - np.mean(y)) ** 2)
 
 
 # Set up options that must be defined by the user
@@ -85,6 +90,15 @@ f = lambda m, c: plt.plot([], [], marker=m, color=c, ls="none")[0]
 handles = [f(markerarray[i], "k") for i in range(len(markerarray))]
 handles += [f("s", "black") for i in range(len(colorarray))]
 
+
+# Do curve fitting of the data for performance modelling purposes.
+def gustafson_func(N, t0, s, c, d, f):
+    return t0 * (1 / N) + c * (N ** d) * np.log10(N) + f * np.log(N)
+
+
+# Set bounds for the parameters (all non-negative)
+param_bounds = ([0, -np.inf, 0, -np.inf, 0], [np.inf, np.inf, np.inf, np.inf, np.inf])
+
 d = 0
 # Initialization static scaling analysis
 # plt.figure(figsize=(10, 6), num=1)
@@ -117,16 +131,33 @@ for n in range(len(rays)):
         # Bring the lowest available index to the line to normalize the scaling plot * (ideal / lowest available index)
         first = np.argmax(mask)
 
-        plt.loglog(x[mask], (processes[first] * y[first]) / y[mask], linewidth=1, marker=colorarray[i],
+        if np.any(mask):
+            # Perform non-linear curve fitting
+            popt, pcov = curve_fit(gustafson_func, x[mask], y[mask], bounds=param_bounds)
+
+            # Extract the fitted parameters
+            t0, s, c, d, f = popt
+
+            # Calculate the R-squared value
+            y_fit = gustafson_func(x[mask], t0, s, c, d, f)
+            r_squared = r_squared_func(y[mask], y_fit)
+
+            plt.loglog(x[mask], (processes[first] * y[first]) / y_fit, c="black", linestyle="-.",
+                       label=f'Fitted curve: t0={t0:.2f}, s={s:.2f}, c={c:.2f}, r^2={r_squared:.2f}')
+            print(f't0={t0:.2f}, s={s:.2f}, c={c:.2f}, d={d:.2f}, f={f:.2f}, r^2={r_squared:.2f}')
+
+        adjusted = (processes[first] * y[first]) / y[mask]
+        plt.loglog(x[mask], adjusted, linewidth=1, marker=colorarray[i],
                    c="black", markersize=4)
 plt.plot(processes, processes, linewidth=1, c="black", linestyle="--")
-plt.yticks(fontsize=7)
-plt.xticks(fontsize=7)
+plt.yticks(fontsize=10)
+plt.xticks(fontsize=10)
 plt.xlabel(r'MPI Processes', fontsize=10)
 plt.ylabel(r'Speedup', fontsize=10)
-labels = dtheta
-labels = np.append(labels, faces)
-plt.legend(["2D"], loc="upper left")  # , "3D"
+# labels = dtheta
+# labels = np.append(labels, faces)
+# plt.legend(["2D"], loc="upper left")  # , "3D"
+# plt.legend()
 plt.savefig('initScalingStrongBlack' + dims, dpi=1500, bbox_inches='tight')
 plt.show()
 
@@ -195,15 +226,31 @@ for n in range(len(rays)):
         # Bring the lowest available index to the line to normalize the scaling plot * (ideal / lowest available index)
         first = np.argmax(mask)
 
-        plt.loglog(x[mask], (processes[first] * y[first]) / y[mask], linewidth=1, marker=colorarray[i],
+        if np.any(mask):
+            # Perform non-linear curve fitting
+            popt, pcov = curve_fit(gustafson_func, x[mask], y[mask], bounds=param_bounds)
+
+            # Extract the fitted parameters
+            t0, s, c, d, f = popt
+
+            # Calculate the R-squared value
+            y_fit = gustafson_func(x[mask], t0, s, c, d, f)
+            r_squared = r_squared_func(y[mask], y_fit)
+
+            plt.loglog(x[mask], (processes[first] * y[first]) / y_fit, c="black", linestyle="-.",
+                       label=f'Fitted curve: t0={t0:.2f}, s={s:.2f}, c={c:.2f}, r^2={r_squared:.2f}')
+            print(f't0={t0:.2f}, s={s:.2f}, c={c:.2f}, d={d:.2f}, f={f:.2f}, r^2={r_squared:.2f}')
+        adjusted = (processes[first] * y[first]) / y[mask]
+        plt.loglog(x[mask], adjusted, linewidth=1, marker=colorarray[i],
                    c="black", markersize=4)
 plt.plot(processes, processes, linewidth=1, c="black", linestyle="--")
-plt.yticks(fontsize=7)
-plt.xticks(fontsize=7)
+plt.yticks(fontsize=10)
+plt.xticks(fontsize=10)
 plt.xlabel(r'MPI Processes', fontsize=10)
 plt.ylabel(r'Speedup', fontsize=10)
-labels = dtheta
-labels = np.append(labels, faces)
-plt.legend(["2D"], loc="upper left")  # , "3D"
+# labels = dtheta
+# labels = np.append(labels, faces)
+# plt.legend(["2D"], loc="upper left")  # , "3D"
+# plt.legend()
 plt.savefig('solveScalingStrongBlack' + dims, dpi=1500, bbox_inches='tight')
 plt.show()

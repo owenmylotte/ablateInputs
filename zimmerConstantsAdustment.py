@@ -2,6 +2,7 @@ import numpy as np  # for matrix manipulation
 import matplotlib.pyplot as plt  # for plotting
 
 # This is the code for the Zimmer absorption constants calculation
+plt.rcParams["font.family"] = "Noto Serif CJK JP"
 
 kapparef = 1
 Tsurf = 300.0
@@ -129,31 +130,31 @@ computeConsts(aCO, bCO, wEpsCO, wKappaCO)
 # These are the plots
 
 plt.figure(figsize=(6, 4), num=2)
-plt.title("Absorption Properties", pad=1, fontsize=10)  # TITLE HERE
+# plt.title("Absorption Properties", pad=1, fontsize=10)  # TITLE HERE
 # plt.plot(temperature, kappaH2O, c='blue', linewidth=1)
 # plt.plot(temperature, kappaCO2, c='grey', linewidth=1)
 # plt.plot(temperature, kappaCH4, c='red', linewidth=1)
 # plt.plot(temperature, kappaCO, c='green', linewidth=1)
 
-plt.semilogy(temperature, zEpsH2O, c='blue', linewidth=1)
-plt.semilogy(temperature, zEpsCO2, c='grey', linewidth=1)
-plt.semilogy(temperature, zEpsCH4, c='red', linewidth=1)
-plt.semilogy(temperature, zEpsCO, c='green', linewidth=1)
+plt.semilogy(temperature, zKappaH2O, c='black', linewidth=1, linestyle="solid")
+plt.semilogy(temperature, zKappaCO2, c='black', linewidth=1, linestyle="-.")
+plt.semilogy(temperature, zKappaCH4, c='black', linewidth=1, linestyle="--")
+plt.semilogy(temperature, zKappaCO, c='black', linewidth=1, linestyle=":")
 
-plt.semilogy(temperature, wEpsCH4, c='red', linewidth=1, linestyle="--")
+# plt.semilogy(temperature, wEpsCH4, c='red', linewidth=1, linestyle="--")
 # plt.semilogy(temperature, wEpsCO, c='green', linewidth=1, linestyle="--")
 
 # plt.semilogy(temperature, kappa, c='black', linewidth=1)
 
-plt.yticks(fontsize=7)
-plt.xticks(fontsize=7)
-plt.xlabel('Temperature [K]', fontsize=10)
-plt.ylabel('Emissivity', fontsize=10)
-plt.legend(["Zimmer H2O", "Zimmer CO2", "Zimmer CH4", "Zimmer CO", "WSGG CH4", "WSGG CO"], loc="upper right",
-           fontsize=7)
+plt.yticks(fontsize=10)
+plt.xticks(fontsize=10)
+plt.xlabel(r'Temperature $[K]$', fontsize=10)
+plt.ylabel(r'Absorptivity $[m^{-1}]$', fontsize=10)
+plt.legend(["H2O", "CO2", "CH4", "CO", "WSGG CH4", "WSGG CO"], loc="upper right",
+           fontsize=10)
 # plt.ylim(1E-1, 1E5)
 # plt.xlim(0, 2500)
-# plt.savefig('PlatesIrradiation_Convergence', dpi=1000, bbox_inches='tight')
+plt.savefig('ZimmerConstants', dpi=1000, bbox_inches='tight')
 plt.show()
 
 print(min(zKappaH2O))
@@ -164,3 +165,8 @@ print(min(zKappaCH4))
 print(temperature[np.argmin(zKappaCH4)])
 print(min(zKappaCO))
 print(temperature[np.argmin(zKappaCO)])
+
+# Plot the mean soot properties
+lam = 1
+n = 1.811 + (0.1263 * np.log(lam)) + (0.027 * np.log(lam) * np.log(lam)) + (0.0417 * np.log(lam) * np.log(lam) * np.log(lam))
+k = 0.5821 + (0.1213 * np.log(lam)) + (0.2309 * np.log(lam) * np.log(lam)) - (0.01 * np.log(lam) * np.log(lam) * np.log(lam))
