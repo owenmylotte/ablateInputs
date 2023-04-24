@@ -5,7 +5,7 @@ import itertools
 from os.path import exists
 from scipy.optimize import curve_fit
 
-plt.rcParams["font.family"] = "Noto Serif CJK JP"
+# plt.rcParams["font.family"] = "Noto Serif CJK JP"
 
 
 def findNext(item, nameArray, i):
@@ -34,7 +34,7 @@ dims = "_vol"
 
 # Template path: "outputs/Scaling2D_30_16_[105, 15].xml"
 # basePath = "slabRadSF2DScaling/scalingCsv/volumetricCsv/"
-basePath = "csvFiles/"
+basePath = "/Users/owen/scalingCsv/" # TODO: Change this so that the path is an input
 initName = b"Radiation::Initialize"
 solveName = b"Radiation::EvaluateGains"
 
@@ -93,11 +93,13 @@ handles += [f("s", "black") for i in range(len(colorarray))]
 
 # Do curve fitting of the data for performance modelling purposes.
 def gustafson_func(N, t0, s, c, d, f):
-    return t0 * (1 / N) + c * (N ** d) * np.log10(N) + f * np.log(N)
+    performance = min(s, d)
+    # return t0 * (1 / N) + c * (N ** d) * np.log10(N) + f * np.log(N)
+    return t0 * ((c / (N * performance)) + f * np.log(N))
 
 
 # Set bounds for the parameters (all non-negative)
-param_bounds = ([0, -np.inf, 0, -np.inf, 0], [np.inf, np.inf, np.inf, np.inf, np.inf])
+param_bounds = ([0, 0, 0, 0, 0], [np.inf, np.inf, np.inf, np.inf, np.inf])
 
 d = 0
 # Initialization static scaling analysis
