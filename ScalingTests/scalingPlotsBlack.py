@@ -4,255 +4,215 @@ import matplotlib.pyplot as plt  # for plotting
 import itertools
 from os.path import exists
 from scipy.optimize import curve_fit
+import argparse
+import pathlib
 
-# plt.rcParams["font.family"] = "Noto Serif CJK JP"
-
-
-def findNext(item, nameArray, i):
-    if item.find("name").text == nameArray[i]:
-        if not item.find('time/maxvalue') is None:
-            initTime[r, p, f] = item.find('time/maxvalue').text
-
-
-def r_squared_func(y, y_fit):
-    return 1 - np.sum((y - y_fit) ** 2) / np.sum((y - np.mean(y)) ** 2)
-
-
-# Set up options that must be defined by the user
-colorarray = ["o", "s", "o", "s", ".", ".", ".", ".",
-              ".", ".", ".", ".", ".", ".",
-              "."]
-markerarray = [".", "1", "P", "*"]
-
-# Define the arrays that contain the options which were used
-processes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]  # , 8192, 16384, 32768]
-faces = ["[105,15]", "[149,21]", "[297,42]"]  # , "[297,42,42]", "[420,60]", "[594,85]", "[594,85,85]",
-# "[840,120]"]  # [210,30]
-rays = np.array([5, 10, 25, 50])
-dtheta = 180 / rays
-dims = "_vol"
 
 # Template path: "outputs/Scaling2D_30_16_[105, 15].xml"
 # basePath = "slabRadSF2DScaling/scalingCsv/volumetricCsv/"
-basePath = "/Users/owen/scalingCsv/" # TODO: Change this so that the path is an input
-initName = b"Radiation::Initialize"
-solveName = b"Radiation::EvaluateGains"
+# basePath = "csvFiles/"
+# initName = b"Radiation::Initialize"
+# solveName = b"Radiation::EvaluateGains"
 
-# Define an iterator which stores input parameters and iterates through all combinations of the options
-options = itertools.product(rays, processes, faces)
+class PerformanceAnalysis:
 
-# Problem size doubles for each increase
-cells = np.array([[105, 15], [149, 21], [210, 30], [297, 42], [420, 60], [594, 85], [840, 120]])
-cellsize = np.ones([2, np.shape(cells)[0]])
-for n in range(np.shape(cellsize)[0]):
-    for i in range(np.shape(cells)[0]):
-        for j in range(np.shape(cells)[1]):
-            cellsize[n, i] *= cells[i, j]
-            if n == 1:
-                cellsize[n, i] *= cells[i, 1]
+    def __init__(self, base_path=None, name=None, processes=None, faces=None, cellsize=None, rays=None, events=None):
+        self.basePath = base_path
+        self.name = name
+        self.processes = processes
+        self.faces = faces
+        self.cellsize = cellsize
+        self.events = events
+        self.rays = rays
 
-# Create arrays which the parsed information will be stored inside: Whatever information is desired
-initTime = np.zeros((len(rays), len(processes), len(faces)))
-solveTime = np.zeros((len(rays), len(processes), len(faces)))
+    @staticmethod
+    def r_squared_func(y, y_fit):
+        return 1 - np.sum((y - y_fit) ** 2) / np.sum((y - np.mean(y)) ** 2)
 
-# Iterate through the arrays to get information out of the xml files
-for r in range(len(rays)):
-    for p in range(len(processes)):
-        for f in range(len(faces)):
-            # Create strings which represent the file names of the outputs
-            path = basePath + "volumetricSFScaling" + "_" + str(rays[r]) + "_" + str(processes[p]) + "_" + str(
-                faces[f]) + ".csv"  # File path
-            dtypes = {'names': ('stage', 'name', 'time'),
-                      'formats': ('S30', 'S30', 'f4')}
+    def load_csv_files(self):
+        # Create arrays which the parsed information will be stored inside: Whatever information is desired
+        times = np.zeros(len(self.events), len(self.rays), len(self.processes), len(self.faces))
+        # Iterate through the arrays to get information out of the files
+        for r in range(len(self.rays)):
+            for p in range(len(self.processes)):
+                for f in range(len(self.faces)):
+                    # Create strings which represent the file names of the outputs
+                    path = self.base_path + self.name + "_" + str(self.rays[r]) + "_" + str(
+                        self.processes[p]) + "_" + str(
+                        self.faces[f]) + ".csv"  # File path
+                    dtypes = {'names': ('stage', 'name', 'time'),
+                              'formats': ('S30', 'S30', 'f4')}
 
-            if exists(path):
-                data = np.loadtxt(path, delimiter=",", dtype=dtypes, skiprows=1, usecols=(0, 1, 4))
-                lines = len(data)  # Get the length of the csv
+                    if exists(path):  # If the path exists then it can be loaded
+                        data = np.loadtxt(path, delimiter=",", dtype=dtypes, skiprows=1, usecols=(0, 1, 4))
+                        lines = len(data)  # Get the length of the csv
+                        for e in range(len(self.events)):
 
-                for i in range(lines):  # Iterate through all the lines in the csv
-                    if (data[i][1] == solveName) and (data[i][2] > solveTime[r, p, f]):  # Check current line
-                        solveTime[r, p, f] = data[i][2]  # If it is, then write the value in column index 4 of that line
-                for i in range(lines):  # Iterate through all the lines in the csv
-                    if (data[i][1] == initName) and (data[i][2] > initTime[r, p, f]):  # Check current line
-                        initTime[r, p, f] = data[i][2]  # If it is, then write the value in column index 4 of that line
+                            for i in range(lines):  # Iterate through all the lines in the csv
+                                if (data[i][1] == self.events[e]) and (
+                                        data[i][2] > times[e, r, p, f]):  # Check current line
+                                    times[e, r, p, f] = data[i][
+                                        2]  # If it is, then write the value in column 4 of that line
 
-            # If the time is never written then the filter code below should still take care of it just fine.
-        if initTime[r, p, f] == 0:
-            initTime[r, p, f] = float("nan")
-        if solveTime[r, p, f] == 0:
-            solveTime[r, p, f] = float("nan")
+                            # If the time is never written then the filter code then don't try to plot it
+                            if times[e, r, p, f] == 0:
+                                times[e, r, p, f] = float("nan")
 
-processes = np.asarray(processes)
-faces = np.asarray(faces)
-rays = np.asarray(rays)
+        self.processes = np.asarray(self.processes)
+        self.faces = np.asarray(self.faces)
+        self.rays = np.asarray(self.rays)
 
-f = lambda m, c: plt.plot([], [], marker=m, color=c, ls="none")[0]
-handles = [f(markerarray[i], "k") for i in range(len(markerarray))]
-handles += [f("s", "black") for i in range(len(colorarray))]
+    # Do curve fitting of the data for performance modelling purposes.
+    @staticmethod
+    def gustafson_func(self, N, t0, s, c, d, f):
+        # intensity = s / N
+        # performance = np.min(N, d)
+        # return t0 * (N ** f) + c * performance * np.log10(N)
+        # return t0 * (1 / ((N ** c) * performance) +  * np.log(N))
+        # return t0 * (1 / ((N ** c) * s) + (1 - 1 / (N ** c)) * np.log(N))
+        return t0 * np.log(N) + s * np.log(N) * np.log(N) + d * np.log(N) * np.log(N) * np.log(N) + c * N ** f
+
+    # Set bounds for the parameters (all non-negative)
+    # param_bounds = ([0, -np.inf, 0, -np.inf, 0], [np.inf, np.inf, np.inf, np.inf, np.inf])
+    param_bounds = ([0, 0, 0, 0, -np.inf], [np.inf, np.inf, np.inf, np.inf, np.inf])
+
+    def plot_static_scaling(self):
+        for e in range(len(self.events)):
+            # Initialization static scaling analysis
+            plt.figure(figsize=(10, 6), num=1)
+            plt.title("Initialization Static Scaling" + dims, pad=1)
+            for n in range(len(rays)):
+                for i in range(len(self.processes)):
+                    mask = np.isfinite(self.times[e, n, i, :])
+                    x = self.cellsize
+                    y = self.cellsize / self.times[e, n, i, :]
+                    plt.loglog(x[mask], y[mask], linewidth=1, marker=markerarray[n], c=colorarray[i])
+            plt.yticks(fontsize=10)
+            plt.xticks(fontsize=10)
+            plt.xlabel(r'DOF $[cells]$', fontsize=10)
+            plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
+            labels = dtheta
+            labels = np.append(labels, self.processes)
+            plt.legend(handles, labels, loc="upper left")
+            plt.savefig('StaticScaling_' + self.events[e] + ".png", dpi=1500, bbox_inches='tight')
+            plt.show()
+
+    def plot_weak_scaling(self):
+        for e in range(len(self.events)):
+            # Initialization Weak scaling analysis
+            weak_init = np.zeros([len(self.rays), len(self.processes) + len(self.faces), len(self.faces)])
+            I = len(self.processes)
+            for n in range(len(rays)):
+                for i in range(len(self.processes)):
+                    for j in range(len(self.faces)):
+                        x = ((I - 1) - i) + j
+                        weak_init[n, x, j] = self.times[e, n, i, j]
+                        if weak_init[n, x, j] == 0:
+                            weak_init[n, x, j] = float("nan")
+
+            plt.figure(figsize=(6, 4), num=1)
+            plt.title("Initialization Weak Scaling", pad=1)
+            I = len(self.processes)
+            for n in range(len(rays)):
+                for i in range(len(self.faces) + len(self.processes)):
+                    weak_init = np.diagonal(self.times, offset=(i - I), axis1=0, axis2=1)
+                    mask = np.isfinite(weak_init)
+                    x = self.cellsize
+                    y = self.cellsize / weak_init
+                    # Bring the lowest available index to the line to normalize the scaling plot *
+                    # (ideal / lowest available index)
+                    first = np.argmax(mask)
+
+                    plt.loglog(x[mask], (self.cellsize[first] * y[first]) / y[mask], linewidth=1, marker='.')
+            plt.yticks(fontsize=10)
+            plt.xticks(fontsize=10)
+            plt.xlabel(r'DOF $[cells]$', fontsize=10)
+            plt.ylabel(r'Efficiency', fontsize=10)
+            # plt.legend(faces, loc="upper left")
+            plt.savefig('WeakScaling_' + self.events[e] + ".png", dpi=1500, bbox_inches='tight')
+            plt.show()
+
+    def plot_strong_scaling(self, function_fit):
+        # Initialization Strong scaling analysis
+        plt.figure(figsize=(6, 4), num=4)
+        # plt.title("Solve Strong Scaling" + dims, pad=1)
+        for e in range(len(self.events)):
+            for n in range(len(rays)):
+                for i in range(len(self.faces)):
+                    mask = np.isfinite(self.times[e, n, :, i])
+                    x = self.processes
+                    y = self.times[e, n, :, i]
+
+                    # Bring the lowest available index to the line to normalize the scaling plot *
+                    # (ideal / lowest available index)
+                    first = np.argmax(mask)
+
+                    if np.any(mask):
+                        # Perform non-linear curve fitting
+                        popt, pcov = curve_fit(function_fit, x[mask], y[mask])  # , bounds=param_bounds)
+
+                        # Extract the fitted parameters
+                        t0, s, c, d, f = popt
+
+                        # Calculate the R-squared value
+                        y_fit = function_fit(x[mask], t0, s, c, d, f)
+                        r_squared = self.r_squared_func(y[mask], y_fit)
+
+                        plt.loglog(x[mask], (self.processes[first] * y[first]) / y_fit, c="black", linestyle="-.",
+                                   label=f'Fitted curve: t0={t0:.2f}, s={s:.2f}, c={c:.2f}, r^2={r_squared:.2f}')
+                        print(f't0={t0:.2f}, s={s:.2f}, c={c:.2f}, d={d:.2f}, f={f:.2f}, r^2={r_squared:.2f}')
+                    adjusted = (self.processes[first] * y[first]) / y[mask]
+                    plt.loglog(x[mask], adjusted, linewidth=1, marker=colorarray[i],
+                               c="black", markersize=4)
+            plt.plot(self.processes, self.processes, linewidth=1, c="black", linestyle="--")
+            plt.yticks(fontsize=10)
+            plt.xticks(fontsize=10)
+            plt.xlabel(r'MPI Processes', fontsize=10)
+            plt.ylabel(r'Speedup', fontsize=10)
+            # labels = dtheta
+            # labels = np.append(labels, faces)
+            # plt.legend(["2D"], loc="upper left")  # , "3D"
+            # plt.legend()
+            plt.savefig('StrongScaling_' + self.events[e] + ".png", dpi=1500, bbox_inches='tight')
+            plt.show()
 
 
-# Do curve fitting of the data for performance modelling purposes.
-def gustafson_func(N, t0, s, c, d, f):
-    performance = min(s, d)
-    # return t0 * (1 / N) + c * (N ** d) * np.log10(N) + f * np.log(N)
-    return t0 * ((c / (N * performance)) + f * np.log(N))
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description='Process scaling data from PETSc events.')
+    parser.add_argument('--path', dest='base_path', type=pathlib.Path, required=True,
+                        help='Path to the base directory containing scaling csv files.')
+    parser.add_argument('--name', dest='name', type=str, required=True,
+                        help='Title of the files being processed.')
+    parser.add_argument('--processes', dest='processes', type=int, required=True, nargs="+",
+                        help='Process counts being considered.')
+    parser.add_argument('--problems', dest='problems', type=str, required=True, nargs="+",
+                        help='Problems being considered.')
+    parser.add_argument('--dofs', dest='cellsize', type=float, required=True, nargs="+",
+                        help='Mesh or dof size associated with each problem.')
+    parser.add_argument('--events', dest='events', type=str, required=True, nargs="+",
+                        help='Event names to measure.')
 
+    args = parser.parse_args()
+    rays = np.array([5, 10, 25, 50])
 
-# Set bounds for the parameters (all non-negative)
-param_bounds = ([0, 0, 0, 0, 0], [np.inf, np.inf, np.inf, np.inf, np.inf])
+    scaling_data = PerformanceAnalysis(args.base_path, args.name, args.processes,
+                                       args.problems, args.cellsize, rays, args.events)
 
-d = 0
-# Initialization static scaling analysis
-# plt.figure(figsize=(10, 6), num=1)
-# plt.title("Initialization Static Scaling" + dims, pad=1)
-# for n in range(len(rays)):
-#     for i in range(len(processes)):
-#         mask = np.isfinite(initTime[n, i, :])
-#         x = cellsize[d, :]
-#         y = cellsize[d, :] / initTime[n, i, :]
-#         plt.loglog(x[mask], y[mask], linewidth=1, marker=markerarray[n], c=colorarray[i])
-# plt.yticks(fontsize=10)
-# plt.xticks(fontsize=10)
-# plt.xlabel(r'DOF $[cells]$', fontsize=10)
-# plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
-# labels = dtheta
-# labels = np.append(labels, processes)
-# plt.legend(handles, labels, loc="upper left")
-# plt.savefig('initScalingStatic' + dims, dpi=1500, bbox_inches='tight')
-# plt.show()
+    # Set up plotting options that must be defined by the user
+    colorarray = ["o", "s", "o", "s", ".", ".", ".", ".",
+                  ".", ".", ".", ".", ".", ".",
+                  "."]
+    markerarray = [".", "1", "P", "*"]
+    plt.rcParams["font.family"] = "Noto Serif CJK JP"
 
-# Initialization Strong scaling analysis
-plt.figure(figsize=(6, 4), num=2)
-# plt.title("Initialization Strong Scaling" + dims, pad=1)
-for n in range(len(rays)):
-    for i in range(len(faces)):
-        mask = np.isfinite(initTime[n, :, i])
-        x = processes
-        y = initTime[n, :, i]
+    f = lambda m, c: plt.plot([], [], marker=m, color=c, ls="none")[0]
+    handles = [f(markerarray[i], "k") for i in range(len(markerarray))]
+    handles += [f("s", "black") for i in range(len(colorarray))]
 
-        # Bring the lowest available index to the line to normalize the scaling plot * (ideal / lowest available index)
-        first = np.argmax(mask)
-
-        if np.any(mask):
-            # Perform non-linear curve fitting
-            popt, pcov = curve_fit(gustafson_func, x[mask], y[mask], bounds=param_bounds)
-
-            # Extract the fitted parameters
-            t0, s, c, d, f = popt
-
-            # Calculate the R-squared value
-            y_fit = gustafson_func(x[mask], t0, s, c, d, f)
-            r_squared = r_squared_func(y[mask], y_fit)
-
-            plt.loglog(x[mask], (processes[first] * y[first]) / y_fit, c="black", linestyle="-.",
-                       label=f'Fitted curve: t0={t0:.2f}, s={s:.2f}, c={c:.2f}, r^2={r_squared:.2f}')
-            print(f't0={t0:.2f}, s={s:.2f}, c={c:.2f}, d={d:.2f}, f={f:.2f}, r^2={r_squared:.2f}')
-
-        adjusted = (processes[first] * y[first]) / y[mask]
-        plt.loglog(x[mask], adjusted, linewidth=1, marker=colorarray[i],
-                   c="black", markersize=4)
-plt.plot(processes, processes, linewidth=1, c="black", linestyle="--")
-plt.yticks(fontsize=10)
-plt.xticks(fontsize=10)
-plt.xlabel(r'MPI Processes', fontsize=10)
-plt.ylabel(r'Speedup', fontsize=10)
-# labels = dtheta
-# labels = np.append(labels, faces)
-# plt.legend(["2D"], loc="upper left")  # , "3D"
-# plt.legend()
-plt.savefig('initScalingStrongBlack' + dims, dpi=1500, bbox_inches='tight')
-plt.show()
-
-# Initialization Weak scaling analysis
-# weakInit = np.zeros([len(rays), len(processes) + len(faces), len(faces)])
-# I = len(processes)
-# for n in range(len(rays)):
-#     for i in range(len(processes)):
-#         for j in range(len(faces)):
-#             x = ((I-1) - i) + j
-#             weakInit[n, x, j] = initTime[n, i, j]
-#             if weakInit[n, x, j] == 0:
-#                 weakInit[n, x, j] = float("nan")
-
-# plt.figure(figsize=(6, 4), num=1)
-# plt.title("Initialization Weak Scaling", pad=1)
-# I = len(processes)
-# for n in range(len(rays)):
-#     for i in range(len(faces) + len(processes)):
-#         weakInit = np.diagonal(initTime, offset=(i-I), axis1=0, axis2=1)
-#         mask = np.isfinite(weakInit)
-#         x = cellsize[d, :]
-#         y = cellsize[d, :] / weakInit[:]
-#         # Bring the lowest available index to the line to normalize the scaling plot * (ideal / lowest available index)
-#         first = np.argmax(mask)
-#
-#         plt.loglog(x[mask], (cellsize[first] * y[first]) / y[mask], linewidth=1, marker='.')
-# plt.yticks(fontsize=10)
-# plt.xticks(fontsize=10)
-# plt.xlabel(r'DOF $[cells]$', fontsize=10)
-# plt.ylabel(r'Efficiency', fontsize=10)
-# # plt.legend(faces, loc="upper left")
-# plt.savefig('scalingWeak' + dims, dpi=1500, bbox_inches='tight')
-# plt.show()
-
-
-# Solve static scaling analysis
-# plt.figure(figsize=(10, 6), num=3)
-# plt.title("Solve Static Scaling" + dims, pad=1)
-# for n in range(len(rays)):
-#     for i in range(len(processes)):
-#         mask = np.isfinite(solveTime[n, i, :])
-#         x = cellsize[d, :]
-#         y = cellsize[d, :] / solveTime[n, i, :]
-#         plt.loglog(x[mask], y[mask], linewidth=1, marker=markerarray[n],
-#                    c=colorarray[i])
-# plt.yticks(fontsize=10)
-# plt.xticks(fontsize=10)
-# plt.xlabel(r'DOF $[cells]$', fontsize=10)
-# plt.ylabel(r'Performance $[\frac{DOF}{s}]$', fontsize=10)
-# labels = dtheta
-# labels = np.append(labels, processes)
-# plt.legend(handles, labels, loc="upper left")
-# plt.savefig('solveScalingStatic' + dims, dpi=1500, bbox_inches='tight')
-# plt.show()
-
-# Initialization Strong scaling analysis
-plt.figure(figsize=(6, 4), num=4)
-# plt.title("Solve Strong Scaling" + dims, pad=1)
-for n in range(len(rays)):
-    for i in range(len(faces)):
-        mask = np.isfinite(solveTime[n, :, i])
-        x = processes
-        y = solveTime[n, :, i]
-
-        # Bring the lowest available index to the line to normalize the scaling plot * (ideal / lowest available index)
-        first = np.argmax(mask)
-
-        if np.any(mask):
-            # Perform non-linear curve fitting
-            popt, pcov = curve_fit(gustafson_func, x[mask], y[mask], bounds=param_bounds)
-
-            # Extract the fitted parameters
-            t0, s, c, d, f = popt
-
-            # Calculate the R-squared value
-            y_fit = gustafson_func(x[mask], t0, s, c, d, f)
-            r_squared = r_squared_func(y[mask], y_fit)
-
-            plt.loglog(x[mask], (processes[first] * y[first]) / y_fit, c="black", linestyle="-.",
-                       label=f'Fitted curve: t0={t0:.2f}, s={s:.2f}, c={c:.2f}, r^2={r_squared:.2f}')
-            print(f't0={t0:.2f}, s={s:.2f}, c={c:.2f}, d={d:.2f}, f={f:.2f}, r^2={r_squared:.2f}')
-        adjusted = (processes[first] * y[first]) / y[mask]
-        plt.loglog(x[mask], adjusted, linewidth=1, marker=colorarray[i],
-                   c="black", markersize=4)
-plt.plot(processes, processes, linewidth=1, c="black", linestyle="--")
-plt.yticks(fontsize=10)
-plt.xticks(fontsize=10)
-plt.xlabel(r'MPI Processes', fontsize=10)
-plt.ylabel(r'Speedup', fontsize=10)
-# labels = dtheta
-# labels = np.append(labels, faces)
-# plt.legend(["2D"], loc="upper left")  # , "3D"
-# plt.legend()
-plt.savefig('solveScalingStrongBlack' + dims, dpi=1500, bbox_inches='tight')
-plt.show()
+    # Define the arrays that contain the options which were used
+    # processes = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]  # , 8192, 16384, 32768]
+    # faces = ["[105,15]", "[149,21]", "[297,42]"]  # , "[297,42,42]", "[420,60]", "[594,85]", "[594,85,85]",
+    # "[840,120]"]  # [210,30]
+    dtheta = 180 / rays
+    dims = "_vol"
