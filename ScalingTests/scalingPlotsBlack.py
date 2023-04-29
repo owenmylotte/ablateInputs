@@ -1,11 +1,8 @@
-import xml.etree.cElementTree as ET
 import numpy as np  # for matrix manipulation
 import matplotlib.pyplot as plt  # for plotting
-import itertools
 from os.path import exists
 from scipy.optimize import curve_fit
 import argparse
-import pathlib
 
 
 # Template path: "outputs/Scaling2D_30_16_[105, 15].xml"
@@ -105,7 +102,7 @@ class PerformanceAnalysis:
             labels = dtheta
             labels = np.append(labels, self.processes)
             plt.legend(self.handles, labels, loc="upper left")
-            plt.savefig(self.name + str(self.events[e]) + '_static_scaling.png', dpi=1500, bbox_inches='tight')
+            plt.savefig(self.base_path + "/figures/" + self.name + str(self.events[e]) + '_static_scaling.png', dpi=1500, bbox_inches='tight')
             plt.show()
 
     def plot_weak_scaling(self):
@@ -140,7 +137,7 @@ class PerformanceAnalysis:
             plt.xlabel(r'DOF $[cells]$', fontsize=10)
             plt.ylabel(r'Efficiency', fontsize=10)
             # plt.legend(faces, loc="upper left")
-            plt.savefig(self.name + str(self.events[e]) + '_weak_scaling.png', dpi=1500, bbox_inches='tight')
+            plt.savefig(self.base_path + "/figures/" + self.name + str(self.events[e]) + '_weak_scaling.png', dpi=1500, bbox_inches='tight')
             plt.show()
 
     def plot_strong_scaling(self, function_fit):
@@ -184,7 +181,7 @@ class PerformanceAnalysis:
             # labels = np.append(labels, faces)
             # plt.legend(["2D"], loc="upper left")  # , "3D"
             # plt.legend()
-            plt.savefig(self.name + str(self.events[e]) + '_strong_scaling.png', dpi=1500, bbox_inches='tight')
+            plt.savefig(self.base_path + "/figures/" + self.name + str(self.events[e]) + '_strong_scaling.png', dpi=1500, bbox_inches='tight')
             plt.show()
 
 
