@@ -28,7 +28,6 @@ timestepper:
         eos: !ablate::eos::PerfectGas &eos
           parameters:
             gamma: 1.4
-
             Rgas: 287.0
         name: domain
   initialization:
@@ -80,5 +79,7 @@ solvers:
       rays: 500
       properties: !ablate::eos::radiationProperties::Constant
         absorptivity: 1
+        emissivity: 1
+        eos: *eos
       log: !ablate::monitors::logs::StdOut
         name: radlog
