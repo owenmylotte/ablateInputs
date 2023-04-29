@@ -1,5 +1,5 @@
 """
-Adiabatic flame temperature and equilibrium composition for a fuel/air mixture
+Adiabatic flame temperature and equilibrium.planar composition for a fuel/air mixture
 as a function of equivalence ratio, including formation of solid carbon.
 
 Requires: cantera >= 2.5.0, matplotlib >= 2.0

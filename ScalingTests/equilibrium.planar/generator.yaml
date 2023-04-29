@@ -1,0 +1,17 @@
+---
+name: sbatch/equilibrium.planar.
+enumerations:
+  - !enumerator::enumerations::List
+    name: processes
+    values: [ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 ]
+  - !enumerator::enumerations::List
+    name: faces
+    values: [ "[100]", "[200]", "[400]", "[800]", "[1600]", "[3200]", "[6400]" ]
+  - !enumerator::enumerations::List
+    name: rays
+    values: [ 15, 50, 250]
+generator:
+  !enumerator::generators::FileTemplateGenerator
+  path: generator.sbatch
+reporters:
+  - !enumerator::reporters::StreamReporter

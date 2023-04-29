@@ -2,37 +2,35 @@
 # energy equation. This serves as verification for the radiation solver.
 ---
 environment:
-  title: _RadEqTest
+  title: _equilibrium.spherical
   tagDirectory: true
 arguments:
   dm_plex_gmsh_use_regions: true
+  outputAuxVector: true
 timestepper:
   # setup default controls for the time stepper
   arguments:
-    ts_type: euler
+    ts_type: rk
     ts_max_time: 1.0E6
-    ts_max_steps: 10
-    ts_dt: 1.0E-9
-    # petsc adaptive timestepping can be turned on to replace physics timestepping
-    #    ts_adapt_safety: 0.9
-    #    ts_adapt_monitor: ""
-    ts_adapt_type: none
+    ts_max_steps: 10000000000
+    ts_dt: 1.0E-10
+    ts_adapt_monitor: ""
+    ts_adapt_safety: 0.75
   # io controls how often the results are saved to a file for visualization and restart
-  io:
+  io: !ablate::io::Hdf5MultiFileSerializer
     #  results are outputted every 0.001 seconds of real simulation time
     interval: 100 #!ablate::io::interval::SimulationTimeInterval 0.001
   # load in a mesh file
   domain: !ablate::domain::MeshFile
     name: flowRegionMesh
-    path: ../geom/radEqTest.msh
+    path: ../../geom/R1_5.0m.msh
     # Options to be applied to the volumetric geometry
     options:
-      dm_refine: 0
+      dm_refine: 3
       dm_plex_check_all: true
       dm_partition_view: true
       dm_plex_hash_location: true
       dm_distribute_overlap: 0
-    #      dm_label_view: flowRegion
     modifiers:
       # label the vertices of regions with all faces labeled
       - !ablate::domain::modifiers::CompleteLabel
@@ -119,21 +117,26 @@ solvers:
     eos: *eos
     computePhysicsTimeStep: true
   - !ablate::radiation::VolumeRadiation
-    id: radiation
-    eos: *eos
-    region: *R2
-    fieldBoundary:
-      name: BoundaryFaces
-    rays: 5
+    id: radiationSolver
+    region:
+      name: flowRegion
     interval: 1
-    properties: !ablate::eos::radiationProperties::Constant
-      absorptivity: 1
-    log: !ablate::monitors::logs::StdOut
-      name: radlog
-#   use a boundary solver to update the cells in the wallBoundaryCells region to represent standard wall
-  - !ablate::boundarySolver::BoundarySolver
+    radiation: !ablate::radiation::RaySharingRadiation
+      id: flameradiation
+      region:
+        name: flowRegion
+      rays: 200
+      properties: !ablate::eos::radiationProperties::Constant
+        absorptivity: 1
+        emissivity: 1
+        eos: *eos
+      log: !ablate::monitors::logs::StdOut
+        name: raysharinglog
+  # use a boundary solver to update the cells in the wallBoundaryCells region to represent standard wall
+  - !ablate::boundarySolver::DebugBoundarySolver
     id: sphereBoundary
-    region: *R1
+    region:
+      name: BoundaryCells
     fieldBoundary:
       name: BoundaryFaces
     mergeFaces: true

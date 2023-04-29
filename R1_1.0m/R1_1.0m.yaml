@@ -1,4 +1,4 @@
-# Radiative equilibrium problem for testing the coupling of the radiation solver with the
+# Radiative equilibrium.planar problem for testing the coupling of the radiation solver with the
 # energy equation. This serves as verification for the radiation solver.
 ---
 environment:
