@@ -26,7 +26,7 @@ time[294912]="04:00:00"
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=irradiationScalingTests_{{rays}}_{{processes}}_{{faces}}
+#SBATCH --output=irradiation_{{rays}}_{{processes}}_{{faces}}
 
 ##### Load Required modules
 # gcc
@@ -52,10 +52,8 @@ export UPWIND=leastsquares
 ##### Launch parallel job using srun
 srun -n{{processes}} /usr/workspace/mylotte1/ablateOpt/ablate \
   --input ../input.yaml \
-  -yaml::environment::title irradiationScalingTests_{{rays}}_{{processes}}_{{faces}} \
   -yaml::timestepper::domain::faces {{faces}} \
   -yaml::solvers::[2]::radiation::rays {{rays}} \
-  -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
-  -log_view :irradiationScalingTests_{{rays}}_{{processes}}_{{faces}}.xml:ascii_xml
+  -log_view :irradiation_{{rays}}_{{processes}}_{{faces}}.csv:ascii_csv
 
 echo "End Time " $(date +%s)

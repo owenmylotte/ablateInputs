@@ -3,33 +3,31 @@
 
 # Array for determining the allocated time of the job
 declare -A time # Replace this array with however much time it actually takes + margin
-time[1]="24:00:00"
-time[2]="24:00:00"
-time[4]="12:00:00"
-time[8]="12:00:00"
-time[16]="12:00:00"
-time[32]="08:00:00"
-time[64]="08:00:00"
-time[128]="08:00:00"
-time[256]="05:00:00"
-time[512]="05:00:00"
-time[1024]="05:00:00"
-time[2048]="05:00:00"
-time[4096]="05:00:00"
-time[8192]="05:00:00"
-time[16384]="05:00:00"
-time[32768]="05:00:00"
+time[36]="24:00:00"
+time[72]="24:00:00"
+time[144]="12:00:00"
+time[288]="12:00:00"
+time[576]="12:00:00"
+time[1152]="06:00:00"
+time[2304]="06:00:00"
+time[4608]="06:00:00"
+time[9216]="05:00:00"
+time[18432]="04:00:00"
+time[36864]="04:00:00"
+time[73728]="04:00:00"
+time[147456]="04:00:00"
+time[294912]="04:00:00"
 
 ##### These lines are for Slurm
 #SBATCH -n {{processes}}
 #SBATCH --use-min-nodes
-#SBATCH -J slab.vol
+#SBATCH -J slab
 #SBATCH -t ${time[{{processes}}]}
 #SBATCH -p pbatch
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=volumetricSF_{{rays}}_{{processes}}_{{faces}}
+#SBATCH --output=slab.2D_{{rays}}_{{processes}}_{{faces}}
 
 ##### Load Required modules
 # gcc
@@ -55,10 +53,9 @@ export UPWIND=leastsquares
 ##### Launch parallel job using srun
 srun -n{{processes}} /usr/workspace/mylotte1/ablateOpt/ablate \
   --input ../input.yaml \
-  -yaml::environment::title volumetricSFScaling_{{rays}}_{{processes}}_{{faces}} \
   -yaml::timestepper::domain::faces {{faces}} \
-  -yaml::solvers::[4]::radiation::rays {{rays}} \
-  -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
-  -log_view :volumetricSFScaling_{{rays}}_{{processes}}_{{faces}}.csv:ascii_csv
+  -yaml::solvers::[5]::radiation::rays {{rays}} \
+  -yaml::solvers::[4]::processes::[0]::radiation::rays {{rays}} \
+  -log_view :slab.3D_{{rays}}_{{processes}}_{{faces}}.csv:ascii_csv
 
 echo "End Time " $(date +%s)

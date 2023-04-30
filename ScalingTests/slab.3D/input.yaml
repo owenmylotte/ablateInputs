@@ -1,6 +1,6 @@
 ---
 environment:
-  title: _slab.volume.3D
+  title: _slab.3D
   tagDirectory: true
 arguments:
   outputAuxVector: true
@@ -365,6 +365,19 @@ solvers:
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
+        radiationInterval: 0
+        radiation: !ablate::radiation::SurfaceRadiation
+          id: surfaceflux
+          region:
+            name: flowRegion
+          rays: 25
+          properties: !ablate::eos::radiationProperties::Sum
+            - !ablate::eos::radiationProperties::Zimmer
+              eos: *eos
+            - !ablate::eos::radiationProperties::SootMeanProperties
+              eos: *eos
+#          log: !ablate::monitors::logs::StdOut
+        emissivity: 0.90
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
   - !ablate::radiation::VolumeRadiation
@@ -382,5 +395,5 @@ solvers:
           eos: *eos
         - !ablate::eos::radiationProperties::SootMeanProperties
           eos: *eos
-      log: !ablate::monitors::logs::StdOut
-        name: rad_log
+#      log: !ablate::monitors::logs::StdOut
+#        name: rad_log

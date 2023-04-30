@@ -21,13 +21,13 @@ time[294912]="04:00:00"
 ##### These lines are for Slurm
 #SBATCH -n {{processes}}
 #SBATCH --use-min-nodes
-#SBATCH -J slab.vol
+#SBATCH -J slab
 #SBATCH -t ${time[{{processes}}]}
 #SBATCH -p pbatch
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=volumetricSF_{{rays}}_{{processes}}_{{faces}}
+#SBATCH --output=slab.2D_{{rays}}_{{processes}}_{{faces}}
 
 ##### Load Required modules
 # gcc
@@ -53,10 +53,9 @@ export UPWIND=leastsquares
 ##### Launch parallel job using srun
 srun -n{{processes}} /usr/workspace/mylotte1/ablateOpt/ablate \
   --input ../input.yaml \
-  -yaml::environment::title volumetricSFScaling_{{rays}}_{{processes}}_{{faces}} \
   -yaml::timestepper::domain::faces {{faces}} \
-  -yaml::solvers::[4]::radiation::rays {{rays}} \
-  -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
-  -log_view :volumetricSFScaling_{{rays}}_{{processes}}_{{faces}}.csv:ascii_csv
+  -yaml::solvers::[5]::radiation::rays {{rays}} \
+  -yaml::solvers::[4]::processes::[0]::radiation::rays {{rays}} \
+  -log_view :slab.2D_{{rays}}_{{processes}}_{{faces}}.csv:ascii_csv
 
 echo "End Time " $(date +%s)

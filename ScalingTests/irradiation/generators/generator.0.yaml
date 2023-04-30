@@ -9,7 +9,7 @@ enumerations:
     values: [ "[100]", "[200]", "[400]", "[800]", "[1600]", "[3200]", "[6400]", "[12800]", "[25600]", "[51200]", "[102400]", "[204800]" ]
   - !enumerator::enumerations::List
     name: rays
-    values: [ 5, 15, 50, 100, 250 ]
+    values: [ 8, 11, 15, 22, 31 ]
 generator:
   !enumerator::generators::FileTemplateGenerator
   path: ../generator.sbatch
