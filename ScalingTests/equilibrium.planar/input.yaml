@@ -13,8 +13,6 @@ timestepper:
     ts_dt: 1.0E-10
     ts_adapt_monitor: ""
     ts_adapt_safety: 0.8
-  io: !ablate::io::Hdf5MultiFileSerializer
-    interval: 100
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
     faces: [ 500 ]

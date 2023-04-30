@@ -1,15 +1,15 @@
 ---
-name: slab.volume.2D.
+name: sbatch/slab.surface.2D.
 enumerations:
   - !enumerator::enumerations::List
     name: processes
-    values: [ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 ]
+    values: [ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096] #, 8192, 16384, 32768]
   - !enumerator::enumerations::List
     name: faces
-    values: ["[297,42]", "[594,85]", "[297,42,42]", "[594,85,85]"]
+    values: ["[297,42]"]
   - !enumerator::enumerations::List
     name: rays
-    values: [5]
+    values: [ 5, 15, 50, 100, 250 ]
 generator:
   !enumerator::generators::FileTemplateGenerator
   path: slab.volume.2D.sbatch

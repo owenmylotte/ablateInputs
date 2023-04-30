@@ -1,17 +1,17 @@
 ---
-name: irradiationScalingTests.
+name: sbatch/slab.surface.3D.
 enumerations:
   - !enumerator::enumerations::List
     name: processes
-    values: [ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 ]
+    values: [ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096] #, 8192, 16384, 32768]
   - !enumerator::enumerations::List
     name: faces
-    values: [ "[100]", "[200]", "[400]", "[800]", "[1600]", "[3200]", "[6400]" ]
+    values: ["[297,42]"]
   - !enumerator::enumerations::List
     name: rays
-    values: [ 15, 50, 250]
+    values: [ 5, 15, 50, 100, 250 ]
 generator:
   !enumerator::generators::FileTemplateGenerator
-  path: generator.sbatch
+  path: slab.volume.2D.sbatch
 reporters:
   - !enumerator::reporters::StreamReporter

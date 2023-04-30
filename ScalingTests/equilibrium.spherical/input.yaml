@@ -12,14 +12,10 @@ timestepper:
   arguments:
     ts_type: rk
     ts_max_time: 1.0E6
-    ts_max_steps: 10000000000
+    ts_max_steps: 10
     ts_dt: 1.0E-10
     ts_adapt_monitor: ""
     ts_adapt_safety: 0.75
-  # io controls how often the results are saved to a file for visualization and restart
-  io: !ablate::io::Hdf5MultiFileSerializer
-    #  results are outputted every 0.001 seconds of real simulation time
-    interval: 100 #!ablate::io::interval::SimulationTimeInterval 0.001
   # load in a mesh file
   domain: !ablate::domain::MeshFile
     name: flowRegionMesh
@@ -121,7 +117,7 @@ solvers:
     region:
       name: flowRegion
     interval: 1
-    radiation: !ablate::radiation::RaySharingRadiation
+    radiation: !ablate::radiation::VolumeRadiation
       id: flameradiation
       region:
         name: flowRegion
