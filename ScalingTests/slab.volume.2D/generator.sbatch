@@ -3,29 +3,20 @@
 
 # Array for determining the allocated time of the job
 declare -A time # Replace this array with however much time it actually takes + margin
-time[1]="24:00:00"
-time[2]="24:00:00"
-time[4]="12:00:00"
-time[8]="12:00:00"
-time[16]="12:00:00"
-time[32]="08:00:00"
-time[64]="08:00:00"
-time[128]="08:00:00"
-time[256]="05:00:00"
-time[512]="05:00:00"
-time[1024]="05:00:00"
-time[2048]="05:00:00"
-time[4096]="05:00:00"
-time[8192]="05:00:00"
-time[16384]="05:00:00"
-time[32768]="05:00:00"
-
-# Array representing the dimensionality of the input file that should be called
-declare -A dimensions # Add entries for additional meshes as needed
-dimensions["[297,42]"]="2D"
-dimensions["[594,85]"]="2D"
-dimensions["[297,42,42]"]="3D"
-dimensions["[594,85,85]"]="3D"
+time[36]="24:00:00"
+time[72]="24:00:00"
+time[144]="12:00:00"
+time[288]="12:00:00"
+time[576]="12:00:00"
+time[1152]="06:00:00"
+time[2304]="06:00:00"
+time[4608]="06:00:00"
+time[9216]="05:00:00"
+time[18432]="04:00:00"
+time[36864]="04:00:00"
+time[73728]="04:00:00"
+time[147456]="04:00:00"
+time[294912]="04:00:00"
 
 ##### These lines are for Slurm
 #SBATCH -n {{processes}}
@@ -61,7 +52,7 @@ export UPWIND=leastsquares
 
 ##### Launch parallel job using srun
 srun -n{{processes}} /usr/workspace/mylotte1/ablateOpt/ablate \
-  --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/volumetricSFScaling/volumetricSF${dimensions[{{faces}}]}.yaml \
+  --input ../input.yaml \
   -yaml::environment::title volumetricSFScaling_{{rays}}_{{processes}}_{{faces}} \
   -yaml::timestepper::domain::faces {{faces}} \
   -yaml::solvers::[4]::radiation::rays {{rays}} \

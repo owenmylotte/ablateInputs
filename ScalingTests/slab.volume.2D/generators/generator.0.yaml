@@ -3,7 +3,7 @@ name: sbatch/slab.volume.2D.
 enumerations:
   - !enumerator::enumerations::List
     name: processes
-    values: [ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 ]
+    values: [ 36, 72, 144, 288, 576, 1152, 2304, 4608, 9216, 18432, 36864, 73728, 147456, 294912 ]
   - !enumerator::enumerations::List
     name: faces
     values: ["[105,15]", "[186,40]" "[297,42]", "[594,85]"]

@@ -3,7 +3,7 @@ name: sphericalEquilibriumScalingTests.
 enumerations:
   - !enumerator::enumerations::List
     name: processes
-    values: [ 1, 4, 16, 64, 256, 1024, 4096, 16384]
+    values: [ 36, 72, 144, 288, 576, 1152, 2304, 4608, 9216, 18432, 36864, 73728, 147456, 294912 ]
   - !enumerator::enumerations::List
     name: faces
     values: [ 0, 2, 4, 6, 8, 10, 12, 14 ]

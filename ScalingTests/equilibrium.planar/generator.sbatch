@@ -1,11 +1,27 @@
 #!/bin/bash
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
+declare -A time # Replace this array with however much time it actually takes + margin
+time[36]="24:00:00"
+time[72]="24:00:00"
+time[144]="12:00:00"
+time[288]="12:00:00"
+time[576]="12:00:00"
+time[1152]="06:00:00"
+time[2304]="06:00:00"
+time[4608]="06:00:00"
+time[9216]="05:00:00"
+time[18432]="04:00:00"
+time[36864]="04:00:00"
+time[73728]="04:00:00"
+time[147456]="04:00:00"
+time[294912]="04:00:00"
+
 ##### These lines are for Slurm
 #SBATCH -n {{processes}}
 #SBATCH --use-min-nodes
 #SBATCH -J planar
-#SBATCH -t 12:00:00
+#SBATCH -t ${time[{{processes}}]}
 #SBATCH -p pbatch
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
@@ -27,19 +43,14 @@ export HDF5_ROOT="${PETSC_DIR}/${PETSC_ARCH}"
 # Include the bin directory to access mpi commands
 export PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
 
-# Make a temp directory so that tchem has a place to vomit its files
 mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
-export UPWIND=leastsquares
-
 ##### Launch parallel job using srun
-srun -n{{processes}} /g/g20/mylotte1/ablateOpt/ablate \
-  --input ../planarEquilibriumScaling/planarEquilibrium.yaml \
-  -yaml::environment::title planarEquilibriumScalingTests_{{rays}}_{{processes}}_{{faces}} \
+srun -n{{processes}} /usr/workspace/mylotte1/ablateOpt/ablate \
+  --input ../input.yaml \
   -yaml::timestepper::domain::faces {{faces}} \
   -yaml::solvers::[2]::radiation::rays {{rays}} \
-  -yaml::timestepper::domain::fields::[0]::conservedFieldOptions::petscfv_type $UPWIND \
-  -log_view :planarEquilibriumScalingTests_{{rays}}_{{processes}}_{{faces}}.xml:ascii_xml
+  -log_view :equilibrium.planar_{{rays}}_{{processes}}_{{faces}}.csv:ascii_csv
 
 echo "End Time " $(date +%s)

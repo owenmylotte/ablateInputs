@@ -20,13 +20,6 @@ time[8192]="05:00:00"
 time[16384]="05:00:00"
 time[32768]="05:00:00"
 
-# Array representing the dimensionality of the input file that should be called
-declare -A dimensions # Add entries for additional meshes as needed
-dimensions["[297,42]"]="2D"
-dimensions["[594,85]"]="2D"
-dimensions["[297,42,42]"]="3D"
-dimensions["[594,85,85]"]="3D"
-
 ##### These lines are for Slurm
 #SBATCH -n {{processes}}
 #SBATCH --use-min-nodes
@@ -61,7 +54,7 @@ export UPWIND=leastsquares
 
 ##### Launch parallel job using srun
 srun -n{{processes}} /usr/workspace/mylotte1/ablateOpt/ablate \
-  --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/volumetricSFScaling/volumetricSF${dimensions[{{faces}}]}.yaml \
+  --input ../input.yaml \
   -yaml::environment::title volumetricSFScaling_{{rays}}_{{processes}}_{{faces}} \
   -yaml::timestepper::domain::faces {{faces}} \
   -yaml::solvers::[4]::radiation::rays {{rays}} \
