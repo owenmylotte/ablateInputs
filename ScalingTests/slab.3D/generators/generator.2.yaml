@@ -1,15 +1,15 @@
 ---
-name: sbatch/slab.surface.3D.0.
+name: ../sbatch/slab.3D.0.
 enumerations:
   - !enumerator::enumerations::List
     name: processes
-    values: [ 36, 72, 144, 288, 576, 1152, 2304, 4608, 9216, 18432, 36864, 73728, 147456, 294912 ]
+    values: [36864, 73728] #, 147456, 294912 ]
   - !enumerator::enumerations::List
     name: faces
-    values: ["[297,42]"]
+    values: ["[429,61,61]", "[681,97,97]", "[1081,154,154]", "[1716,245,245]", "[2724,389,389]"]
   - !enumerator::enumerations::List
     name: rays
-    values: [ 5, 15, 50, 100, 250 ]
+    values: [ 15, 100 ]
 generator:
   !enumerator::generators::FileTemplateGenerator
   path: ../generator.sbatch

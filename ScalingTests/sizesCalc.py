@@ -18,16 +18,16 @@ print(cell_array)
 # np.sqrt(cells / 7) = x
 x_array = np.sqrt(cell_array / 7.0)
 y_array = x_array * 7
-print(x_array)
-print(y_array)
+things = np.vstack((x_array, y_array, cell_array))
+print(things)
 
 # 3D mesh size calculation
 # volume = x**3 * 7
 # np.cbrt(cells / 7) = x
 x_array = np.cbrt(cell_array / 7.0)
 y_array = x_array * 7
-print(x_array)
-print(y_array)
+things = np.vstack((x_array, y_array, cell_array))
+print(np.transpose(things))
 
 # Groups
 # Faces[min, max] Processes [min, max]

@@ -1,15 +1,15 @@
 ---
-name: ../sbatch/irradiation.0.
+name: ../sbatch/slab.3D.0.
 enumerations:
   - !enumerator::enumerations::List
     name: processes
-    values: [ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 ]
+    values: [ 147456, 294912 ]
   - !enumerator::enumerations::List
     name: faces
-    values: [ "[100]", "[200]", "[400]", "[800]", "[1600]", "[3200]", "[6400]" ]
+    values: ["[429,61,61]", "[681,97,97]", "[1081,154,154]", "[1716,245,245]", "[2724,389,389]"]
   - !enumerator::enumerations::List
     name: rays
-    values: [ 5, 15, 50, 100, 250 ]
+    values: [ 15, 100 ]
 generator:
   !enumerator::generators::FileTemplateGenerator
   path: ../generator.sbatch

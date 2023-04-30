@@ -327,7 +327,7 @@ solvers:
           id: surfaceflux
           region:
             name: flowRegion
-          rays: 25
+          rays: 5
           properties: !ablate::eos::radiationProperties::Sum
             - !ablate::eos::radiationProperties::Zimmer
               eos: *eos
@@ -338,3 +338,20 @@ solvers:
           name: rad_log
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
+  - !ablate::radiation::VolumeRadiation
+    id: radiationSolver
+    region:
+      name: flowRegion
+    interval: 10
+    radiation: !ablate::radiation::Radiation
+      id: volRad
+      region:
+        name: flowRegion
+      rays: 5
+      properties: !ablate::eos::radiationProperties::Sum
+        - !ablate::eos::radiationProperties::Zimmer
+          eos: *eos
+        - !ablate::eos::radiationProperties::SootMeanProperties
+          eos: *eos
+      log: !ablate::monitors::logs::StdOut
+        name: rad_log
