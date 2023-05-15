@@ -110,8 +110,8 @@ solvers:
     id: radiationSolver
     region:
       name: flowRegion
-    interval: 100
-    radiation: !ablate::radiation::Radiation
+    interval: 25
+    radiation: !ablate::radiation::RaySharingRadiation
       id: flameradiation
       region:
         name: flowRegion

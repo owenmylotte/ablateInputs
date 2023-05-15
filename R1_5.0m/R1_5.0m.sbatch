@@ -31,7 +31,7 @@ mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
 ##### Launch parallel job using srun
-srun -N2 -n36 /usr/workspace/mylotte1/ablateOpt/ablate \
+srun -n26000 /usr/workspace/mylotte1/ablateOpt/ablate \
 	--input /p/lustre1/mylotte1/ablateInputs/R1_5.0m/R1_5.0m.yaml \
 	-log_view :equilibrium.spherical_25_26000_2600000.csv:ascii_csv
 
