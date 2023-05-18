@@ -123,7 +123,7 @@ solvers:
       log: !ablate::monitors::logs::StdOut
         name: radlog
   # use a boundary solver to update the cells in the wallBoundaryCells region to represent standard wall
-  - !ablate::boundarySolver::DebugBoundarySolver
+  - !ablate::boundarySolver::BoundarySolver
     id: sphereBoundary
     region:
       name: BoundaryCells
