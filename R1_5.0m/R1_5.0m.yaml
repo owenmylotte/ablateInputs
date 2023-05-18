@@ -24,7 +24,7 @@ timestepper:
   # load in a mesh file
   domain: !ablate::domain::MeshFile
     name: flowRegionMesh
-    path: ../geom/R1_5.0m.msh
+    path: ../geom/new_model.msh
     # Options to be applied to the volumetric geometry
     options:
       dm_plex_check_all: true
@@ -44,10 +44,10 @@ timestepper:
         regions:
           - &R1
             name: R1
-            value: 8
+            value: 2
           - &R2
             name: R2
-            value: 9
+            value: 1
         # mark all the resulting boundary faces with boundaryFaces label
         boundaryRegion:
           name: BoundaryFaces
@@ -111,17 +111,17 @@ solvers:
     region:
       name: flowRegion
     interval: 25
-    radiation: !ablate::radiation::RaySharingRadiation
+    radiation: !ablate::radiation::Radiation
       id: flameradiation
       region:
         name: flowRegion
-      rays: 25
+      rays: 50
       properties: !ablate::eos::radiationProperties::Constant
         absorptivity: 1
         emissivity: 1
         eos: *eos
-  #      log: !ablate::monitors::logs::StdOut
-  #        name: radlog
+      log: !ablate::monitors::logs::StdOut
+        name: radlog
   # use a boundary solver to update the cells in the wallBoundaryCells region to represent standard wall
   - !ablate::boundarySolver::DebugBoundarySolver
     id: sphereBoundary
