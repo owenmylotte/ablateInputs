@@ -103,7 +103,7 @@ solvers:
     monitors:
       - !ablate::monitors::TimeStepMonitor
         interval: 25
-      - !ablate::monitors::PhysicsTimeStep
+      - !ablate::monitors::PhysicsTimeSteps
         interval: 25
     eos: *eos
   - !ablate::radiation::VolumeRadiation
@@ -111,7 +111,7 @@ solvers:
     region:
       name: flowRegion
     interval: 25
-    radiation: !ablate::radiation::Radiation
+    radiation: !ablate::radiation::RaySharingRadiation
       id: flameradiation
       region:
         name: flowRegion

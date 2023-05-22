@@ -20,6 +20,8 @@ def l2norm(numerical, analytical):
     return l2
 
 
+savePath = "/home/owen/CLionProjects/ParallelRadiationJCP/figures/"
+
 data5 = np.loadtxt("anothertest5.txt", delimiter=' ', skiprows=1, dtype=float)
 data10 = np.loadtxt("anothertest10.txt", delimiter=' ', skiprows=1, dtype=float)
 data25 = np.loadtxt("anothertest25.txt", delimiter=' ', skiprows=1, dtype=float)
@@ -51,13 +53,14 @@ plt.plot(data5000[:, 0], data5000[:, 5], c='black', linewidth=1)
 plt.legend([r"$d \theta = 3.6$", r"$d \theta = 1.8$", r"$d \theta = 0.18$",
             "Analytical Solution"],
            # , r"$d \theta = 0.09$", "Analytical Solution"],
-           loc="upper right", prop={'size': 7})
+           loc="upper right", prop={'size': 7}, frameon=False)
+
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
-plt.xlabel('Postion $[m]$', fontsize=10)
-plt.ylabel(r'Irradiation $[\frac{W}{m^3}]$', fontsize=10)
+plt.xlabel('x $[m]$', fontsize=10)
+plt.ylabel(r'I $[\frac{W}{m^3}]$', fontsize=10)
 plt.ticklabel_format(style="sci")
-plt.savefig('PlatesValidation1D', dpi=1000, bbox_inches='tight')
+plt.savefig(savePath + 'PlatesValidation1D', dpi=1000, bbox_inches='tight')
 plt.show()
 
 ## Results for comparison mesh refinement
@@ -69,13 +72,14 @@ plt.plot(irrMesh10[:, 0], irrMesh10[:, 3], c='black', linestyle="dashdot", linew
 plt.plot(irrMesh10[:, 0], irrMesh10[:, 3], c='black', linestyle="dashed", linewidth=1)  # , c='red', s=4)
 plt.plot(data5000[:, 0], data5000[:, 5], c='black', linewidth=1)
 plt.legend([r"$dx = 10^{-3}$", r"$dx = 5 \times 10^{-4}$", r"$dx = 10^{-4}$",
-            "Analytical Solution"], loc="upper right", prop={'size': 7})
+            "Analytical Solution"], loc="upper right", prop={'size': 7}, frameon=False)
+
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
 plt.xlabel('Postion $[m]$', fontsize=10)
 plt.ylabel(r'Irradiation $[\frac{W}{m^3}]$', fontsize=10)
 plt.ticklabel_format(style="sci")
-plt.savefig('PlatesValidation1D_Mesh', dpi=1000, bbox_inches='tight')
+plt.savefig(savePath + 'PlatesValidation1D_Mesh', dpi=1000, bbox_inches='tight')
 plt.show()
 
 ## Ray Error stuff
@@ -93,9 +97,9 @@ plt.figure(figsize=(6, 4), num=2)
 plt.loglog(ref_irradiation[0:8], l2_irradiation[0:8], c='black', linewidth=1, marker='.')
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
-plt.xlabel('Ray Number', fontsize=10)
-plt.ylabel('Irradiation Error', fontsize=10)
-plt.savefig('PlatesIrradiation_Convergence', dpi=1000, bbox_inches='tight')
+plt.xlabel('N', fontsize=10)
+plt.ylabel(r'$\epsilon_I$', fontsize=10)
+plt.savefig(savePath + 'PlatesIrradiation_Convergence', dpi=1000, bbox_inches='tight')
 plt.show()
 
 ## Mesh Convergence Stuff
@@ -114,9 +118,10 @@ plt.figure(figsize=(6, 4), num=2)
 plt.loglog(irrMeshes, l2irrMeshes, c='black', linewidth=1, marker='.')
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
-plt.xlabel('Cell Number', fontsize=10)
-plt.ylabel('Irradiation Error', fontsize=10)
-plt.savefig('PlatesIrradiation_MeshConvergence', dpi=1000, bbox_inches='tight')
+plt.gca().xaxis.set_major_locator(plt.LogLocator(base=1.778))
+plt.xlabel('N', fontsize=10)
+plt.ylabel(r'$\epsilon_I$', fontsize=10)
+plt.savefig(savePath + 'PlatesIrradiation_MeshConvergence', dpi=1000, bbox_inches='tight')
 plt.show()
 
 ## Scaling Stuff
@@ -137,8 +142,9 @@ plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
 plt.xlabel('# Processes', fontsize=10)
 plt.ylabel('Speedup', fontsize=10)
-plt.legend(["Initialization (no sharing)", "Solve (no sharing)", "Ideal"], loc="upper left", prop={'size': 7})
-plt.savefig('PlatesIrradiation_Scaling', dpi=1000, bbox_inches='tight')
+plt.legend(["Initialization (no sharing)", "Solve (no sharing)", "Ideal"], loc="upper left", prop={'size': 7}, frameon=False)
+
+plt.savefig(savePath + 'PlatesIrradiation_Scaling', dpi=1000, bbox_inches='tight')
 plt.show()
 
 # %% Radiative Equilibrium Plot
@@ -169,13 +175,14 @@ plt.plot(dataSimit[:, 0], dataSimit[:, 1], c='black', linewidth=1)
 # plt.scatter(dataAblate10sh[:, 0], dataAblate10sh[:, 6], c='purple', s=4)
 
 plt.legend([r"$d \theta = 36$", r"$d \theta = 18$", r"$d \theta = 0.36$", "Simit", ], loc="upper right",
-           prop={'size': 7})
+           prop={'size': 7}, frameon=False)
+
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
-plt.xlabel('Postion $[m]$', fontsize=10)
-plt.ylabel('Temperature $[K]$', fontsize=10)
+plt.xlabel('x $[m]$', fontsize=10)
+plt.ylabel('T $[K]$', fontsize=10)
 plt.ylim(1450, 1900)
-plt.savefig('EquilibriumValidation1D', dpi=1000, bbox_inches='tight')
+plt.savefig(savePath + 'EquilibriumValidation1D', dpi=1000, bbox_inches='tight')
 plt.show()
 
 ## Equilibrium Mesh Comparison Plot
@@ -189,13 +196,14 @@ plt.plot(eqMesh100[:, 0], eqMesh100[:, 5], c='black', linestyle="dashed", linewi
 plt.plot(dataSimit[:, 0], dataSimit[:, 1], c='black', linewidth=1)
 plt.legend([r"$dx = 10^{-1}$", r"$dx = 5 \times 10^{-2}$", r"$dx = 10^{-2}$",
             "Simit"], loc="upper right",
-           prop={'size': 7})
+           prop={'size': 7}, frameon=False)
+
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
-plt.xlabel('Postion $[m]$', fontsize=10)
-plt.ylabel('Temperature $[K]$', fontsize=10)
+plt.xlabel('x $[m]$', fontsize=10)
+plt.ylabel('T $[K]$', fontsize=10)
 plt.ylim(1450, 1900)
-plt.savefig('EquilibriumValidation1DMesh', dpi=1000, bbox_inches='tight')
+plt.savefig(savePath + 'EquilibriumValidation1DMesh', dpi=1000, bbox_inches='tight')
 plt.show()
 
 ## Error Stuff
@@ -212,9 +220,9 @@ plt.figure(figsize=(6, 4), num=4)
 plt.loglog(ref_equilibrium, l2_equilibrium, c='black', linewidth=1, marker='.')
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
-plt.xlabel('Ray Number', fontsize=10)
-plt.ylabel('Temperature Error', fontsize=10)
-plt.savefig('Equilibrium_Convergence', dpi=1000, bbox_inches='tight')
+plt.xlabel('N', fontsize=10)
+plt.ylabel('$\epsilon_T$', fontsize=10)
+plt.savefig(savePath + 'Equilibrium_Convergence', dpi=1000, bbox_inches='tight')
 plt.show()
 
 ## Mesh Convergence Stuff
@@ -233,9 +241,10 @@ plt.figure(figsize=(6, 4), num=4)
 plt.loglog(irrMeshes, l2irrMeshes, c='black', linewidth=1, marker='.')
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
-plt.xlabel('Cell Number', fontsize=10)
-plt.ylabel('Temperature Error', fontsize=10)
-plt.savefig('Equilibrium_MeshConvergence', dpi=1000, bbox_inches='tight')
+plt.gca().xaxis.set_major_locator(plt.LogLocator(base=10.0, numticks=5))
+plt.xlabel('N', fontsize=10)
+plt.ylabel('$\epsilon_T$', fontsize=10)
+plt.savefig(savePath + 'Equilibrium_MeshConvergence', dpi=1000, bbox_inches='tight')
 plt.show()
 
 # ## Scaling Stuff
@@ -257,7 +266,7 @@ plt.show()
 # plt.xlabel('# Processes', fontsize=10)
 # plt.ylabel('Speedup', fontsize=10)
 # plt.legend(["Initialization (no sharing)", "Solve (no sharing)", "Ideal"], loc="upper left", prop={'size': 7})
-# plt.savefig('Equilibrium_Scaling', dpi=1000, bbox_inches='tight')
+# plt.savefig(savePath + 'Equilibrium_Scaling', dpi=1000, bbox_inches='tight')
 # plt.show()
 
 # %% Diffusion Flame Verification
@@ -278,7 +287,7 @@ plt.show()
 # plt.xticks(fontsize=7)
 # plt.xlabel('Postion $[m]$', fontsize=10)
 # plt.ylabel('Temperature $[K]$', fontsize=10)
-# plt.savefig('DiffusionFlameValidation', dpi=1000, bbox_inches='tight')
+# plt.savefig(savePath + 'DiffusionFlameValidation', dpi=1000, bbox_inches='tight')
 # plt.show()
 #
 # # # %% Error Convergence Plot
@@ -303,8 +312,8 @@ plt.plot(x, temp, c='black', linewidth=1)  # , c='blue', s=4)
 
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
-plt.xlabel('Postion $[m]$', fontsize=10)
-plt.ylabel(r'Temperature $[K]$', fontsize=10)
+plt.xlabel('x $[m]$', fontsize=10)
+plt.ylabel(r'T $[K]$', fontsize=10)
 plt.ticklabel_format(style="sci")
-plt.savefig('PlatesTemperature', dpi=1000, bbox_inches='tight')
+plt.savefig(savePath + 'PlatesTemperature', dpi=1000, bbox_inches='tight')
 plt.show()
