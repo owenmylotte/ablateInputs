@@ -7,6 +7,7 @@ Created on Wed Apr  6 08:32:01 2022
 import numpy as np
 import matplotlib.pyplot as plt  # for plotting
 import matplotlib.font_manager
+import matplotlib.ticker as ticker
 
 # plt.style.use('ggplot')
 plt.rcParams["font.family"] = "Noto Serif CJK JP"
@@ -76,8 +77,8 @@ plt.legend([r"$dx = 10^{-3}$", r"$dx = 5 \times 10^{-4}$", r"$dx = 10^{-4}$",
 
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
-plt.xlabel('Postion $[m]$', fontsize=10)
-plt.ylabel(r'Irradiation $[\frac{W}{m^3}]$', fontsize=10)
+plt.xlabel('x $[m]$', fontsize=10)
+plt.ylabel(r'I $[\frac{W}{m^3}]$', fontsize=10)
 plt.ticklabel_format(style="sci")
 plt.savefig(savePath + 'PlatesValidation1D_Mesh', dpi=1000, bbox_inches='tight')
 plt.show()
@@ -95,8 +96,8 @@ l2_irradiation = np.array(
 plt.figure(figsize=(6, 4), num=2)
 # plt.title("Irradiation Ray Convergence", pad=1, fontsize=10)  # TITLE HERE
 plt.loglog(ref_irradiation[0:8], l2_irradiation[0:8], c='black', linewidth=1, marker='.')
-plt.yticks(fontsize=7)
-plt.xticks(fontsize=7)
+plt.yticks(fontsize=10)
+plt.xticks(fontsize=10)
 plt.xlabel('N', fontsize=10)
 plt.ylabel(r'$\epsilon_I$', fontsize=10)
 plt.savefig(savePath + 'PlatesIrradiation_Convergence', dpi=1000, bbox_inches='tight')
@@ -116,9 +117,18 @@ print(l2irrMeshes)
 plt.figure(figsize=(6, 4), num=2)
 # plt.title("Irradiation Mesh Convergence", pad=1, fontsize=10)  # TITLE HERE
 plt.loglog(irrMeshes, l2irrMeshes, c='black', linewidth=1, marker='.')
-plt.yticks(fontsize=7)
-plt.xticks(fontsize=7)
-plt.gca().xaxis.set_major_locator(plt.LogLocator(base=1.778))
+plt.yticks(fontsize=10)
+plt.xticks(fontsize=10)
+# Define your custom formatter function
+
+
+def minor_formatter(x, pos):
+    return f'{int(x)}'
+
+
+# Set minor formatter for both axes
+plt.gca().xaxis.set_minor_formatter(ticker.FuncFormatter(minor_formatter))
+plt.gca().tick_params(axis='x', which='minor', labelsize=8.5)  # set fontsize for minor ticks
 plt.xlabel('N', fontsize=10)
 plt.ylabel(r'$\epsilon_I$', fontsize=10)
 plt.savefig(savePath + 'PlatesIrradiation_MeshConvergence', dpi=1000, bbox_inches='tight')
@@ -218,8 +228,8 @@ l2_equilibrium = np.array(
 plt.figure(figsize=(6, 4), num=4)
 # plt.title("Radiative Equilibrium Ray Convergence", pad=1, fontsize=10)  # TITLE HERE
 plt.loglog(ref_equilibrium, l2_equilibrium, c='black', linewidth=1, marker='.')
-plt.yticks(fontsize=7)
-plt.xticks(fontsize=7)
+plt.yticks(fontsize=10)
+plt.xticks(fontsize=10)
 plt.xlabel('N', fontsize=10)
 plt.ylabel('$\epsilon_T$', fontsize=10)
 plt.savefig(savePath + 'Equilibrium_Convergence', dpi=1000, bbox_inches='tight')
@@ -239,10 +249,18 @@ for i in range(len(irrMeshes)):
 plt.figure(figsize=(6, 4), num=4)
 # plt.title("Radiative Equilibrium Mesh Convergence", pad=1, fontsize=10)  # TITLE HERE
 plt.loglog(irrMeshes, l2irrMeshes, c='black', linewidth=1, marker='.')
-plt.yticks(fontsize=7)
-plt.xticks(fontsize=7)
-plt.gca().xaxis.set_major_locator(plt.LogLocator(base=10.0, numticks=5))
-plt.xlabel('N', fontsize=10)
+plt.yticks(fontsize=10)
+plt.xticks(fontsize=10)
+# Define your custom formatter function
+
+
+def minor_formatter(x, pos):
+    return f'{int(x)}'
+
+
+# Set minor formatter for both axes
+plt.gca().xaxis.set_minor_formatter(ticker.FuncFormatter(minor_formatter))
+plt.gca().tick_params(axis='x', which='minor', labelsize=8.5)  # set fontsize for minor ticks
 plt.ylabel('$\epsilon_T$', fontsize=10)
 plt.savefig(savePath + 'Equilibrium_MeshConvergence', dpi=1000, bbox_inches='tight')
 plt.show()

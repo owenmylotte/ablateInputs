@@ -27,7 +27,7 @@ timestepper:
     path: ../geom/new_model.msh
     # Options to be applied to the volumetric geometry
     options:
-      dm_plex_check_all: true
+      dm_plex_check_all: false
       dm_plex_hash_location: true
       dm_distribute_overlap: 0
     modifiers:
