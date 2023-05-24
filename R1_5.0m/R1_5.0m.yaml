@@ -15,8 +15,6 @@ timestepper:
     ts_dt: 1.0E-9
     # petsc adaptive timestepping can be turned on to replace physics timestepping
     ts_adapt_safety: 0.9
-    ts_adapt_monitor: ""
-    #    ts_adapt_type: none
   # io controls how often the results are saved to a file for visualization and restart
   io:
     #  results are outputted every 0.001 seconds of real simulation time
@@ -24,30 +22,23 @@ timestepper:
   # load in a mesh file
   domain: !ablate::domain::MeshFile
     name: flowRegionMesh
-    path: ../geom/new_model.msh
+    path: ../geom/spherical_shell.msh
     # Options to be applied to the volumetric geometry
     options:
       dm_plex_check_all: true
       dm_plex_hash_location: true
       dm_distribute_overlap: 1
     modifiers:
-      # label the vertices of regions with all faces labeled
-      - !ablate::domain::modifiers::CompleteLabel
-        region:
-          name: R1
-      - !ablate::domain::modifiers::CompleteLabel
-        region:
-          name: R2
+      - !ablate::domain::modifiers::CollapseLabels
+        regions:
+          - name: R1
+          - name: R2
       # extrude all boundaries to add needed ghost cells for the boundary solver
       - !ablate::domain::modifiers::ExtrudeLabel
         # extrude the boundary cells marked
         regions:
-          - &R1
-            name: R1
-            value: 2
-          - &R2
-            name: R2
-            value: 1
+          - name: R1
+          - name: R2
         # mark all the resulting boundary faces with boundaryFaces label
         boundaryRegion:
           name: BoundaryFaces
@@ -66,7 +57,9 @@ timestepper:
           parameters:
             gamma: 1.4
             Rgas: 287.0
-        name: domain
+        conservedFieldOptions:
+          petscfv_type: leastsquares
+          petsclimiter_type: vanleer
   initialization:
     - !ablate::finiteVolume::fieldFunctions::Euler
       region:
@@ -75,21 +68,19 @@ timestepper:
         eos: *eos
         pressure: 1.0
         temperature: 1500
-        velocity: "0, 0, 0"
+        velocity: "0.0, 0.0, 0.0"
     - !ablate::finiteVolume::fieldFunctions::Euler
-      region: *R1
+      region:
+        name: BoundaryCells
       state: &R1State
         eos: *eos
-        temperature: 2000.0
+        temperature: !ablate::mathFunctions::geom::Sphere
+          center: [0, 0, 0]
+          radius: 6.0
+          insideValues: 2000.0
+          outsideValues: 1000.0
         pressure: 1.0
-        velocity: "0, 0, 0"
-    - !ablate::finiteVolume::fieldFunctions::Euler
-      region: *R2
-      state: &R2State
-        eos: *eos
-        temperature: 1000.0
-        pressure: 1.0
-        velocity: "0, 0, 0"
+        velocity: "0.0, 0.0, 0.0"
 solvers:
   - !ablate::finiteVolume::CompressibleFlowSolver
     id: vortexFlowField
@@ -97,18 +88,18 @@ solvers:
       name: flowRegion
     monitors:
       - !ablate::monitors::TimeStepMonitor
-        interval: 25
+        interval: 100
     eos: *eos
   - !ablate::radiation::VolumeRadiation
     id: radiationSolver
     region:
       name: flowRegion
     interval: 25
-    radiation: !ablate::radiation::RaySharingRadiation
+    radiation: !ablate::radiation::Radiation
       id: flameradiation
       region:
         name: flowRegion
-      rays: 20
+      rays: 2
       properties: !ablate::eos::radiationProperties::Constant
         absorptivity: 1
         emissivity: 1
