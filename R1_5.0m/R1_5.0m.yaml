@@ -20,16 +20,16 @@ timestepper:
   # io controls how often the results are saved to a file for visualization and restart
   io:
     #  results are outputted every 0.001 seconds of real simulation time
-    interval: 100
+    interval: 250
   # load in a mesh file
   domain: !ablate::domain::MeshFile
     name: flowRegionMesh
     path: ../geom/new_model.msh
     # Options to be applied to the volumetric geometry
     options:
-      dm_plex_check_all: false
+      dm_plex_check_all: true
       dm_plex_hash_location: true
-      dm_distribute_overlap: 0
+      dm_distribute_overlap: 1
     modifiers:
       # label the vertices of regions with all faces labeled
       - !ablate::domain::modifiers::CompleteLabel
@@ -60,11 +60,6 @@ timestepper:
       # if using mpi, this modifier distributes cells
       - !ablate::domain::modifiers::DistributeWithGhostCells
         ghostCellDepth: 3
-      - !ablate::domain::modifiers::FvmCheck
-        region:
-          name: flowRegion
-        expectedFaceCount: 6
-        expectedNodeCount: 8
     fields:
       - !ablate::finiteVolume::CompressibleFlowFields
         eos: !ablate::eos::PerfectGas &eos
@@ -103,8 +98,6 @@ solvers:
     monitors:
       - !ablate::monitors::TimeStepMonitor
         interval: 25
-      - !ablate::monitors::PhysicsTimeSteps
-        interval: 25
     eos: *eos
   - !ablate::radiation::VolumeRadiation
     id: radiationSolver
@@ -115,7 +108,7 @@ solvers:
       id: flameradiation
       region:
         name: flowRegion
-      rays: 50
+      rays: 20
       properties: !ablate::eos::radiationProperties::Constant
         absorptivity: 1
         emissivity: 1
