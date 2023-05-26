@@ -1,15 +1,15 @@
 ---
-name: ../sbatch/equilibrium.planar.0.
+name: equilibrium.planar.0.
 enumerations:
   - !enumerator::enumerations::List
     name: processes
-    values: [ 36, 72, 144, 288, 576, 1152, 2304 ]
+    values: [ 36, 72, 144, 288, 576, 1152, 2304, 4608, 9216, 18432 ]
   - !enumerator::enumerations::List
     name: faces
-    values: [ "[100]", "[200]", "[400]", "[800]", "[1600]", "[3200]", "[6400]", "[12800]", "[25600]", "[51200]", "[102400]", "[204800]" ]
+    values: [ "[50000]" ]
   - !enumerator::enumerations::List
     name: rays
-    values: [ 5, 15, 50, 100, 250 ]
+    values: [ 23 ]
 generator:
   !enumerator::generators::FileTemplateGenerator
   path: ../generator.sbatch

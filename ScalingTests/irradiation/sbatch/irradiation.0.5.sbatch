@@ -2,7 +2,7 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -n {{processes}}
+#SBATCH -n 36
 #SBATCH --use-min-nodes
 #SBATCH -J irradiation
 #SBATCH -t 24:00:00
@@ -10,7 +10,7 @@
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=irradiation_{{rays}}_{{processes}}_{{faces}}
+#SBATCH --output=irradiation_23_36_[50000]
 
 ##### Load Required modules
 # gcc
@@ -31,10 +31,10 @@ mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
 ##### Launch parallel job using srun
-srun -n{{processes}} /usr/workspace/mylotte1/ablateOpt/ablate \
+srun -n36 /usr/workspace/mylotte1/ablateOpt/ablate \
   --input ../input.yaml \
-  -yaml::timestepper::domain::faces {{faces}} \
-  -yaml::solvers::[2]::radiation::rays {{rays}} \
-  -log_view :irradiation_{{rays}}_{{processes}}_{{faces}}.csv:ascii_csv
+  -yaml::timestepper::domain::faces [50000] \
+  -yaml::solvers::[2]::radiation::rays 23 \
+  -log_view :irradiation_23_36_[50000].csv:ascii_csv
 
 echo "End Time " $(date +%s)

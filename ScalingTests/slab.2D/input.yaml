@@ -297,11 +297,11 @@ solvers:
     region:
       name: flowRegion
     interval: 10
-    radiation: !ablate::radiation::Radiation
+    radiation: !ablate::radiation::RaySharingRadiation
       id: volRad
       region:
         name: flowRegion
-      rays: 5
+      rays: 23
       properties: !ablate::eos::radiationProperties::Sum
         - !ablate::eos::radiationProperties::Zimmer
           eos: *eos

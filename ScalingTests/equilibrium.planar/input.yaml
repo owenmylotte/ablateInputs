@@ -15,7 +15,7 @@ timestepper:
     ts_adapt_safety: 0.8
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 500 ]
+    faces: [ 50000 ]
     lower: [ 0 ]
     upper: [ 1 ]
     simplex: false
@@ -75,11 +75,11 @@ solvers:
     region:
       name: interiorCells
     interval: 0
-    radiation: !ablate::radiation::Radiation
+    radiation: !ablate::radiation::RaySharingRadiation
       id: radiation
       region:
         name: interiorCells
-      rays: 1
+      rays: 23
       properties: !ablate::eos::radiationProperties::Constant
         absorptivity: 1
         emissivity: 1

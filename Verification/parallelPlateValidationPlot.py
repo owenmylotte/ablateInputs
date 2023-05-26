@@ -335,3 +335,23 @@ plt.ylabel(r'T $[K]$', fontsize=10)
 plt.ticklabel_format(style="sci")
 plt.savefig(savePath + 'PlatesTemperature', dpi=1000, bbox_inches='tight')
 plt.show()
+
+# # Define the parameters
+# alpha = 0.5  # Communication latency
+# beta = 0.1  # Memory bandwidth cost
+# d = 3  # Dimensions
+# p = np.linspace(1, 1E5, 400)  # MPI processes
+#
+# # Compute the discretization N
+# N = alpha * np.log2(p) * (p ** (1 / d) - 1) / (p ** (1 / d) * (7 * beta) - 5 * beta)
+#
+# # Create the plot
+# plt.figure(figsize=(8, 6))
+# plt.plot(p, N, label='Discretization N')
+# plt.fill_between(p, 0, N, alpha=0.2)  # Fill the area under the curve
+# plt.xlabel('MPI processes (p)', fontsize=12)
+# plt.ylabel('Discretization (N)', fontsize=12)
+# plt.title('Performance Trade-off', fontsize=15)
+# plt.grid(True)
+# plt.legend()
+# plt.show()

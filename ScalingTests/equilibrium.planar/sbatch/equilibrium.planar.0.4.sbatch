@@ -2,15 +2,15 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -n {{processes}}
+#SBATCH -n 288
 #SBATCH --use-min-nodes
-#SBATCH -J irradiation
+#SBATCH -J planar
 #SBATCH -t 24:00:00
 #SBATCH -p pbatch
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=irradiation_{{rays}}_{{processes}}_{{faces}}
+#SBATCH --output=equilibrium.planar_23_288_[50000]
 
 ##### Load Required modules
 # gcc
@@ -26,15 +26,14 @@ export HDF5_ROOT="${PETSC_DIR}/${PETSC_ARCH}"
 # Include the bin directory to access mpi commands
 export PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
 
-# Make a temp directory so that tchem has a place to vomit its files
 mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
 ##### Launch parallel job using srun
-srun -n{{processes}} /usr/workspace/mylotte1/ablateOpt/ablate \
+srun -n288 /usr/workspace/mylotte1/ablateOpt/ablate \
   --input ../input.yaml \
-  -yaml::timestepper::domain::faces {{faces}} \
-  -yaml::solvers::[2]::radiation::rays {{rays}} \
-  -log_view :irradiation_{{rays}}_{{processes}}_{{faces}}.csv:ascii_csv
+  -yaml::timestepper::domain::faces [50000] \
+  -yaml::solvers::[2]::radiation::rays 23 \
+  -log_view :equilibrium.planar_23_288_[50000].csv:ascii_csv
 
 echo "End Time " $(date +%s)
