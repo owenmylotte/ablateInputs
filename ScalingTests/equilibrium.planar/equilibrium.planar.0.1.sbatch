@@ -31,7 +31,7 @@ cd tmp_$SLURM_JOBID
 
 ##### Launch parallel job using srun
 srun -n144 /usr/workspace/mylotte1/ablateOpt/ablate \
-  --input input.yaml \
+  --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/equilibrium.planar/input.yaml \
   -yaml::timestepper::domain::faces [50000] \
   -yaml::solvers::[2]::radiation::rays 23 \
   -log_view :equilibrium.planar_23_144_[50000].csv:ascii_csv
