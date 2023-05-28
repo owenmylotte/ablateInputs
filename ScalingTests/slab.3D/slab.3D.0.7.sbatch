@@ -10,7 +10,7 @@
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=slab.2D_23_576_[186,40,40]
+#SBATCH --output=slab.3D_23_576_[186,40,40]
 
 ##### Load Required modules
 # gcc

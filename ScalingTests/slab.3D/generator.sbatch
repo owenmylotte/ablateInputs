@@ -10,7 +10,7 @@
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=slab.2D_{{rays}}_{{processes}}_{{faces}}
+#SBATCH --output=slab.3D_{{rays}}_{{processes}}_{{faces}}
 
 ##### Load Required modules
 # gcc
