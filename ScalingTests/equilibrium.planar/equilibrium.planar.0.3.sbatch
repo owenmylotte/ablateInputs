@@ -2,7 +2,7 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -n 9216
+#SBATCH -n 2304
 #SBATCH --use-min-nodes
 #SBATCH -J planar
 #SBATCH -t 24:00:00
@@ -10,7 +10,7 @@
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=equilibrium.planar_23_9216_[50000]
+#SBATCH --output=equilibrium.planar_23_2304_[50000]
 
 ##### Load Required modules
 # gcc
@@ -30,10 +30,10 @@ mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
 ##### Launch parallel job using srun
-srun -n9216 /usr/workspace/mylotte1/ablateOpt/ablate \
-  --input ../input.yaml \
+srun -n2304 /usr/workspace/mylotte1/ablateOpt/ablate \
+  --input input.yaml \
   -yaml::timestepper::domain::faces [50000] \
   -yaml::solvers::[2]::radiation::rays 23 \
-  -log_view :equilibrium.planar_23_9216_[50000].csv:ascii_csv
+  -log_view :equilibrium.planar_23_2304_[50000].csv:ascii_csv
 
 echo "End Time " $(date +%s)

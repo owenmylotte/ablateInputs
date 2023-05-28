@@ -2,15 +2,15 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -n 18432
+#SBATCH -n 288
 #SBATCH --use-min-nodes
-#SBATCH -J slab
+#SBATCH -J irradiation
 #SBATCH -t 24:00:00
 #SBATCH -p pbatch
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=slab.2D_23_18432_[186,40,40]
+#SBATCH --output=irradiation_23_288_[50000]
 
 ##### Load Required modules
 # gcc
@@ -30,14 +30,11 @@ export PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
 mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
-export UPWIND=leastsquares
-
 ##### Launch parallel job using srun
-srun -n18432 /usr/workspace/mylotte1/ablateOpt/ablate \
-  --input ../input.yaml \
-  -yaml::timestepper::domain::faces [186,40,40] \
-  -yaml::solvers::[5]::radiation::rays 23 \
-  -yaml::solvers::[4]::processes::[0]::radiation::rays 23 \
-  -log_view :slab.3D_23_18432_[186,40,40].csv:ascii_csv
+srun -n288 /usr/workspace/mylotte1/ablateOpt/ablate \
+  --input input.yaml \
+  -yaml::timestepper::domain::faces [50000] \
+  -yaml::solvers::[2]::radiation::rays 23 \
+  -log_view :irradiation_23_288_[50000].csv:ascii_csv
 
 echo "End Time " $(date +%s)
