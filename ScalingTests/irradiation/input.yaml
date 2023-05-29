@@ -8,7 +8,7 @@ timestepper:
   name: theMainTimeStepper
   arguments:
     ts_type: euler
-    ts_max_steps: 10
+    ts_max_steps: 5
     ts_dt: 1.0E-12
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
@@ -81,5 +81,5 @@ solvers:
         absorptivity: 1
         emissivity: 1
         eos: *eos
-      log: !ablate::monitors::logs::StdOut
-        name: radlog
+#      log: !ablate::monitors::logs::StdOut
+#        name: radlog

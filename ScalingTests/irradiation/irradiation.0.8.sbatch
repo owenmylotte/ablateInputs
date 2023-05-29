@@ -10,7 +10,7 @@
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=irradiation_23_72_[50000]
+#SBATCH --output=irradiation_15_72_[50000]
 
 ##### Load Required modules
 # gcc
@@ -34,7 +34,7 @@ cd tmp_$SLURM_JOBID
 srun -n72 /usr/workspace/mylotte1/ablateOpt/ablate \
   --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/irradiation/input.yaml \
   -yaml::timestepper::domain::faces [50000] \
-  -yaml::solvers::[2]::radiation::rays 23 \
-  -log_view :irradiation_23_72_[50000].csv:ascii_csv
+  -yaml::solvers::[2]::radiation::rays 15 \
+  -log_view :irradiation_15_72_[50000].csv:ascii_csv
 
 echo "End Time " $(date +%s)
