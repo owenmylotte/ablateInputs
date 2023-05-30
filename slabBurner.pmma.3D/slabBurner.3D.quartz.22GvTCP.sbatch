@@ -2,8 +2,8 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -N 100
-#SBATCH -J 22GvTCP
+#SBATCH -N 2
+#SBATCH -J slab
 #SBATCH -t 24:00:00
 #SBATCH -p pbatch
 #SBATCH --mail-type=ALL
@@ -12,14 +12,13 @@
 
 ##### Load Required modules
 # gcc
-module load mkl/2019.0
-module load valgrind/3.16.1
-module load gcc/10.2.1
-module load  cmake/3.21.1 
+module load clang/14.0.6-magic
+module load cmake/3.25.2
+module load gcc/10.3.1-magic
 
 # Load PETSC ENV
 export PETSC_DIR="/usr/workspace/mylotte1/petsc"
-export PETSC_ARCH="arch-ablate-opt-gcc" # arch-ablate-debug or arch-ablate-opt
+export PETSC_ARCH="arch-ablate-opt" # arch-ablate-debug or arch-ablate-opt
 export PKG_CONFIG_PATH="${PETSC_DIR}/${PETSC_ARCH}/lib/pkgconfig:$PKG_CONFIG_PATH"
 export HDF5_ROOT="${PETSC_DIR}/${PETSC_ARCH}"  
 # Include the bin directory to access mpi commands
@@ -30,17 +29,14 @@ mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
 export TITLE=_slabBurner.pmma.3D.testingvTCP
-export FACES=186,40,40
-export FILE=/p/lustre1/mylotte1/ablateInputs/slabBurner.pmma.3D/slabBurner.3D.6G.pmma.rad.soot.yaml
+export FILE=/p/lustre1/mylotte1/ablateInputs/slabBurner.pmma.3D/slabBurner.pmma.3D.yaml
 
 # export TITLE=6G-186x40x40-pmma-radLoss-$SLURM_JOBID
 # export FACES=186,40,40
 # export FILE=/p/lustre2/ubchrest/ablateInputs/slabBurner.pmma.3D/slabBurner.3D.6G.pmma.radLoss.yaml
 
 ##### Launch parallel job using srun
-srun -n3600 /usr/workspace/mylotte1/ablateOpt/ablate \
-   --input $FILE \
-   -yaml::environment::title $TITLE \
-   -yaml::timestepper::domain::faces [$FACES]
+srun -n72 /usr/workspace/mylotte1/ablateSlabs/ablate \
+   --input $FILE
 
 echo 'Done'
