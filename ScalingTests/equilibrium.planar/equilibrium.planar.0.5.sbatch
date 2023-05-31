@@ -10,7 +10,6 @@
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=equilibrium.planar_15_36_[50000]
 
 ##### Load Required modules
 # gcc
@@ -28,6 +27,8 @@ export PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
 
 mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
+
+echo "Configuration: _15_36_[50000]"
 
 ##### Launch parallel job using srun
 srun -n36 /usr/workspace/mylotte1/ablateOpt/ablate \

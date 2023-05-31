@@ -10,7 +10,6 @@
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=irradiation_15_1152_[50000]
 
 ##### Load Required modules
 # gcc
@@ -29,6 +28,8 @@ export PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
 # Make a temp directory so that tchem has a place to vomit its files
 mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
+
+echo "Configuration: _15_1152_[50000]"
 
 ##### Launch parallel job using srun
 srun -n1152 /usr/workspace/mylotte1/ablateOpt/ablate \

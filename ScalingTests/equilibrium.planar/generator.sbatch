@@ -10,7 +10,6 @@
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=equilibrium.planar_{{rays}}_{{processes}}_{{faces}}
 
 ##### Load Required modules
 # gcc
@@ -28,6 +27,8 @@ export PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
 
 mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
+
+echo "Configuration: _{{rays}}_{{processes}}_{{faces}}"
 
 ##### Launch parallel job using srun
 srun -n{{processes}} /usr/workspace/mylotte1/ablateOpt/ablate \

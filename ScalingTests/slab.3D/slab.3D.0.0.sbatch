@@ -10,7 +10,6 @@
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=slab.3D_23_1152_[186,40,40]
 
 ##### Load Required modules
 # gcc
@@ -32,12 +31,14 @@ cd tmp_$SLURM_JOBID
 
 export UPWIND=leastsquares
 
+echo "Configuration: _15_1152_[186,40,40]"
+
 ##### Launch parallel job using srun
 srun -n1152 /usr/workspace/mylotte1/ablateOpt/ablate \
   --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/slab.3D/input.yaml \
   -yaml::timestepper::domain::faces [186,40,40] \
-  -yaml::solvers::[5]::radiation::rays 23 \
-  -yaml::solvers::[4]::processes::[0]::radiation::rays 23 \
-  -log_view :slab.3D_23_1152_[186,40,40].csv:ascii_csv
+  -yaml::solvers::[5]::radiation::rays 15 \
+  -yaml::solvers::[4]::processes::[0]::radiation::rays 15 \
+  -log_view :slab.3D_15_1152_[186,40,40].csv:ascii_csv
 
 echo "End Time " $(date +%s)

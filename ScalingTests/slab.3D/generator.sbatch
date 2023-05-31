@@ -10,7 +10,6 @@
 #SBATCH --mail-type=NONE
 #SBATCH -A sunyb
 #SBATCH --mail-user=owenmylo@buffalo.edu
-#SBATCH --output=slab.3D_{{rays}}_{{processes}}_{{faces}}
 
 ##### Load Required modules
 # gcc
@@ -31,6 +30,8 @@ mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
 export UPWIND=leastsquares
+
+echo "Configuration: _{{rays}}_{{processes}}_{{faces}}"
 
 ##### Launch parallel job using srun
 srun -n{{processes}} /usr/workspace/mylotte1/ablateOpt/ablate \
