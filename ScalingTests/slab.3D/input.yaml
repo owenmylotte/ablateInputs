@@ -365,19 +365,19 @@ solvers:
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
-        radiationInterval: 0
-        radiation: !ablate::radiation::SurfaceRadiation
-          id: surfaceflux
-          region:
-            name: flowRegion
-          rays: 23
-          properties: !ablate::eos::radiationProperties::Sum
-            - !ablate::eos::radiationProperties::Zimmer
-              eos: *eos
-            - !ablate::eos::radiationProperties::SootMeanProperties
-              eos: *eos
-#          log: !ablate::monitors::logs::StdOut
-        emissivity: 0.90
+#        radiationInterval: 0
+#        radiation: !ablate::radiation::SurfaceRadiation
+#          id: surfaceflux
+#          region:
+#            name: flowRegion
+#          rays: 23
+#          properties: !ablate::eos::radiationProperties::Sum
+#            - !ablate::eos::radiationProperties::Zimmer
+#              eos: *eos
+#            - !ablate::eos::radiationProperties::SootMeanProperties
+#              eos: *eos
+##          log: !ablate::monitors::logs::StdOut
+#        emissivity: 0.90
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
   - !ablate::radiation::VolumeRadiation

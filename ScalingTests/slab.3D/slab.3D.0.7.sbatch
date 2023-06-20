@@ -38,7 +38,6 @@ srun -n576 /usr/workspace/mylotte1/ablateOpt/ablate \
   --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/slab.3D/input.yaml \
   -yaml::timestepper::domain::faces [186,40,40] \
   -yaml::solvers::[5]::radiation::rays 15 \
-  -yaml::solvers::[4]::processes::[0]::radiation::rays 15 \
   -log_view :slab.3D_15_576_[186,40,40].csv:ascii_csv
 
 echo "End Time " $(date +%s)
