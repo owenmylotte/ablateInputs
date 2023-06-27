@@ -241,49 +241,49 @@ solvers:
         interval: !ablate::io::interval::DelayInterval
           interval: 25
           minimumSimulationTime: .01 #about 1 flow throughs
-      - !ablate::monitors::RadiationFlux
-        id: slabFluxMonitor
-        region:
-          name: heatFluxMonitorFaces
-        radiation:
-          - !ablate::radiation::SurfaceRadiation
-            id: slabMonitorTracer
-            region:
-              name: heatFluxMonitorRegion
-            rays: 25
-            properties: !ablate::eos::radiationProperties::Sum
-              - !ablate::eos::radiationProperties::Zimmer
-                eos: *eos
-              - !ablate::eos::radiationProperties::SootMeanProperties
-                eos: *eos
-      - !ablate::monitors::RadiationFlux
-        id: vTCPMonitor_front
-        region:
-          name: boundaryFacesFront
-        radiation:
-          - !ablate::radiation::OrthogonalRadiation
-            id: tcpTracer_front
-            region:
-              name: interiorFlowRegion
-            properties: !ablate::eos::radiationProperties::SootSpectrumProperties
-              eos: *eos
-              wavelengths: [ 650.0E-9, 532.0E-9, 470.0E-9 ] # Red wavelength, # Green wavelength, # Blue wavelength
-              bandwidths: [ 10E-9, 10E-9 , 10E-9 ]
-            log: !ablate::monitors::logs::StdOut
-      - !ablate::monitors::RadiationFlux
-        id: vTCPMonitor_top
-        region:
-          name: boundaryFacesTop
-        radiation:
-          - !ablate::radiation::OrthogonalRadiation
-            id: tcpTracer_top
-            region:
-              name: interiorFlowRegion
-            properties: !ablate::eos::radiationProperties::SootSpectrumProperties
-              eos: *eos
-              wavelengths: [ 650.0E-9, 532.0E-9, 470.0E-9 ] # Red wavelength, # Green wavelength, # Blue wavelength
-              bandwidths: [ 10E-9, 10E-9 , 10E-9 ]
-            log: !ablate::monitors::logs::StdOut
+#      - !ablate::monitors::RadiationFlux
+#        id: slabFluxMonitor
+#        region:
+#          name: heatFluxMonitorFaces
+#        radiation:
+#          - !ablate::radiation::SurfaceRadiation
+#            id: slabMonitorTracer
+#            region:
+#              name: heatFluxMonitorRegion
+#            rays: 25
+#            properties: !ablate::eos::radiationProperties::Sum
+#              - !ablate::eos::radiationProperties::Zimmer
+#                eos: *eos
+#              - !ablate::eos::radiationProperties::SootMeanProperties
+#                eos: *eos
+#      - !ablate::monitors::RadiationFlux
+#        id: vTCPMonitor_front
+#        region:
+#          name: boundaryFacesFront
+#        radiation:
+#          - !ablate::radiation::OrthogonalRadiation
+#            id: tcpTracer_front
+#            region:
+#              name: interiorFlowRegion
+#            properties: !ablate::eos::radiationProperties::SootSpectrumProperties
+#              eos: *eos
+#              wavelengths: [ 650.0E-9, 532.0E-9, 470.0E-9 ] # Red wavelength, # Green wavelength, # Blue wavelength
+#              bandwidths: [ 10E-9, 10E-9 , 10E-9 ]
+#            log: !ablate::monitors::logs::StdOut
+#      - !ablate::monitors::RadiationFlux
+#        id: vTCPMonitor_top
+#        region:
+#          name: boundaryFacesTop
+#        radiation:
+#          - !ablate::radiation::OrthogonalRadiation
+#            id: tcpTracer_top
+#            region:
+#              name: interiorFlowRegion
+#            properties: !ablate::eos::radiationProperties::SootSpectrumProperties
+#              eos: *eos
+#              wavelengths: [ 650.0E-9, 532.0E-9, 470.0E-9 ] # Red wavelength, # Green wavelength, # Blue wavelength
+#              bandwidths: [ 10E-9, 10E-9 , 10E-9 ]
+#            log: !ablate::monitors::logs::StdOut
     additionalProcesses:
       - !ablate::finiteVolume::processes::PressureGradientScaling
         &pgs
@@ -370,13 +370,13 @@ solvers:
 #          id: surfaceflux
 #          region:
 #            name: flowRegion
-#          rays: 23
+#          rays: 2
 #          properties: !ablate::eos::radiationProperties::Sum
 #            - !ablate::eos::radiationProperties::Zimmer
 #              eos: *eos
 #            - !ablate::eos::radiationProperties::SootMeanProperties
 #              eos: *eos
-##          log: !ablate::monitors::logs::StdOut
+#          log: !ablate::monitors::logs::StdOut
 #        emissivity: 0.90
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
