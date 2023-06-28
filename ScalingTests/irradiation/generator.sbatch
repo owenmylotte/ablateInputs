@@ -36,6 +36,7 @@ srun -n{{processes}} /usr/workspace/mylotte1/ablateOpt/ablate \
   --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/irradiation/input.yaml \
   -yaml::timestepper::domain::faces {{faces}} \
   -yaml::solvers::[2]::radiation::rays {{rays}} \
-  -log_view :irradiation_{{rays}}_{{processes}}_{{faces}}.csv:ascii_csv
+  -log_view :irradiation_{{rays}}_{{processes}}_{{faces}}.csv:ascii_csv \
+  -build_twosided redscatter
 
 echo "End Time " $(date +%s)
