@@ -29,14 +29,14 @@ export PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
 mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
-echo "Configuration: _23_18432_[50000]"
+echo "Configuration: _23_18432_[500000]"
 
 ##### Launch parallel job using srun
 srun -n18432 /usr/workspace/mylotte1/ablateOpt/ablate \
   --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/irradiation/input.yaml \
-  -yaml::timestepper::domain::faces [50000] \
+  -yaml::timestepper::domain::faces [500000] \
   -yaml::solvers::[2]::radiation::rays 23 \
-  -log_view :irradiation_23_18432_[50000].csv:ascii_csv \
+  -log_view :irradiation_23_18432_[500000].csv:ascii_csv \
   -build_twosided redscatter
 
 echo "End Time " $(date +%s)

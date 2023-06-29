@@ -6,10 +6,10 @@ enumerations:
     values: [ 36, 72, 144, 288, 576, 1152, 2304, 4608, 9216, 18432 ]
   - !enumerator::enumerations::List
     name: faces
-    values: [ "[50000]" ]
+    values: [ "500000]" ]
   - !enumerator::enumerations::List
     name: rays
-    values: [ 23 ]
+    values: [ 15 ]
 generator:
   !enumerator::generators::FileTemplateGenerator
   path: ../generator.sbatch
