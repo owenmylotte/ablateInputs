@@ -395,5 +395,5 @@ solvers:
           eos: *eos
         - !ablate::eos::radiationProperties::SootMeanProperties
           eos: *eos
-#      log: !ablate::monitors::logs::StdOut
-#        name: rad_log
+      log: !ablate::monitors::logs::StdOut
+        name: rad_log
