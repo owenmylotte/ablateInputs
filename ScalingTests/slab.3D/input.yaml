@@ -14,7 +14,7 @@ timestepper:
     ts_adapt_type: physicsConstrained
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 105,15,15 ]
+    faces: [ 186,15,15 ]
     lower: [ 0.0, 0.0, -0.0127 ]
     upper: [ 0.1, 0.0254, 0.0127 ]
     simplex: false
@@ -389,7 +389,7 @@ solvers:
       id: volRad
       region:
         name: flowRegion
-      rays: 23
+      rays: 2
       properties: !ablate::eos::radiationProperties::Sum
         - !ablate::eos::radiationProperties::Zimmer
           eos: *eos
