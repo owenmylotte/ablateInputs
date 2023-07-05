@@ -117,11 +117,11 @@ solvers:
     region:
       name: flowRegion
     interval: 1
-    radiation: !ablate::radiation::VolumeRadiation
+    radiation: !ablate::radiation::Radiation
       id: flameradiation
       region:
         name: flowRegion
-      rays: 200
+      rays: 23
       properties: !ablate::eos::radiationProperties::Constant
         absorptivity: 1
         emissivity: 1

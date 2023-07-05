@@ -8,11 +8,11 @@ timestepper:
   name: theMainTimeStepper
   arguments:
     ts_type: euler
-    ts_max_steps: 5
+    ts_max_steps: 1
     ts_dt: 1.0E-12
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 50000 ]
+    faces: [ 50 ]
     lower: [ -0.01 ]
     upper: [ 0.01 ]
     simplex: false
@@ -76,10 +76,10 @@ solvers:
         name: interiorCells
       fieldBoundary:
         name: boundaryCells
-      rays: 23
+      rays: 2
       properties: !ablate::eos::radiationProperties::Constant
         absorptivity: 1
         emissivity: 1
         eos: *eos
-#      log: !ablate::monitors::logs::StdOut
-#        name: radlog
+      log: !ablate::monitors::logs::StdOut
+        name: radlog

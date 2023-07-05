@@ -14,7 +14,7 @@ timestepper:
     ts_adapt_type: physicsConstrained
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 186,15,15 ]
+    faces: [ 105,15,15 ]
     lower: [ 0.0, 0.0, -0.0127 ]
     upper: [ 0.1, 0.0254, 0.0127 ]
     simplex: false
@@ -377,7 +377,7 @@ solvers:
 #            - !ablate::eos::radiationProperties::SootMeanProperties
 #              eos: *eos
 #          log: !ablate::monitors::logs::StdOut
-#        emissivity: 0.90
+        emissivity: 0.90
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
   - !ablate::radiation::VolumeRadiation
@@ -385,7 +385,7 @@ solvers:
     region:
       name: flowRegion
     interval: 10
-    radiation: !ablate::radiation::RaySharingRadiation
+    radiation: !ablate::radiation::Radiation
       id: volRad
       region:
         name: flowRegion
