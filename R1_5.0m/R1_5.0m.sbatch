@@ -13,7 +13,7 @@
 
 ##### Load Required modules
 # gcc
-module load gcc/10.3.1-magic
+module load clang/14.0.6-magic
 module load cmake/3.25.2
 
 # Load PETSC ENV
