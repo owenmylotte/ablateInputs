@@ -6,7 +6,7 @@ enumerations:
     values: [ 36, 72, 144, 288, 576, 1152, 2304, 4608, 9216, 18432 ]
   - !enumerator::enumerations::List
     name: faces
-    values: [ "[190,45,45]" ]
+    values: [ "[186,40,40]" ]
   - !enumerator::enumerations::List
     name: rays
     values: [ 15 ]

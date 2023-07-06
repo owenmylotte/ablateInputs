@@ -31,13 +31,13 @@ cd tmp_$SLURM_JOBID
 
 export UPWIND=leastsquares
 
-echo "Configuration: _15_9216_[190,45,45]"
+echo "Configuration: _15_9216_[186,40,40]"
 
 ##### Launch parallel job using srun
 srun -n9216 /usr/workspace/mylotte1/ablateOpt/ablate \
   --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/slab.3D/input.yaml \
-  -yaml::timestepper::domain::faces [190,45,45] \
-  -yaml::solvers::[5]::radiation::rays 15 \
-  -log_view :slab.3D_15_9216_[190,45,45].csv:ascii_csv
+  -yaml::timestepper::domain::faces [186,40,40] \
+  -yaml::solvers::[4]::radiation::rays 15 \
+  -log_view :slab.3D_15_9216_[186,40,40].csv:ascii_csv
 
 echo "End Time " $(date +%s)

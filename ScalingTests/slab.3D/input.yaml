@@ -8,7 +8,7 @@ timestepper:
   arguments:
     ts_type: rk
     ts_max_time: 1
-    ts_max_steps: 10
+    ts_max_steps: 5
     ts_dt: 1.0e-10
     ts_adapt_safety: 0.95
     ts_adapt_type: physicsConstrained
@@ -21,24 +21,6 @@ timestepper:
     options:
       dm_plex_hash_location: true
     preModifiers:
-      # cluster around the top of the slab
-      - !ablate::domain::modifiers::OnePointClusteringMapper
-        direction: 1
-        start: 0.0
-        end: 0.0254
-        beta: 2.5
-        location: 0.009
-
-        # cluster around the sides of the slab
-      - !ablate::domain::modifiers::TwoPointClusteringMapper
-        direction: 2
-        start: -0.0127
-        end: 0.0127
-        location: 0.0
-        offset: 0.004
-        beta: 2.5
-        location: 0.006
-
       # distribute the mesh across the mpi rank with ghost cells
       - !ablate::domain::modifiers::DistributeWithGhostCells
         ghostCellDepth: 3
@@ -52,35 +34,7 @@ timestepper:
           - name: boundaryCellsBottom
           - name: boundaryCellsFront
           - name: boundaryCellsBack
-      # create a label for the slab burner
-      - !ablate::domain::modifiers::CreateLabel
-        region:
-          name: slabBurnerRegion
-        function: !ablate::mathFunctions::geom::ConvexPolygon
-          points:
-            - [0.0132,-.1]
-            - [0.0132,0]
-            - [0.0173,0.0045]
-            - [0.0214,0.0069]
-            - [0.0258,0.0082]
-            - [0.0385,0.009]
-            - [0.0592,0.009]
-            - [0.0702,0.0087]
-            - [0.0722,0.0079]
-            - [0.0727,0.007]
-            - [0.0728,0]
-            - [0.0728,-.1]
-          maxDistance: 0.003965
 
-      # create a label for defining the glowPlug
-      - !ablate::domain::modifiers::SubtractLabel
-        # cut the slabBurner and glow plug out of the flowRegion
-        differenceRegion:
-          name: flowRegion
-        minuendRegion:
-          name: interiorCells
-        subtrahendRegions:
-          - name: slabBurnerRegion
       - !ablate::domain::modifiers::TagLabelInterface
         leftRegion:
           name: interiorCells
@@ -95,60 +49,6 @@ timestepper:
           name: boundaryCellsTop
         boundaryFaceRegion:
           name: boundaryFacesTop
-      - !ablate::domain::modifiers::SubtractLabel
-        # cut the slabBurner and glow plug out of the boundaryWalls
-        differenceRegion:
-          name: wallBoundaryRegion
-        minuendRegion:
-          name: allWallBoundaryRegion
-        subtrahendRegions:
-          - name: slabBurnerRegion
-      - !ablate::domain::modifiers::TagLabelInterface
-        # define the boundary between the slab burner and flow
-        leftRegion:
-          name: flowRegion
-        rightRegion:
-          name: slabBurnerRegion
-        boundaryFaceRegion:
-          name: slabBurnerBoundaryFaces
-        rightBoundaryCellRegion:
-          name: slabBurnerBoundaryCells
-
-      - !ablate::domain::modifiers::SubtractLabel
-        # remove the slabBurnerFace from the flowRegion
-        differenceRegion:
-          name: interiorFlowRegion
-        minuendRegion:
-          name: flowRegion
-        subtrahendRegions:
-          - name: slabBurnerBoundaryFaces
-        incompleteLabel: true
-
-        # Create a region for the flat plate heat flux monitor to operate on
-      - !ablate::domain::modifiers::CreateLabel
-        region:
-          name: heatFluxMonitorRegion
-        function: !ablate::mathFunctions::geom::Box
-          lower: [ 0 , 0.009, -0.0127 ]
-          upper: [ 0.1, 0.0254, 0.0127 ]
-
-      - !ablate::domain::modifiers::SubtractLabel
-        # separates the regions above and below the slab
-        differenceRegion:
-          name: lowerSlabRegion
-        minuendRegion:
-          name: interiorCells
-        subtrahendRegions:
-          - name: heatFluxMonitorRegion
-
-      - !ablate::domain::modifiers::TagLabelInterface
-        # define the boundary between the upper and lower regions
-        leftRegion:
-          name: heatFluxMonitorRegion
-        rightRegion:
-          name: lowerSlabRegion
-        boundaryFaceRegion:
-          name: heatFluxMonitorFaces
 
       - !ablate::domain::modifiers::GhostBoundaryCells
     fields:
@@ -193,31 +93,11 @@ timestepper:
     - fieldName: densityProgress
       field: "0.0"
 
-    - !ablate::finiteVolume::fieldFunctions::Euler
-      # slab Burner
-      region:
-        name: slabBurnerBoundaryCells
-      state: &fuelFieldState
-        eos: *eos
-        temperature: 653.0 #fuel temperature
-        pressure: 101325.0
-        velocity: "0.0, 00, 0.0"
-        other: !ablate::finiteVolume::fieldFunctions::MassFractions
-          &fuelMassFrac
-          eos: *eos
-          values:
-            - fieldName: MMETHAC_C5H8O2 # The fuel boundary condition
-              field: 1.0
-    - !ablate::finiteVolume::fieldFunctions::DensityMassFractions
-      region:
-        name: slabBurnerBoundaryCells
-      state: *fuelFieldState
-
 solvers:
   - !ablate::finiteVolume::CompressibleFlowSolver
     id: flowField
     region:
-      name: interiorFlowRegion
+      name: interiorCells
     parameters:
       cfl: 0.45
     eos: *eos
@@ -230,11 +110,6 @@ solvers:
     monitors:
       - !ablate::monitors::TimeStepMonitor
         interval: 25
-      - !ablate::monitors::MixtureFractionMonitor
-        mixtureFractionCalculator: !ablate::monitors::MixtureFractionCalculator
-          eos: *eos
-          massFractionsFuel: *fuelMassFrac
-          massFractionsOxidizer: *oxMassFrac
       - !ablate::monitors::TurbFlowStats
         fields: [ velocity, temperature ]
         eos: *eos
@@ -342,7 +217,7 @@ solvers:
   - !ablate::boundarySolver::BoundarySolver
     id: walls
     region:
-      name: wallBoundaryRegion
+      name: allWallBoundaryRegion
     fieldBoundary:
       name: boundaryFaces
     mergeFaces: true
@@ -350,46 +225,16 @@ solvers:
       - !ablate::boundarySolver::lodi::IsothermalWall
         eos: *eos
         pgs: *pgs
-
-  - !ablate::boundarySolver::BoundarySolver
-    id: slab boundary
-    region:
-      name: slabBurnerBoundaryCells
-    fieldBoundary:
-      name: slabBurnerBoundaryFaces
-    processes:
-      - !ablate::boundarySolver::physics::Sublimation
-        latentHeatOfFusion: 840890
-        transportModel: !ablate::eos::transport::Sutherland
-          eos: *eos
-        pgs: *pgs
-        eos: *eos
-        massFractions: *fuelMassFrac
-#        radiationInterval: 0
-#        radiation: !ablate::radiation::SurfaceRadiation
-#          id: surfaceflux
-#          region:
-#            name: flowRegion
-#          rays: 2
-#          properties: !ablate::eos::radiationProperties::Sum
-#            - !ablate::eos::radiationProperties::Zimmer
-#              eos: *eos
-#            - !ablate::eos::radiationProperties::SootMeanProperties
-#              eos: *eos
-#          log: !ablate::monitors::logs::StdOut
-        emissivity: 0.90
-    monitors:
-      - !ablate::monitors::BoundarySolverMonitor
   - !ablate::radiation::VolumeRadiation
     id: radiationSolver
     region:
-      name: flowRegion
-    interval: 10
-    radiation: !ablate::radiation::Radiation
+      name: interiorCells
+    interval: 0
+    radiation: !ablate::radiation::RaySharingRadiation
       id: volRad
       region:
-        name: flowRegion
-      rays: 2
+        name: interiorCells
+      rays: 23
       properties: !ablate::eos::radiationProperties::Sum
         - !ablate::eos::radiationProperties::Zimmer
           eos: *eos

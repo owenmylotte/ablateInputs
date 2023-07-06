@@ -37,7 +37,7 @@ echo "Configuration: _{{rays}}_{{processes}}_{{faces}}"
 srun -n{{processes}} /usr/workspace/mylotte1/ablateOpt/ablate \
   --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/slab.3D/input.yaml \
   -yaml::timestepper::domain::faces {{faces}} \
-  -yaml::solvers::[5]::radiation::rays {{rays}} \
+  -yaml::solvers::[4]::radiation::rays {{rays}} \
   -log_view :slab.3D_{{rays}}_{{processes}}_{{faces}}.csv:ascii_csv
 
 echo "End Time " $(date +%s)
