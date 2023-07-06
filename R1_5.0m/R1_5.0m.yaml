@@ -18,11 +18,11 @@ timestepper:
   # io controls how often the results are saved to a file for visualization and restart
   io:
     #  results are outputted every 0.001 seconds of real simulation time
-    interval: 250
+    interval: 0
   # load in a mesh file
   domain: !ablate::domain::MeshFile
     name: volumeMesh
-    path: ../geom/spherical_shell.msh
+    path: /home/owen/post-processing/ablate/test_thing.msh
     # Options to be applied to the volumetric geometry
     options:
       dm_plex_check_all: true
@@ -51,13 +51,13 @@ timestepper:
           name: R1_bound
         function: !ablate::mathFunctions::geom::Sphere
           center: [ 0, 0, 0 ]
-          radius: 4.9
+          radius: 4
       - !ablate::domain::modifiers::CreateLabel
         region:
           name: R2_bound
         function: !ablate::mathFunctions::geom::Sphere
           center: [ 0, 0, 0 ]
-          radius: 10.1
+          radius: 11
       - !ablate::domain::modifiers::SubtractLabel
         # separates the regions above and below the slab
         differenceRegion:
@@ -82,13 +82,13 @@ timestepper:
           name: outerSphere
         subtrahendRegions:
           - name: innerSphere
-      - !ablate::domain::modifiers::MergeLabels
-        mergedRegion:
-          name: volume
-        regions:
-          - name: R2
-          - name: R1
-          - name: shellRegion
+#      - !ablate::domain::modifiers::MergeLabels
+#        mergedRegion:
+#          name: volume
+#        regions:
+#          - name: R2
+#          - name: R1
+#          - name: shellRegion
     fields:
       - !ablate::finiteVolume::CompressibleFlowFields
         eos: !ablate::eos::PerfectGas &eos
@@ -101,12 +101,12 @@ timestepper:
   initialization:
     - !ablate::finiteVolume::fieldFunctions::Euler
       region:
-        name: shellRegion
+        name: volume
       state: &initFlowState
         eos: *eos
         pressure: 1.0
         temperature: !ablate::mathFunctions::Formula
-          formula: "((x*x)+(y*y)+(z*z))*200.0"
+          formula: "sqrt((x*x)+(y*y)+(z*z))*200.0"
         velocity: "0.0, 0.0, 0.0"
     - !ablate::finiteVolume::fieldFunctions::Euler
       region:
@@ -131,18 +131,18 @@ solvers:
       name: volume
     monitors:
       - !ablate::monitors::TimeStepMonitor
-        interval: 250
+        interval: 0
     eos: *eos
   - !ablate::radiation::VolumeRadiation
     id: radiationSolver
     region:
       name: shellRegion
-    interval: 25
+    interval: 0
     radiation: !ablate::radiation::RaySharingRadiation
       id: flameradiation
       region:
         name: shellRegion
-      rays: 23
+      rays: 2
       properties: !ablate::eos::radiationProperties::Constant
         absorptivity: 1
         emissivity: 1
