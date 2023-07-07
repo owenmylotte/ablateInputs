@@ -82,13 +82,13 @@ timestepper:
           name: outerSphere
         subtrahendRegions:
           - name: innerSphere
-#      - !ablate::domain::modifiers::MergeLabels
-#        mergedRegion:
-#          name: volume
-#        regions:
-#          - name: R2
-#          - name: R1
-#          - name: shellRegion
+      - !ablate::domain::modifiers::MergeLabels
+        mergedRegion:
+          name: volume
+        regions:
+          - name: R2
+          - name: R1
+          - name: shellRegion
     fields:
       - !ablate::finiteVolume::CompressibleFlowFields
         eos: !ablate::eos::PerfectGas &eos
@@ -142,7 +142,7 @@ solvers:
       id: flameradiation
       region:
         name: shellRegion
-      rays: 2
+      rays: 23
       properties: !ablate::eos::radiationProperties::Constant
         absorptivity: 1
         emissivity: 1
