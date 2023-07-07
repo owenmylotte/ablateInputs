@@ -18,11 +18,11 @@ timestepper:
   # io controls how often the results are saved to a file for visualization and restart
   io:
     #  results are outputted every 0.001 seconds of real simulation time
-    interval: 0
+    interval: 100
   # load in a mesh file
   domain: !ablate::domain::MeshFile
     name: volumeMesh
-    path: /home/owen/post-processing/ablate/test_thing.msh
+    path: ../geom/spherical_shell.msh
     # Options to be applied to the volumetric geometry
     options:
       dm_plex_check_all: true
@@ -137,8 +137,8 @@ solvers:
     id: radiationSolver
     region:
       name: shellRegion
-    interval: 0
-    radiation: !ablate::radiation::RaySharingRadiation
+    interval: 10
+    radiation: !ablate::radiation::Radiation
       id: flameradiation
       region:
         name: shellRegion

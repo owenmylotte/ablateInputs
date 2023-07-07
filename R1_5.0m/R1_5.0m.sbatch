@@ -2,7 +2,7 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -n 26000
+#SBATCH -n 9216
 #SBATCH --use-min-nodes
 #SBATCH -J rad.eq
 #SBATCH -t 24:00:00
@@ -29,6 +29,6 @@ mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
 ##### Launch parallel job using srun
-srun -n26000 /usr/workspace/mylotte1/ablateOpt/ablate \
+srun -n9216 /usr/workspace/mylotte1/ablateOpt/ablate \
 	--input /p/lustre1/mylotte1/ablateInputs/R1_5.0m/R1_5.0m.yaml
 echo 'Done'
