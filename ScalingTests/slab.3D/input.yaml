@@ -234,11 +234,10 @@ solvers:
       id: volRad
       region:
         name: interiorCells
-      rays: 23
-      properties: !ablate::eos::radiationProperties::Sum
-        - !ablate::eos::radiationProperties::Zimmer
-          eos: *eos
-        - !ablate::eos::radiationProperties::SootMeanProperties
-          eos: *eos
+      rays: 15
+      properties: !ablate::eos::radiationProperties::Constant
+        absorptivity: 1
+        emissivity: 1
+        eos: *eos
       log: !ablate::monitors::logs::StdOut
         name: rad_log

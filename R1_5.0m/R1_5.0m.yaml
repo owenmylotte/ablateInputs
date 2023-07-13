@@ -138,7 +138,7 @@ solvers:
     region:
       name: shellRegion
     interval: 10
-    radiation: !ablate::radiation::Radiation
+    radiation: !ablate::radiation::RaySharingRadiation
       id: flameradiation
       region:
         name: shellRegion
