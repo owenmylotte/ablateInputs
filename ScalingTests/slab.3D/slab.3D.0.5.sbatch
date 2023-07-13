@@ -37,6 +37,7 @@ srun -n36 /usr/workspace/mylotte1/ablateOpt/ablate \
   --input /p/lustre1/mylotte1/ablateInputs/ScalingTests/slab.3D/input.yaml \
   -yaml::timestepper::domain::faces [186,40,40] \
   -yaml::solvers::[4]::radiation::rays 15 \
-  -log_view :slab.3D_15_36_[186,40,40].csv:ascii_csv
+  -log_view :slab.3D_15_36_[186,40,40].csv:ascii_csv \
+  -build_twosided redscatter
 
 echo "End Time " $(date +%s)
