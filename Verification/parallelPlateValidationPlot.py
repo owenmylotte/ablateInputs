@@ -128,7 +128,7 @@ plt.plot(dataAblate_10rays[:, 0], dataAblate_10rays[:, 5], c='black', linestyle=
 plt.plot(dataAblate_500rays[:, 0], dataAblate_500rays[:, 5], c='black', linestyle="dashed", linewidth=1)
 plt.plot(dataSimit[:, 0], dataSimit[:, 1], c='black', linewidth=1)
 
-plt.legend([r"$d \theta = 36$", r"$d \theta = 18$", r"$d \theta = 0.36$", "Simit", ], loc="upper right",
+plt.legend([r"$d \theta = 36$", r"$d \theta = 18$", r"$d \theta = 0.36$", "Reference Solution", ], loc="upper right",
            prop={'size': 7}, frameon=False)
 
 plt.yticks(fontsize=7)
@@ -192,14 +192,29 @@ import matplotlib.pyplot as plt  # for plotting
 import matplotlib.font_manager
 import matplotlib.ticker as ticker
 
-# plt.style.use('ggplot')
-plt.rcParams["font.family"] = "Noto Serif CJK JP"
+# Direct input
+# plt.rcParams['text.latex.preamble'] = [r'\usepackage{lmodern}']
+# Options
+W = 5.8
+plt.rcParams.update({
+    'figure.figsize': (W, W/(4/3)),     # 4:3 aspect ratio
+    'font.size' : 10,                   # Set font size to 11pt
+    'axes.labelsize': 10,               # -> axis labels
+    'legend.fontsize': 10,              # -> legends
+    'font.family': 'lmodern',
+    'text.usetex': True,
+    'text.latex.preamble': (            # LaTeX preamble
+        r'\usepackage{lmodern}'
+        # ... more packages if needed
+    )
+})
 plt.rc('mathtext', fontset='dejavuserif')
 frac_thing = 0.2
 
 savePath = "/home/owen/CLionProjects/ParallelRadiationJCP/figures/"
 
-plt.figure(figsize=(3, 2), num=1)
+fig = plt.figure()
+fig.set_size_inches(3.54, 3.54)
 
 x = np.linspace(-0.01, 0.01, 1000)
 temp = np.zeros(1000)
@@ -218,12 +233,10 @@ ax = plt.gca()
 for axis in ['top', 'bottom', 'left', 'right']:
     ax.spines[axis].set_linewidth(0.5)
 
-plt.yticks(fontsize=7)
-plt.xticks(fontsize=7)
-plt.xlabel('x $[m]$', fontsize=10)
-plt.ylabel(r'T $[K]$', fontsize=10)
+plt.xlabel('x $[m]$')  # , fontsize=10)
+plt.ylabel(r'T $[K]$')  # , fontsize=10)
 plt.ticklabel_format(style="sci")
-plt.subplots_adjust(left=frac_thing, top=1 - frac_thing, right=1 - frac_thing, bottom=frac_thing)
-plt.savefig(savePath + 'PlatesTemperature', dpi=1000)  # , bbox_inches='tight') #, pad_inches=0)
+# plt.subplots_adjust(left=frac_thing, top=1 - frac_thing, right=1 - frac_thing, bottom=frac_thing)
+plt.savefig(savePath + 'PlatesTemperature' + '.pdf', dpi=1000, bbox_inches='tight')  # , pad_inches=0)
 # TODO: Change the bounding box to be equal width on both sides of the plot
 plt.show()
