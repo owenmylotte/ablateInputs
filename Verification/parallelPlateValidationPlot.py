@@ -188,25 +188,20 @@ plt.show()
 
 # %% Results stuff
 import numpy as np
-import matplotlib.pyplot as plt  # for plotting
-import matplotlib.font_manager
-import matplotlib.ticker as ticker
+import matplotlib.pyplot as plt
+import matplotlib
+from matplotlib import rc
 
 # Direct input
 # plt.rcParams['text.latex.preamble'] = [r'\usepackage{lmodern}']
 # Options
 W = 5.8
-plt.rcParams.update({
-    'figure.figsize': (W, W/(4/3)),     # 4:3 aspect ratio
-    'font.size' : 10,                   # Set font size to 11pt
-    'axes.labelsize': 10,               # -> axis labels
-    'legend.fontsize': 10,              # -> legends
-    'font.family': 'lmodern',
+matplotlib.rcParams.update({
+    "pgf.texsystem": "pdflatex",
+    'font.family': 'serif',
     'text.usetex': True,
-    'text.latex.preamble': (            # LaTeX preamble
-        r'\usepackage{lmodern}'
-        # ... more packages if needed
-    )
+    'pgf.rcfonts': False,
+    'axes.unicode_minus': False,
 })
 plt.rc('mathtext', fontset='dejavuserif')
 frac_thing = 0.2
@@ -237,6 +232,6 @@ plt.xlabel('x $[m]$')  # , fontsize=10)
 plt.ylabel(r'T $[K]$')  # , fontsize=10)
 plt.ticklabel_format(style="sci")
 # plt.subplots_adjust(left=frac_thing, top=1 - frac_thing, right=1 - frac_thing, bottom=frac_thing)
-plt.savefig(savePath + 'PlatesTemperature' + '.pdf', dpi=1000, bbox_inches='tight')  # , pad_inches=0)
+plt.savefig(savePath + 'PlatesTemperature', dpi=1000, bbox_inches='tight')  # , pad_inches=0)
 # TODO: Change the bounding box to be equal width on both sides of the plot
 plt.show()
