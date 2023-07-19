@@ -10,7 +10,7 @@ import matplotlib.font_manager
 import matplotlib.ticker as ticker
 import tikzplotlib
 
-global_marker = 1
+global_marker = 3
 
 # Direct input
 matplotlib.rcParams.update({
@@ -57,16 +57,15 @@ plt.plot(data5000[:, 0], data5000[:, 5], c='black', linewidth=1)
 plt.legend([r"$d \theta = 3.6$", r"$d \theta = 1.8$", r"$d \theta = 0.18$",
             "Analytical Solution"],
            # , r"$d \theta = 0.09$", "Analytical Solution"],
-           loc="upper right", prop={'size': 7}, frameon=False)
+           loc="lower center", prop={'size': 7}, frameon=False)
 
 plt.yticks(fontsize=7)
 plt.xticks(fontsize=7)
 plt.xlabel('x $[m]$', fontsize=10)
 plt.ylabel(r'I $[\frac{W}{m^3}]$', fontsize=10)
 plt.ticklabel_format(style="sci")
-tikzplotlib.save(savePath + 'PlatesValidation1D' + '.tex', axis_height=r'\figH',
-                 axis_width=r'\figW')
-# TODO: Change the bounding box to be equal width on both sides of the plot
+tikzplotlib.save(savePath + 'PlatesValidation1D' + '.tex', axis_height=r'0.95\textwidth',
+                 axis_width=r'0.95\textwidth')
 plt.show()
 
 # Ray Error stuff
@@ -87,7 +86,6 @@ plt.xlabel('N', fontsize=10)
 plt.ylabel(r'$\epsilon_I$', fontsize=10)
 tikzplotlib.save(savePath + 'PlatesIrradiation_Convergence' + '.tex', axis_height=r'0.95\textwidth',
                  axis_width=r'0.95\textwidth')
-# TODO: Change the bounding box to be equal width on both sides of the plot
 plt.show()
 
 ## Mesh Convergence Stuff
@@ -119,7 +117,6 @@ plt.xlabel('N', fontsize=10)
 plt.ylabel(r'$\epsilon_I$', fontsize=10)
 tikzplotlib.save(savePath + 'PlatesIrradiation_MeshConvergence' + '.tex', axis_height=r'0.95\textwidth',
                  axis_width=r'0.95\textwidth')
-# TODO: Change the bounding box to be equal width on both sides of the plot
 plt.show()
 
 # %% Radiative Equilibrium Plot
@@ -200,7 +197,6 @@ plt.ylabel('$\epsilon_T$', fontsize=10)
 plt.xlabel('N', fontsize=10)
 tikzplotlib.save(savePath + 'Equilibrium_MeshConvergence' + '.tex', axis_height=r'0.95\textwidth',
                  axis_width=r'0.95\textwidth')
-# TODO: Change the bounding box to be equal width on both sides of the plot
 plt.show()
 
 # %% Results stuff
@@ -250,5 +246,4 @@ import tikzplotlib
 # tikzplotlib.save("test.tex")
 tikzplotlib.save(savePath + 'PlatesTemperature' + '.tex', axis_height=r'0.95\textwidth',
                  axis_width=r'0.95\textwidth')  # , pad_inches=0)
-# TODO: Change the bounding box to be equal width on both sides of the plot
 plt.show()
