@@ -8,9 +8,19 @@ import numpy as np
 import matplotlib.pyplot as plt  # for plotting
 import matplotlib.font_manager
 import matplotlib.ticker as ticker
+import tikzplotlib
 
-# plt.style.use('ggplot')
-plt.rcParams["font.family"] = "Noto Serif CJK JP"
+global_marker = 1
+
+# Direct input
+matplotlib.rcParams.update({
+    "pgf.texsystem": "pdflatex",
+    'font.family': 'serif',
+    'text.usetex': True,
+    'pgf.rcfonts': False,
+    'axes.unicode_minus': False,
+})
+plt.rc('mathtext', fontset='dejavuserif')
 
 
 def l2norm(numerical, analytical):
@@ -54,7 +64,8 @@ plt.xticks(fontsize=7)
 plt.xlabel('x $[m]$', fontsize=10)
 plt.ylabel(r'I $[\frac{W}{m^3}]$', fontsize=10)
 plt.ticklabel_format(style="sci")
-plt.savefig(savePath + 'PlatesValidation1D', dpi=1000, bbox_inches='tight')
+tikzplotlib.save(savePath + 'PlatesValidation1D' + '.tex', axis_height=r'\figH',
+                 axis_width=r'\figW')
 # TODO: Change the bounding box to be equal width on both sides of the plot
 plt.show()
 
@@ -69,12 +80,13 @@ l2_irradiation = np.array(
      l2norm(data5000[:, 3], data5000[:, 5])])
 
 plt.figure(figsize=(6, 4), num=2)
-plt.loglog(ref_irradiation[0:8], l2_irradiation[0:8], c='black', linewidth=1, marker='.')
+plt.loglog(ref_irradiation[0:8], l2_irradiation[0:8], c='black', linewidth=1, marker='.', markersize=global_marker)
 plt.yticks(fontsize=10)
 plt.xticks(fontsize=10)
 plt.xlabel('N', fontsize=10)
 plt.ylabel(r'$\epsilon_I$', fontsize=10)
-plt.savefig(savePath + 'PlatesIrradiation_Convergence', dpi=1000, bbox_inches='tight')
+tikzplotlib.save(savePath + 'PlatesIrradiation_Convergence' + '.tex', axis_height=r'0.95\textwidth',
+                 axis_width=r'0.95\textwidth')
 # TODO: Change the bounding box to be equal width on both sides of the plot
 plt.show()
 
@@ -91,7 +103,7 @@ for i in range(len(irrMeshes)):
 print(l2irrMeshes)
 plt.figure(figsize=(6, 4), num=2)
 # plt.title("Irradiation Mesh Convergence", pad=1, fontsize=10)  # TITLE HERE
-plt.loglog(irrMeshes, l2irrMeshes, c='black', linewidth=1, marker='.')
+plt.loglog(irrMeshes, l2irrMeshes, c='black', linewidth=1, marker='.', markersize=global_marker)
 plt.yticks(fontsize=10)
 plt.xticks(fontsize=10)
 
@@ -105,7 +117,8 @@ plt.gca().xaxis.set_minor_formatter(ticker.FuncFormatter(minor_formatter))
 plt.gca().tick_params(axis='x', which='minor', labelsize=8.5)  # set fontsize for minor ticks
 plt.xlabel('N', fontsize=10)
 plt.ylabel(r'$\epsilon_I$', fontsize=10)
-plt.savefig(savePath + 'PlatesIrradiation_MeshConvergence', dpi=1000, bbox_inches='tight')
+tikzplotlib.save(savePath + 'PlatesIrradiation_MeshConvergence' + '.tex', axis_height=r'0.95\textwidth',
+                 axis_width=r'0.95\textwidth')
 # TODO: Change the bounding box to be equal width on both sides of the plot
 plt.show()
 
@@ -136,7 +149,7 @@ plt.xticks(fontsize=7)
 plt.xlabel('x $[m]$', fontsize=10)
 plt.ylabel('T $[K]$', fontsize=10)
 plt.ylim(1450, 1900)
-plt.savefig(savePath + 'EquilibriumValidation1D', dpi=1000, bbox_inches='tight')
+tikzplotlib.save(savePath + 'EquilibriumValidation1D' + '.tex', axis_height=r'\figH', axis_width=r'\figW')
 plt.show()
 
 # Error Stuff
@@ -149,12 +162,14 @@ l2_equilibrium = np.array(
      l2norm(dataAblate_500rays[:, 5], dataSimit[:, 1])])
 
 plt.figure(figsize=(6, 4), num=4)
-plt.loglog(ref_equilibrium, l2_equilibrium, c='black', linewidth=1, marker='.')
+plt.loglog(ref_equilibrium, l2_equilibrium, c='black', linewidth=1, marker='.', markersize=global_marker)
 plt.yticks(fontsize=10)
 plt.xticks(fontsize=10)
 plt.xlabel('N', fontsize=10)
 plt.ylabel('$\epsilon_T$', fontsize=10)
-plt.savefig(savePath + 'Equilibrium_Convergence', dpi=1000, bbox_inches='tight')
+# tikzplotlib.save("test.tex")
+tikzplotlib.save(savePath + 'Equilibrium_Convergence' + '.tex', axis_height=r'0.95\textwidth',
+                 axis_width=r'0.95\textwidth')
 plt.show()
 
 # Mesh Convergence Stuff
@@ -169,7 +184,7 @@ for i in range(len(irrMeshes)):
     l2irrMeshes[i] = l2norm(irrMeshData[:, 5], analyticalSolution)
 
 plt.figure(figsize=(6, 4), num=4)
-plt.loglog(irrMeshes, l2irrMeshes, c='black', linewidth=1, marker='.')
+plt.loglog(irrMeshes, l2irrMeshes, c='black', linewidth=1, marker='.', markersize=global_marker)
 plt.yticks(fontsize=10)
 plt.xticks(fontsize=10)
 
@@ -182,7 +197,9 @@ def minor_formatter(x, pos):
 plt.gca().xaxis.set_minor_formatter(ticker.FuncFormatter(minor_formatter))
 plt.gca().tick_params(axis='x', which='minor', labelsize=8.5)  # set fontsize for minor ticks
 plt.ylabel('$\epsilon_T$', fontsize=10)
-plt.savefig(savePath + 'Equilibrium_MeshConvergence', dpi=1000, bbox_inches='tight')
+plt.xlabel('N', fontsize=10)
+tikzplotlib.save(savePath + 'Equilibrium_MeshConvergence' + '.tex', axis_height=r'0.95\textwidth',
+                 axis_width=r'0.95\textwidth')
 # TODO: Change the bounding box to be equal width on both sides of the plot
 plt.show()
 
@@ -193,9 +210,6 @@ import matplotlib
 from matplotlib import rc
 
 # Direct input
-# plt.rcParams['text.latex.preamble'] = [r'\usepackage{lmodern}']
-# Options
-W = 5.8
 matplotlib.rcParams.update({
     "pgf.texsystem": "pdflatex",
     'font.family': 'serif',
@@ -204,7 +218,6 @@ matplotlib.rcParams.update({
     'axes.unicode_minus': False,
 })
 plt.rc('mathtext', fontset='dejavuserif')
-frac_thing = 0.2
 
 savePath = "/home/owen/CLionProjects/ParallelRadiationJCP/figures/"
 
@@ -219,7 +232,7 @@ for i in range(len(x)):
     else:
         temp[i] = (-(13E6 * x[i] * x[i]) + 2000.0)
 
-plt.plot(x, temp, c='black', linewidth=0.5)  # , c='blue', s=4)
+plt.plot(x, temp, c='black', linewidth=0.5)
 
 # Get the current axes, gca stands for 'get current axis'
 ax = plt.gca()
@@ -231,7 +244,11 @@ for axis in ['top', 'bottom', 'left', 'right']:
 plt.xlabel('x $[m]$')  # , fontsize=10)
 plt.ylabel(r'T $[K]$')  # , fontsize=10)
 plt.ticklabel_format(style="sci")
-# plt.subplots_adjust(left=frac_thing, top=1 - frac_thing, right=1 - frac_thing, bottom=frac_thing)
-plt.savefig(savePath + 'PlatesTemperature', dpi=1000, bbox_inches='tight')  # , pad_inches=0)
+
+import tikzplotlib
+
+# tikzplotlib.save("test.tex")
+tikzplotlib.save(savePath + 'PlatesTemperature' + '.tex', axis_height=r'0.95\textwidth',
+                 axis_width=r'0.95\textwidth')  # , pad_inches=0)
 # TODO: Change the bounding box to be equal width on both sides of the plot
 plt.show()
