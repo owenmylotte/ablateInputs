@@ -8,11 +8,10 @@ arguments:
 timestepper:
   arguments:
     ts_type: rk
-    ts_max_time: 1
-    ts_max_steps: 200000000
-    ts_dt: 1.0e-10
-    ts_adapt_monitor: ""
-    ts_adapt_safety: 0.9
+    ts_max_time: 100000
+    ts_max_steps: 3000000
+    ts_dt: 1.0E-10
+    ts_adapt_safety: 1.0
     ts_adapt_type: physicsConstrained
   io: !ablate::io::Hdf5MultiFileSerializer
     interval: 1000
@@ -85,6 +84,12 @@ timestepper:
           name: interiorCells
         subtrahendRegions:
           - name: slabBurnerRegion
+      - !ablate::domain::modifiers::CreateLabel
+        region:
+          name: heatFluxMonitorRegion
+        function: !ablate::mathFunctions::geom::Box
+          lower: [ 0 , 0.0086, -0.0127 ]
+          upper: [ 0.1, 0.0254, 0.0127 ]
       - !ablate::domain::modifiers::SubtractLabel
         # cut the slabBurner and glow plug out of the boundaryWalls
         differenceRegion:
@@ -93,6 +98,22 @@ timestepper:
           name: allWallBoundaryRegion
         subtrahendRegions:
           - name: slabBurnerRegion
+      - !ablate::domain::modifiers::SubtractLabel
+        # separates the regions above and below the slab
+        differenceRegion:
+          name: lowerSlabRegion
+        minuendRegion:
+          name: flowRegion
+        subtrahendRegions:
+          - name: heatFluxMonitorRegion
+      - !ablate::domain::modifiers::TagLabelInterface
+        # define the boundary between the upper and lower regions
+        leftRegion:
+          name: heatFluxMonitorRegion
+        rightRegion:
+          name: lowerSlabRegion
+        boundaryFaceRegion:
+          name: heatFluxMonitorFaces
       - !ablate::domain::modifiers::TagLabelInterface
         # define the boundary between the slab burner and flow
         leftRegion:
@@ -124,8 +145,13 @@ timestepper:
         conservedFieldOptions:
           petscfv_type: leastsquares
           petsclimiter_type: vanleer
-        region:
-          name: domain
+
+      # create a conserved field to track ndd
+      - !ablate::finiteVolume::ExtraVariable
+        name: "Progress"
+        components: [ "NDD" ]
+
+      # by adding a pressure field the code will compute and output pressure
       - !ablate::domain::FieldDescription
         name: pressure
         type: FV
@@ -136,10 +162,11 @@ timestepper:
     - !ablate::finiteVolume::fieldFunctions::Euler
       state: &flowFieldState
         eos: *eos
-        temperature:  !ablate::mathFunctions::geom::Sphere
-          center: [ 0.015,  0.007, 0.0]
-          radius:  0.005
-          insideValues:  1673.15
+        # use a sphere geometry to set up an ignition kernel
+        temperature: !ablate::mathFunctions::geom::Sphere
+          center: [ 0.0182024,  0.007 , 0.0 ]
+          radius: 0.005
+          insideValues: 1673.15
           outsideValues: 300
         pressure: 101325.0
         velocity: "0.0, 0.0, 0.0"
@@ -180,24 +207,53 @@ solvers:
     parameters:
       cfl: 0.45
     eos: *eos
-    transport: &transportModel !ablate::eos::transport::Sutherland
-      eos: *eos
-    fluxCalculator: !ablate::finiteVolume::fluxCalculator::AusmpUp
-      pgs: *pgs     
-    monitors:
-    - !ablate::monitors::TimeStepMonitor
-      interval: 25
-    - !ablate::monitors::MixtureFractionMonitor
-      mixtureFractionCalculator: !ablate::monitors::MixtureFractionCalculator
+    # the primary transport model applies to everything but the extra variables.
+    transport: !ablate::eos::tChemSoot::SootSpeciesTransportModel
+      # the SootSpeciesTransportModel adjusts the diffusion coefficient to carbon appropriately
+      transport: !ablate::eos::transport::Sutherland
         eos: *eos
-        massFractionsFuel: *fuelMassFrac
-        massFractionsOxidizer: *oxMassFrac
-    - !ablate::monitors::TurbFlowStats
-      fields: [velocity, temperature]  
-      eos: *eos
-      interval: !ablate::io::interval::DelayInterval
+    # if specified, the evTransport is used for the ndd transport
+    evTransport: !ablate::eos::tChemSoot::SootProgressTransportModel
+      transport: !ablate::eos::transport::Sutherland
+        eos: *eos
+    # additional monitors can be added to the flow solver.
+    monitors:
+      # The time step monitor outputs the current timestep and dt every 10 steps
+      - !ablate::monitors::TimeStepMonitor
         interval: 25
-        minimumSimulationTime: .02 #about 2 flow throughs
+      - !ablate::monitors::PhysicsTimeStep
+        interval: 25
+      #       # The TurbFlowStats monitor starts to take statistics after 0.01 seconds every 25 time steps
+      #       - !ablate::monitors::TurbFlowStats
+      #         fields: [ velocity, temperature ]
+      #         eos: *eos
+      #         interval: !ablate::io::interval::DelayInterval
+      #           interval: 25
+      #           minimumSimulationTime: .01 #about 1 flow
+      # The mixture fraction calculator outputs zMix and Yi everytime the serializer saves
+      - !ablate::monitors::MixtureFractionMonitor
+        mixtureFractionCalculator: !ablate::monitors::MixtureFractionCalculator
+          eos: *eos
+          massFractionsFuel: *fuelMassFrac
+          massFractionsOxidizer: *oxMassFrac
+      - !ablate::monitors::RadiationFlux
+        id: slabFluxMonitor
+        region:
+          name: heatFluxMonitorFaces
+        radiation:
+          - !ablate::radiation::SurfaceRadiation
+            id: slabMonitorTracer
+            region:
+              name: heatFluxMonitorRegion
+            rays: 23
+            properties: !ablate::eos::radiationProperties::Sum
+              - !ablate::eos::radiationProperties::Zimmer
+                eos: *eos
+              - !ablate::eos::radiationProperties::SootMeanProperties
+                eos: *eos
+            log: !<!ablate::monitors::logs::StdOut>
+              name: radlog
+            # additional processes can be added to the flow solver
     additionalProcesses:
       - !ablate::finiteVolume::processes::PressureGradientScaling
         &pgs
@@ -208,7 +264,18 @@ solvers:
         log: !ablate::monitors::logs::StdOut
       - !ablate::finiteVolume::processes::Chemistry
         eos: *eos
-   
+      # ThermophoreticDiffusion diffusion controls the diffusion of solid carbon and ndd
+      - !ablate::finiteVolume::processes::ThermophoreticDiffusion
+        transport: !ablate::eos::transport::Sutherland
+          eos: *eos
+      # use ablate::finiteVolume::processes::Soot to compute ndd and carbon source terms
+      - !ablate::finiteVolume::processes::Soot
+        eos: *eos
+    # a flux calculator must be specified to so solver for advection
+    fluxCalculator: !ablate::finiteVolume::fluxCalculator::AusmpUp
+      pgs: *pgs
+
+  # each boundary can be updated with a separate boundary solver
   - !ablate::boundarySolver::BoundarySolver
     id: inlet
     region:
@@ -227,15 +294,15 @@ solvers:
               formula: velFac*(1 - r/(dia/2.0))^(1/7)
               constants:
                 dia: 0.0254
-                velFac: 5.94927204246603   #0.0032  kg/s or 0.192 kg/min
+                velFac: 6.28305996662731 # 0.156 m3/min
               nested:
                 r: !ablate::mathFunctions::Formula
-                  formula: sqrt((x-xc)^2 + (y-yc)^2)
+                  formula: sqrt((y-yc)^2 + (z-zc)^2)
                   constants:
                     yc: 0.0127
-                    xc: 0.0
-                    
-                    
+                    zc: 0.0
+
+  # the outlet boundary uses a reference pressure and maxAcousticsLength
   - !ablate::boundarySolver::BoundarySolver
     id: outlet
     region:
@@ -246,8 +313,8 @@ solvers:
     processes:
       - !ablate::boundarySolver::lodi::OpenBoundary
         referencePressure: 101325.0
-        maxAcousticsLength: 0.1
-        reflectFactor: 1.50
+        maxAcousticsLength: 0.165354
+        reflectFactor: 15.0
         pgs: *pgs
         eos: *eos
   - !ablate::boundarySolver::BoundarySolver
@@ -271,7 +338,10 @@ solvers:
     processes:
       - !ablate::boundarySolver::physics::Sublimation
         latentHeatOfFusion: 840890
-        transportModel: *transportModel
+        # the transport model is enforce to update the zero slip wall condition
+        transportModel: !ablate::eos::transport::Sutherland
+          eos: *eos
+        # the eos/pgs is used tor pressure boundary condition
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
@@ -280,11 +350,18 @@ solvers:
           id: surfaceflux
           region:
             name: flowRegion
-          rays: 6
-          properties: !ablate::eos::radiationProperties::Zimmer
-            eos: *eos
-        emissivity: 0.91    
-    
+          rays: 23
+          # the properties are a function of both gas and soot
+          properties: !ablate::eos::radiationProperties::Sum
+            - !ablate::eos::radiationProperties::Zimmer
+              eos: *eos
+            - !ablate::eos::radiationProperties::SootMeanProperties
+              eos: *eos
+          log: !<!ablate::monitors::logs::StdOut>
+            name: radlog
+        emissivity: 0.9
+        #density of pmma used to output reg rate
+        solidDensity: 1190.0
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
   - !ablate::radiation::VolumeRadiation
@@ -292,11 +369,15 @@ solvers:
     region:
       name: flowRegion
     interval: 10
-    radiation: !ablate::radiation::Radiation
+    radiation: !ablate::radiation::RaySharingRadiation
       id: volRad
       region:
         name: flowRegion
-      rays: 5
-      properties: !ablate::eos::radiationProperties::Zimmer
-        eos: *eos
-      
+      rays: 23
+      properties: !ablate::eos::radiationProperties::Sum
+        - !ablate::eos::radiationProperties::Zimmer
+          eos: *eos
+        - !ablate::eos::radiationProperties::SootMeanProperties
+          eos: *eos
+      log: !<!ablate::monitors::logs::StdOut>
+        name: radlog
