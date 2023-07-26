@@ -3,7 +3,7 @@
 # metadata for the simulation
 environment:
   title: _slabBurner3D
-  tagDirectory: false
+  tagDirectory: true
 # global arguments that can be used by petsc
 arguments:
   # The gmsh arguments must be global because they are used before the mesh options are parsed
@@ -83,7 +83,7 @@ timestepper:
         differenceRegion:
           name: lowerSlabRegion
         minuendRegion:
-          name: interiorFlowRegion
+          name: flowRegion
         subtrahendRegions:
           - name: heatFluxMonitorRegion
       - !ablate::domain::modifiers::TagLabelInterface
@@ -105,18 +105,18 @@ timestepper:
         region:
           name: boundaryCellsFront
         function: !ablate::mathFunctions::geom::Box
-          lower: [ 0 , 0.0254, 0.0127 ]
-          upper: [ 0.1, 0.0, 0.02 ]
+          lower: [ 0 , 0.0, 0.0127 ]
+          upper: [ 0.1, 0.0254, 0.02 ]
       - !ablate::domain::modifiers::TagLabelInterface
         leftRegion:
-          name: interiorFlowRegion
+          name: flowRegion
         rightRegion:
           name: boundaryCellsFront
         boundaryFaceRegion:
           name: boundaryFacesFront
       - !ablate::domain::modifiers::TagLabelInterface
         leftRegion:
-          name: interiorFlowRegion
+          name: flowRegion
         rightRegion:
           name: boundaryCellsTop
         boundaryFaceRegion:
@@ -133,12 +133,12 @@ timestepper:
           mechFile: MMAReduced.soot.yml
           options:
             # set a minimum temperature for the chemical kinetics ode integration
-            thresholdTemperature: 560         
+            thresholdTemperature: 560
         # use a higher order field for the conserved field transport options
         conservedFieldOptions:
           petscfv_type: leastsquares
           petsclimiter_type: vanleer
-          
+
       # create a conserved field to track ndd
       - !ablate::finiteVolume::ExtraVariable
         name: "Progress"
@@ -237,13 +237,13 @@ solvers:
         interval: 25
       - !ablate::monitors::PhysicsTimeStep
         interval: 25
-#       # The TurbFlowStats monitor starts to take statistics after 0.01 seconds every 25 time steps
-#       - !ablate::monitors::TurbFlowStats
-#         fields: [ velocity, temperature ]
-#         eos: *eos
-#         interval: !ablate::io::interval::DelayInterval
-#           interval: 25
-#           minimumSimulationTime: .01 #about 1 flow
+      #       # The TurbFlowStats monitor starts to take statistics after 0.01 seconds every 25 time steps
+      #       - !ablate::monitors::TurbFlowStats
+      #         fields: [ velocity, temperature ]
+      #         eos: *eos
+      #         interval: !ablate::io::interval::DelayInterval
+      #           interval: 25
+      #           minimumSimulationTime: .01 #about 1 flow
       # The mixture fraction calculator outputs zMix and Yi everytime the serializer saves
       - !ablate::monitors::MixtureFractionMonitor
         mixtureFractionCalculator: !ablate::monitors::MixtureFractionCalculator
@@ -259,12 +259,14 @@ solvers:
             id: slabMonitorTracer
             region:
               name: heatFluxMonitorRegion
-            rays: 25
+            rays: 23
             properties: !ablate::eos::radiationProperties::Sum
               - !ablate::eos::radiationProperties::Zimmer
                 eos: *eos
               - !ablate::eos::radiationProperties::SootMeanProperties
                 eos: *eos
+            log: !<!ablate::monitors::logs::StdOut>
+              name: radlog
       - !ablate::monitors::RadiationFlux
         id: vTCPMonitor_front
         region:
@@ -273,7 +275,7 @@ solvers:
           - !ablate::radiation::OrthogonalRadiation
             id: tcpTracer_front
             region:
-              name: interiorFlowRegion
+              name: flowRegion
             properties: !ablate::eos::radiationProperties::SootSpectrumProperties
               eos: *eos
               wavelengths: [ 650.0E-9, 532.0E-9, 470.0E-9 ] # Red wavelength, # Green wavelength, # Blue wavelength
@@ -287,7 +289,7 @@ solvers:
           - !ablate::radiation::OrthogonalRadiation
             id: tcpTracer_top
             region:
-              name: interiorFlowRegion
+              name: flowRegion
             properties: !ablate::eos::radiationProperties::SootSpectrumProperties
               eos: *eos
               wavelengths: [ 650.0E-9, 532.0E-9, 470.0E-9 ] # Red wavelength, # Green wavelength, # Blue wavelength
@@ -304,7 +306,7 @@ solvers:
         maxAlphaAllowed: 100.0
         domainLength: 0.165354
         log: !ablate::monitors::logs::StdOut
-      # the chemistry process is used to compute the species and energy source terms from the reactions
+        # the chemistry process is used to compute the species and energy source terms from the reactions
       - !ablate::finiteVolume::processes::Chemistry
         eos: *eos
       # ThermophoreticDiffusion diffusion controls the diffusion of solid carbon and ndd
@@ -399,20 +401,21 @@ solvers:
         massFractions: *fuelMassFrac
         # the radiviative heat flux to the surface is updated every 10 flow time steps
         radiationInterval: 10
-
         # a surface radiation solver is used to compute heat flux to the surface
         radiation: !ablate::radiation::SurfaceRadiation
           id: surfaceflux
           # the region is used to describe the area in which the flow solver is valid
           region:
             name: flowRegion
-          rays: 25
+          rays: 23
           # the properties are a function of both gas and soot
           properties: !ablate::eos::radiationProperties::Sum
             - !ablate::eos::radiationProperties::Zimmer
               eos: *eos
             - !ablate::eos::radiationProperties::SootMeanProperties
               eos: *eos
+          log: !<!ablate::monitors::logs::StdOut>
+            name: radlog
         emissivity: 0.9
         #density of pmma used to output reg rate
         solidDensity: 1190.0
@@ -433,9 +436,11 @@ solvers:
       id: volRad
       region:
         name: flowRegion
-      rays: 10
+      rays: 23
       properties: !ablate::eos::radiationProperties::Sum
         - !ablate::eos::radiationProperties::Zimmer
           eos: *eos
         - !ablate::eos::radiationProperties::SootMeanProperties
           eos: *eos
+      log: !<!ablate::monitors::logs::StdOut>
+        name: radlog
