@@ -2,7 +2,7 @@
 #### See https://hpc.llnl.gov/training/tutorials/slurm-and-moab#LC
 
 ##### These lines are for Slurm
-#SBATCH -N 600
+#SBATCH -N 512
 #SBATCH -J 6G
 #SBATCH -t 24:00:00
 #SBATCH -p pbatch
@@ -18,7 +18,7 @@ module load gcc/10.2.1
 module load  cmake/3.21.1 
 
 # Load PETSC ENV
-export PETSC_DIR="/p/lustre2/mcgurn4/petsc"
+export PETSC_DIR="/usr/workspace/mylotte1"
 export PETSC_ARCH="arch-ablate-opt-gcc" # arch-ablate-debug or arch-ablate-opt
 export PKG_CONFIG_PATH="${PETSC_DIR}/${PETSC_ARCH}/lib/pkgconfig:$PKG_CONFIG_PATH"
 export HDF5_ROOT="${PETSC_DIR}/${PETSC_ARCH}"  
@@ -29,14 +29,8 @@ export PATH="${PETSC_DIR}/${PETSC_ARCH}/bin:$PATH"
 mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
-export TITLE=6G-600
-export VELOCITY="min(3.985120454,t*3.985120454/.001),0.0,0.0"
-
-
 ##### Launch parallel job using srun
-srun -n21600 /p/lustre2/mcgurn4/ablateOpt/ablate \
-	--input /p/lustre2/ubchrest/ablateInputs/slabBurner3D/slabBurner.3D.yaml \
-	-yaml::environment::title $TITLE \
-    -yaml::solvers::[1]::processes::[0]::velocity \"$VELOCITY\" 
+srun -n18432 /p/lustre1/mylotte1/ablateOpt/ablate \
+	--input /p/lustre1/mylotte1/ablateInputs/slabBurner3D/slabBurner.3D.radLoss.yaml
 	
 echo 'Done'

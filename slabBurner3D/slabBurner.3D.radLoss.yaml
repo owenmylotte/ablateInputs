@@ -18,8 +18,8 @@ timestepper:
     interval: 1000
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-#    faces: [ 186,40,40 ] # this is ~.36mm
-    faces: [105,15,15]
+    faces: [ 420,60,60 ] # this is ~.36mm
+#    faces: [105,15,15]
     lower: [ 0.0, 0.0, -0.0127 ]
     upper: [ 0.1, 0.0254, 0.0127 ]
     simplex: false
@@ -62,20 +62,16 @@ timestepper:
         region:
           name: slabBurnerRegion
         function: !ablate::mathFunctions::geom::ConvexPolygon
+          # Dimensions to match paper: Radiation Heat Transfer in Ablating Boundary Layer Combustion Theory used for
+          #                            Hybrid Rocket Motor Analysis
           points:
             - [ 0.0132,-.1 ]
             - [ 0.0132,0 ]
-            - [ 0.0173,0.0045 ]
-            - [ 0.0214,0.0069 ]
-            - [ 0.0258,0.0082 ]
-            - [ 0.0385,0.009 ]
-            - [ 0.0592,0.009 ]
-            - [ 0.0702,0.0087 ]
-            - [ 0.0722,0.0079 ]
-            - [ 0.0727,0.007 ]
-            - [ 0.0728,0 ]
-            - [ 0.0728,-.1 ]
-          maxDistance: 0.003965
+            - [ 0.0142,0.010 ]
+            - [ 0.0932,0.010 ]
+            - [ 0.0933,0 ]
+            - [ 0.0933,-.1 ]
+          maxDistance: 0.004750
 
       # create a label for defining the glowPlug
       - !ablate::domain::modifiers::SubtractLabel
@@ -127,7 +123,7 @@ timestepper:
         region:
           name: heatFluxMonitorRegion
         function: !ablate::mathFunctions::geom::Box
-          lower: [ 0 , 0.009, -0.0127 ]
+          lower: [ 0 , 0.010, -0.0127 ]
           upper: [ 0.1, 0.0254, 0.0127 ]
 
       - !ablate::domain::modifiers::SubtractLabel
@@ -173,8 +169,8 @@ timestepper:
         eos: *eos
         # use a sphere geometry to set up an ignition kernel
         temperature: !ablate::mathFunctions::geom::Sphere
-          center: [ 0.0182024,  0.007 , 0.0 ]
-          radius: 0.005
+          center: [ 0.0142,  0.010 , 0.0 ]
+          radius: 0.0075
           insideValues: 1673.15
           outsideValues: 300
         pressure: 101325.0
@@ -379,7 +375,7 @@ solvers:
       id: volRad
       region:
         name: flowRegion
-      rays: 23
+      rays: 15
       properties: !ablate::eos::radiationProperties::Sum
         - !ablate::eos::radiationProperties::Zimmer
           eos: *eos
