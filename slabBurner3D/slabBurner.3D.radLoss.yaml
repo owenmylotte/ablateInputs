@@ -263,6 +263,7 @@ solvers:
                 eos: *eos
               - !ablate::eos::radiationProperties::SootMeanProperties
                 eos: *eos
+                ppm: 50.0
             log: !<!ablate::monitors::logs::StdOut>
               name: radlog
           # additional processes can be added to the flow solver
@@ -361,6 +362,7 @@ solvers:
               eos: *eos
             - !ablate::eos::radiationProperties::SootMeanProperties
               eos: *eos
+              ppm: 50.0
           log: !<!ablate::monitors::logs::StdOut>
             name: radlog
         emissivity: 0.9
