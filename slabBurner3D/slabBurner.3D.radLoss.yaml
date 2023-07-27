@@ -1,37 +1,38 @@
-# no rad, add back fake heatflux
 ---
 environment:
   title: _3dSlabBurner
-  tagDirectory: false
+  tagDirectory: true
 arguments:
   outputAuxVector: true
 timestepper:
   arguments:
     ts_type: rk
-    ts_max_time: 1
-    ts_max_steps: 200000000
-    ts_dt: 1.0e-10
-    ts_adapt_monitor: ""
-    ts_adapt_safety: 0.9
+    ts_max_time: 100000
+    ts_max_steps: 3000000
+    ts_dt: 1.0E-10
+    ts_adapt_safety: 0.99
     ts_adapt_type: physicsConstrained
+    ts_rtol: 0.001
+    ts_atol: 0.001
   io: !ablate::io::Hdf5MultiFileSerializer
     interval: 1000
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [186,40,40] # this is ~.36mm
-    lower: [ 0.0, 0.0, -0.0127]
-    upper: [ 0.1, 0.0254, 0.0127]
+    faces: [ 186,40,40 ] # this is ~.36mm
+#    faces: [105,15,15]
+    lower: [ 0.0, 0.0, -0.0127 ]
+    upper: [ 0.1, 0.0254, 0.0127 ]
     simplex: false
     options:
       dm_plex_hash_location: true
     preModifiers:
-        # cluster around the top of the slab
+      # cluster around the top of the slab
       - !ablate::domain::modifiers::OnePointClusteringMapper
         direction: 1
         start: 0.0
         end: 0.0254
         beta: 2.5
-        location:  0.006
+        location: 0.006
         
         # cluster around the sides of the slab
       - !ablate::domain::modifiers::TwoPointClusteringMapper
@@ -41,8 +42,8 @@ timestepper:
         location: 0.0
         offset: 0.003965
         beta: 2.5
-        location:  0.006
-    
+        location: 0.006
+
       # distribute the mesh across the mpi rank with ghost cells
       - !ablate::domain::modifiers::DistributeWithGhostCells
         ghostCellDepth: 3
@@ -62,20 +63,20 @@ timestepper:
           name: slabBurnerRegion
         function: !ablate::mathFunctions::geom::ConvexPolygon
           points:
-            - [0.0132,-.1]
-            - [0.0132,0]
-            - [0.0173,0.0045]
-            - [0.0214,0.0069]
-            - [0.0258,0.0082]
-            - [0.0385,0.009]
-            - [0.0592,0.009]
-            - [0.0702,0.0087]
-            - [0.0722,0.0079]
-            - [0.0727,0.007]
-            - [0.0728,0]
-            - [0.0728,-.1]
+            - [ 0.0132,-.1 ]
+            - [ 0.0132,0 ]
+            - [ 0.0173,0.0045 ]
+            - [ 0.0214,0.0069 ]
+            - [ 0.0258,0.0082 ]
+            - [ 0.0385,0.009 ]
+            - [ 0.0592,0.009 ]
+            - [ 0.0702,0.0087 ]
+            - [ 0.0722,0.0079 ]
+            - [ 0.0727,0.007 ]
+            - [ 0.0728,0 ]
+            - [ 0.0728,-.1 ]
           maxDistance: 0.003965
-          
+
       # create a label for defining the glowPlug
       - !ablate::domain::modifiers::SubtractLabel
         # cut the slabBurner and glow plug out of the flowRegion
@@ -85,6 +86,13 @@ timestepper:
           name: interiorCells
         subtrahendRegions:
           - name: slabBurnerRegion
+      - !ablate::domain::modifiers::TagLabelInterface
+        leftRegion:
+          name: flowRegion
+        rightRegion:
+          name: boundaryCellsFront
+        boundaryFaceRegion:
+          name: boundaryFacesFront
       - !ablate::domain::modifiers::SubtractLabel
         # cut the slabBurner and glow plug out of the boundaryWalls
         differenceRegion:
@@ -103,7 +111,7 @@ timestepper:
           name: slabBurnerBoundaryFaces
         rightBoundaryCellRegion:
           name: slabBurnerBoundaryCells
-          
+
       - !ablate::domain::modifiers::SubtractLabel
         # remove the slabBurnerFace from the flowRegion
         differenceRegion:
@@ -113,6 +121,33 @@ timestepper:
         subtrahendRegions:
           - name: slabBurnerBoundaryFaces
         incompleteLabel: true
+
+        # Create a region for the flat plate heat flux monitor to operate on
+      - !ablate::domain::modifiers::CreateLabel
+        region:
+          name: heatFluxMonitorRegion
+        function: !ablate::mathFunctions::geom::Box
+          lower: [ 0 , 0.009, -0.0127 ]
+          upper: [ 0.1, 0.0254, 0.0127 ]
+
+      - !ablate::domain::modifiers::SubtractLabel
+        # separates the regions above and below the slab
+        differenceRegion:
+          name: lowerSlabRegion
+        minuendRegion:
+          name: interiorCells
+        subtrahendRegions:
+          - name: heatFluxMonitorRegion
+
+      - !ablate::domain::modifiers::TagLabelInterface
+        # define the boundary between the upper and lower regions
+        leftRegion:
+          name: heatFluxMonitorRegion
+        rightRegion:
+          name: lowerSlabRegion
+        boundaryFaceRegion:
+          name: heatFluxMonitorFaces
+
       - !ablate::domain::modifiers::GhostBoundaryCells
     fields:
       - !ablate::finiteVolume::CompressibleFlowFields
@@ -136,10 +171,11 @@ timestepper:
     - !ablate::finiteVolume::fieldFunctions::Euler
       state: &flowFieldState
         eos: *eos
-        temperature:  !ablate::mathFunctions::geom::Sphere
-          center: [ 0.015,  0.007, 0.0]
-          radius:  0.005
-          insideValues:  1673.15
+        # use a sphere geometry to set up an ignition kernel
+        temperature: !ablate::mathFunctions::geom::Sphere
+          center: [ 0.0182024,  0.007 , 0.0 ]
+          radius: 0.005
+          insideValues: 1673.15
           outsideValues: 300
         pressure: 101325.0
         velocity: "0.0, 0.0, 0.0"
@@ -158,15 +194,25 @@ timestepper:
         name: slabBurnerBoundaryCells
       state: &fuelFieldState
         eos: *eos
-        temperature:  653.0 #fuel temperature
+        temperature: 653.0 #fuel temperature
         pressure: 101325.0
-        velocity: "0.0, 00, 0.0"
+        velocity: "0.0, 0.0, 0.0"
         other: !ablate::finiteVolume::fieldFunctions::MassFractions
           &fuelMassFrac
           eos: *eos
           values:
-            - fieldName: MMETHAC_C5H8O2 # The fuel boundary condition
-              field: 1.0
+            - fieldName: H2
+              field: 2.6605252679403324e-08
+            - fieldName: CH4
+              field: 0.03130099022620085
+            - fieldName: C2H2
+              field: 0.019041133292868283
+            - fieldName: C2H4
+              field: 0.9085604652430157
+            - fieldName: C2H6
+              field: 0.012981434565768965
+            - fieldName: C3H8
+              field: 0.02811595000348999
     - !ablate::finiteVolume::fieldFunctions::DensityMassFractions
       region:
         name: slabBurnerBoundaryCells
@@ -180,24 +226,46 @@ solvers:
     parameters:
       cfl: 0.45
     eos: *eos
-    transport: &transportModel !ablate::eos::transport::Sutherland
+    transport: !ablate::eos::transport::Sutherland
       eos: *eos
-    fluxCalculator: !ablate::finiteVolume::fluxCalculator::AusmpUp
-      pgs: *pgs     
+
     monitors:
-    - !ablate::monitors::TimeStepMonitor
-      interval: 25
-    - !ablate::monitors::MixtureFractionMonitor
-      mixtureFractionCalculator: !ablate::monitors::MixtureFractionCalculator
-        eos: *eos
-        massFractionsFuel: *fuelMassFrac
-        massFractionsOxidizer: *oxMassFrac
-    - !ablate::monitors::TurbFlowStats
-      fields: [velocity, temperature]  
-      eos: *eos
-      interval: !ablate::io::interval::DelayInterval
+      # The time step monitor outputs the current timestep and dt every 10 steps
+      - !ablate::monitors::TimeStepMonitor
         interval: 25
-        minimumSimulationTime: .02 #about 2 flow throughs
+      - !ablate::monitors::PhysicsTimeStep
+        interval: 25
+      #       # The TurbFlowStats monitor starts to take statistics after 0.01 seconds every 25 time steps
+      #       - !ablate::monitors::TurbFlowStats
+      #         fields: [ velocity, temperature ]
+      #         eos: *eos
+      #         interval: !ablate::io::interval::DelayInterval
+      #           interval: 25
+      #           minimumSimulationTime: .01 #about 1 flow
+      # The mixture fraction calculator outputs zMix and Yi everytime the serializer saves
+      - !ablate::monitors::MixtureFractionMonitor
+        mixtureFractionCalculator: !ablate::monitors::MixtureFractionCalculator
+          eos: *eos
+          massFractionsFuel: *fuelMassFrac
+          massFractionsOxidizer: *oxMassFrac
+            #      - !ablate::monitors::RadiationFlux
+            #        id: slabFluxMonitor
+            #        region:
+            #          name: heatFluxMonitorFaces
+            #        radiation:
+            #          - !ablate::radiation::SurfaceRadiation
+            #            id: slabMonitorTracer
+            #            region:
+            #              name: heatFluxMonitorRegion
+            #            rays: 2
+            #            properties: !ablate::eos::radiationProperties::Sum
+            #              - !ablate::eos::radiationProperties::Zimmer
+            #                eos: *eos
+            #              - !ablate::eos::radiationProperties::SootMeanProperties
+            #                eos: *eos
+            #            log: !<!ablate::monitors::logs::StdOut>
+            #              name: radlog
+          # additional processes can be added to the flow solver
     additionalProcesses:
       - !ablate::finiteVolume::processes::PressureGradientScaling
         &pgs
@@ -208,7 +276,10 @@ solvers:
         log: !ablate::monitors::logs::StdOut
       - !ablate::finiteVolume::processes::Chemistry
         eos: *eos
-   
+    fluxCalculator: !ablate::finiteVolume::fluxCalculator::AusmpUp
+      pgs: *pgs
+
+  # each boundary can be updated with a separate boundary solver
   - !ablate::boundarySolver::BoundarySolver
     id: inlet
     region:
@@ -227,15 +298,15 @@ solvers:
               formula: velFac*(1 - r/(dia/2.0))^(1/7)
               constants:
                 dia: 0.0254
-                velFac: 5.94927204246603   #0.0032  kg/s or 0.192 kg/min
+                velFac: 6.28305996662731 # 0.156 m3/min
               nested:
                 r: !ablate::mathFunctions::Formula
-                  formula: sqrt((x-xc)^2 + (y-yc)^2)
+                  formula: sqrt((y-yc)^2 + (z-zc)^2)
                   constants:
                     yc: 0.0127
-                    xc: 0.0
-                    
-                    
+                    zc: 0.0
+
+  # the outlet boundary uses a reference pressure and maxAcousticsLength
   - !ablate::boundarySolver::BoundarySolver
     id: outlet
     region:
@@ -246,8 +317,8 @@ solvers:
     processes:
       - !ablate::boundarySolver::lodi::OpenBoundary
         referencePressure: 101325.0
-        maxAcousticsLength: 0.1
-        reflectFactor: 1.50
+        maxAcousticsLength: 0.165354
+        reflectFactor: 15.0
         pgs: *pgs
         eos: *eos
   - !ablate::boundarySolver::BoundarySolver
@@ -270,8 +341,11 @@ solvers:
       name: slabBurnerBoundaryFaces
     processes:
       - !ablate::boundarySolver::physics::Sublimation
-        latentHeatOfFusion: 840890
-        transportModel: *transportModel
+        latentHeatOfFusion: 1462876.0
+        # the transport model is enforce to update the zero slip wall condition
+        transportModel: !ablate::eos::transport::Sutherland
+          eos: *eos
+        # the eos/pgs is used tor pressure boundary condition
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
@@ -280,11 +354,18 @@ solvers:
           id: surfaceflux
           region:
             name: flowRegion
-          rays: 6
-          properties: !ablate::eos::radiationProperties::Zimmer
-            eos: *eos
-        emissivity: 0.91    
-    
+          rays: 23
+          # the properties are a function of both gas and soot
+          properties: !ablate::eos::radiationProperties::Sum
+            - !ablate::eos::radiationProperties::Zimmer
+              eos: *eos
+            - !ablate::eos::radiationProperties::SootMeanProperties
+              eos: *eos
+          log: !<!ablate::monitors::logs::StdOut>
+            name: radlog
+        emissivity: 0.9
+        # density of pmma used to output reg rate
+        solidDensity: 1190.0
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
   - !ablate::radiation::VolumeRadiation
@@ -292,11 +373,16 @@ solvers:
     region:
       name: flowRegion
     interval: 10
-    radiation: !ablate::radiation::Radiation
+    radiation: !ablate::radiation::RaySharingRadiation
       id: volRad
       region:
         name: flowRegion
-      rays: 5
-      properties: !ablate::eos::radiationProperties::Zimmer
-        eos: *eos
-      
+      rays: 23
+      properties: !ablate::eos::radiationProperties::Sum
+        - !ablate::eos::radiationProperties::Zimmer
+          eos: *eos
+        - !ablate::eos::radiationProperties::SootMeanProperties
+          eos: *eos
+          ppm: 50.0
+      log: !<!ablate::monitors::logs::StdOut>
+        name: radlog
