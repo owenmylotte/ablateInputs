@@ -18,7 +18,7 @@ phases:
   - name: gri30
     thermo: ideal-gas
     elements: [O, H, C, N, Ar]
-    species: [H2, H, O, O2, OH, H2O, HO2, H2O2, C, CH, CH2, CH2(S), CH3, CH4,
+    species: [C(s), H2, H, O, O2, OH, H2O, HO2, H2O2, C, CH, CH2, CH2(S), CH3, CH4,
               CO, CO2, HCO, CH2O, CH2OH, CH3O, CH3OH, C2H, C2H2, C2H3, C2H4, C2H5,
               C2H6, HCCO, CH2CO, HCCOH, N, NH, NH2, NH3, NNH, NO, NO2, N2O, HNO, CN,
               HCN, H2CN, HCNN, HCNO, HOCN, HNCO, NCO, AR, C3H7, C3H8, CH2CHO,
@@ -949,6 +949,24 @@ species:
       diameter: 3.621
       polarizability: 1.76
       rotational-relaxation: 4.0
+  - name: C(s)
+    composition: {C: 1}
+    thermo:
+      model: NASA7
+      temperature-ranges: [200.0, 1000.0, 5000.0]
+      data:
+        - [-3.108720720e-01, 4.403536860e-03, 1.903941180e-06,-6.385469660e-09, 2.989642480e-12,
+           -1.086507940e+02, 1.113829530e+00]
+        - [ 1.455718290e+00, 1.717022160e-03,-6.975627860e-07, 1.352770320e-10,-9.675906520e-15,
+            -6.951388140e+02,-8.525830330e+00]
+      note: L8/88
+    transport:
+      model: gas
+      geometry: linear
+      well-depth: 1.
+      diameter: 1.
+      polarizability: 1.
+      rotational-relaxation: 0.
 
 reactions:
   - equation: 2 O + M <=> O2 + M  # Reaction 1
