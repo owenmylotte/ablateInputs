@@ -3,19 +3,16 @@
 
 ##### These lines are for Slurm
 #SBATCH -N 512
-#SBATCH -J 6G
+#SBATCH -J 6G_rad
 #SBATCH -t 24:00:00
 #SBATCH -p pbatch
 #SBATCH --mail-type=ALL
 #SBATCH -A sunyb
-#SBATCH --mail-user=mtmcgurn@buffalo.edu
+#SBATCH --mail-user=owenmylo@buffalo.edu
 
 ##### Load Required modules
-# gcc
-module load mkl/2019.0
-module load valgrind/3.16.1
-module load gcc/10.2.1
-module load  cmake/3.21.1 
+module load clang/14.0.6-magic
+module load cmake/3.25.2
 
 # Load PETSC ENV
 export PETSC_DIR="/usr/workspace/mylotte1"
