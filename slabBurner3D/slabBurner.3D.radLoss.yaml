@@ -18,8 +18,8 @@ timestepper:
     interval: 1000
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 186,40,40 ] # this is ~.36mm
-#    faces: [105,15,15]
+#    faces: [ 186,40,40 ] # this is ~.36mm
+    faces: [105,15,15]
     lower: [ 0.0, 0.0, -0.0127 ]
     upper: [ 0.1, 0.0254, 0.0127 ]
     simplex: false
@@ -248,23 +248,23 @@ solvers:
           eos: *eos
           massFractionsFuel: *fuelMassFrac
           massFractionsOxidizer: *oxMassFrac
-            #      - !ablate::monitors::RadiationFlux
-            #        id: slabFluxMonitor
-            #        region:
-            #          name: heatFluxMonitorFaces
-            #        radiation:
-            #          - !ablate::radiation::SurfaceRadiation
-            #            id: slabMonitorTracer
-            #            region:
-            #              name: heatFluxMonitorRegion
-            #            rays: 2
-            #            properties: !ablate::eos::radiationProperties::Sum
-            #              - !ablate::eos::radiationProperties::Zimmer
-            #                eos: *eos
-            #              - !ablate::eos::radiationProperties::SootMeanProperties
-            #                eos: *eos
-            #            log: !<!ablate::monitors::logs::StdOut>
-            #              name: radlog
+      - !ablate::monitors::RadiationFlux
+        id: slabFluxMonitor
+        region:
+          name: heatFluxMonitorFaces
+        radiation:
+          - !ablate::radiation::SurfaceRadiation
+            id: slabMonitorTracer
+            region:
+              name: heatFluxMonitorRegion
+            rays: 23
+            properties: !ablate::eos::radiationProperties::Sum
+              - !ablate::eos::radiationProperties::Zimmer
+                eos: *eos
+              - !ablate::eos::radiationProperties::SootMeanProperties
+                eos: *eos
+            log: !<!ablate::monitors::logs::StdOut>
+              name: radlog
           # additional processes can be added to the flow solver
     additionalProcesses:
       - !ablate::finiteVolume::processes::PressureGradientScaling
