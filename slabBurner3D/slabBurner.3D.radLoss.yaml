@@ -18,8 +18,8 @@ timestepper:
     interval: 1000
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    faces: [ 420,60,60 ] # this is ~.36mm
-#    faces: [105,15,15]
+    #    faces: [ 420,60,60 ] # this is ~.36mm
+    faces: [ 105,15,15 ]
     lower: [ 0.0, 0.0, -0.0127 ]
     upper: [ 0.1, 0.0254, 0.0127 ]
     simplex: false
@@ -27,22 +27,22 @@ timestepper:
       dm_plex_hash_location: true
     preModifiers:
       # cluster around the top of the slab
-      - !ablate::domain::modifiers::OnePointClusteringMapper
-        direction: 1
-        start: 0.0
-        end: 0.0254
-        beta: 2.5
-        location: 0.006
-        
-        # cluster around the sides of the slab
-      - !ablate::domain::modifiers::TwoPointClusteringMapper
-        direction: 2
-        start: -0.0127
-        end: 0.0127
-        location: 0.0
-        offset: 0.003965
-        beta: 2.5
-        location: 0.006
+      #      - !ablate::domain::modifiers::OnePointClusteringMapper
+      #        direction: 1
+      #        start: 0.0
+      #        end: 0.0254
+      #        beta: 2.5
+      #        location: 0.006
+      #
+      #        # cluster around the sides of the slab
+      #      - !ablate::domain::modifiers::TwoPointClusteringMapper
+      #        direction: 2
+      #        start: -0.0127
+      #        end: 0.0127
+      #        location: 0.0
+      #        offset: 0.003965
+      #        beta: 2.5
+      #        location: 0.006
 
       # distribute the mesh across the mpi rank with ghost cells
       - !ablate::domain::modifiers::DistributeWithGhostCells
@@ -154,7 +154,6 @@ timestepper:
             thresholdTemperature: 560
         conservedFieldOptions:
           petscfv_type: leastsquares
-          petsclimiter_type: vanleer
         region:
           name: domain
       - !ablate::domain::FieldDescription
@@ -163,6 +162,12 @@ timestepper:
         location: aux
         region:
           name: domain
+      # create a conserved field to track ndd
+      - !ablate::finiteVolume::ExtraVariable
+        name: "Progress"
+        components: [ "NDD" ]
+  #        region:
+  #          name: domain
   initialization:
     - !ablate::finiteVolume::fieldFunctions::Euler
       state: &flowFieldState
@@ -184,6 +189,11 @@ timestepper:
     - !ablate::finiteVolume::fieldFunctions::DensityMassFractions
       state: *flowFieldState
 
+    # Set the soot number density to zero
+    - fieldName: densityProgress
+      field: "0.0"
+
+    # Set the boundary cells for the slab to a different initial condition
     - !ablate::finiteVolume::fieldFunctions::Euler
       # slab Burner
       region:
@@ -222,46 +232,47 @@ solvers:
     parameters:
       cfl: 0.45
     eos: *eos
-    transport: !ablate::eos::transport::Sutherland
-      eos: *eos
-
+    # the primary transport model applies to everything but the extra variables.
+    transport: !ablate::eos::tChemSoot::SootSpeciesTransportModel
+      # the SootSpeciesTransportModel adjusts the diffusion coefficient to carbon appropriately
+      transport: !ablate::eos::transport::Sutherland
+        eos: *eos
+    # if specified, the evTransport is used for the ndd transport
+    evTransport: !ablate::eos::tChemSoot::SootProgressTransportModel
+      transport: !ablate::eos::transport::Sutherland
+        eos: *eos
+    # additional monitors can be added to the flow solver.
     monitors:
       # The time step monitor outputs the current timestep and dt every 10 steps
       - !ablate::monitors::TimeStepMonitor
         interval: 25
       - !ablate::monitors::PhysicsTimeStep
         interval: 25
-      #       # The TurbFlowStats monitor starts to take statistics after 0.01 seconds every 25 time steps
-      #       - !ablate::monitors::TurbFlowStats
-      #         fields: [ velocity, temperature ]
-      #         eos: *eos
-      #         interval: !ablate::io::interval::DelayInterval
-      #           interval: 25
-      #           minimumSimulationTime: .01 #about 1 flow
+
       # The mixture fraction calculator outputs zMix and Yi everytime the serializer saves
       - !ablate::monitors::MixtureFractionMonitor
         mixtureFractionCalculator: !ablate::monitors::MixtureFractionCalculator
           eos: *eos
           massFractionsFuel: *fuelMassFrac
           massFractionsOxidizer: *oxMassFrac
-      - !ablate::monitors::RadiationFlux
-        id: slabFluxMonitor
-        region:
-          name: heatFluxMonitorFaces
-        radiation:
-          - !ablate::radiation::SurfaceRadiation
-            id: slabMonitorTracer
-            region:
-              name: heatFluxMonitorRegion
-            rays: 23
-            properties: !ablate::eos::radiationProperties::Sum
-              - !ablate::eos::radiationProperties::Zimmer
-                eos: *eos
-              - !ablate::eos::radiationProperties::SootMeanProperties
-                eos: *eos
-                ppm: 50.0
-            log: !<!ablate::monitors::logs::StdOut>
-              name: radlog
+          #      - !ablate::monitors::RadiationFlux
+          #        id: slabFluxMonitor
+          #        region:
+          #          name: heatFluxMonitorFaces
+          #        radiation:
+          #          - !ablate::radiation::SurfaceRadiation
+          #            id: slabMonitorTracer
+          #            region:
+          #              name: heatFluxMonitorRegion
+          #            rays: 2
+          #            properties: !ablate::eos::radiationProperties::Sum
+          #              - !ablate::eos::radiationProperties::Zimmer
+          #                eos: *eos
+          #              - !ablate::eos::radiationProperties::SootMeanProperties
+          #                eos: *eos
+          #            #                ppm: 50.0
+          #            log: !<!ablate::monitors::logs::StdOut>
+          #              name: radlog
           # additional processes can be added to the flow solver
     additionalProcesses:
       - !ablate::finiteVolume::processes::PressureGradientScaling
@@ -273,6 +284,14 @@ solvers:
         log: !ablate::monitors::logs::StdOut
       - !ablate::finiteVolume::processes::Chemistry
         eos: *eos
+      # ThermophoreticDiffusion diffusion controls the diffusion of solid carbon and ndd
+      - !ablate::finiteVolume::processes::ThermophoreticDiffusion
+        transport: !ablate::eos::transport::Sutherland
+          eos: *eos
+      # use ablate::finiteVolume::processes::Soot to compute ndd and carbon source terms
+      - !ablate::finiteVolume::processes::Soot
+        eos: *eos
+    # a flux calculator must be specified to so solver for advection
     fluxCalculator: !ablate::finiteVolume::fluxCalculator::AusmpUp
       pgs: *pgs
 
@@ -346,41 +365,41 @@ solvers:
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
-        radiationInterval: 10
-        radiation: !ablate::radiation::SurfaceRadiation
-          id: surfaceflux
-          region:
-            name: flowRegion
-          rays: 23
-          # the properties are a function of both gas and soot
-          properties: !ablate::eos::radiationProperties::Sum
-            - !ablate::eos::radiationProperties::Zimmer
-              eos: *eos
-            - !ablate::eos::radiationProperties::SootMeanProperties
-              eos: *eos
-              ppm: 50.0
-          log: !<!ablate::monitors::logs::StdOut>
-            name: radlog
-        emissivity: 0.9
+        #        radiationInterval: 10
+        #        radiation: !ablate::radiation::SurfaceRadiation
+        #          id: surfaceflux
+        #          region:
+        #            name: flowRegion
+        #          rays: 2
+        #          # the properties are a function of both gas and soot
+        #          properties: !ablate::eos::radiationProperties::Sum
+        #            - !ablate::eos::radiationProperties::Zimmer
+        #              eos: *eos
+        #            - !ablate::eos::radiationProperties::SootMeanProperties
+        #              eos: *eos
+        #          #              ppm: 50.0
+        #          log: !<!ablate::monitors::logs::StdOut>
+        #            name: radlog
+        #        emissivity: 0.9
         # density of pmma used to output reg rate
         solidDensity: 1190.0
     monitors:
       - !ablate::monitors::BoundarySolverMonitor
-  - !ablate::radiation::VolumeRadiation
-    id: radiationSolver
-    region:
-      name: flowRegion
-    interval: 10
-    radiation: !ablate::radiation::RaySharingRadiation
-      id: volRad
-      region:
-        name: flowRegion
-      rays: 15
-      properties: !ablate::eos::radiationProperties::Sum
-        - !ablate::eos::radiationProperties::Zimmer
-          eos: *eos
-        - !ablate::eos::radiationProperties::SootMeanProperties
-          eos: *eos
-          ppm: 50.0
-      log: !<!ablate::monitors::logs::StdOut>
-        name: radlog
+        #  - !ablate::radiation::VolumeRadiation
+        #    id: radiationSolver
+        #    region:
+        #      name: flowRegion
+        #    interval: 10
+        #    radiation: !ablate::radiation::Radiation
+        #      id: volRad
+        #      region:
+        #        name: flowRegion
+        #      rays: 2
+        #      properties: !ablate::eos::radiationProperties::Sum
+        #        - !ablate::eos::radiationProperties::Zimmer
+        #          eos: *eos
+        #        - !ablate::eos::radiationProperties::SootMeanProperties
+        #          eos: *eos
+        #      #          ppm: 50.0
+      #      log: !<!ablate::monitors::logs::StdOut>
+#        name: radlog
