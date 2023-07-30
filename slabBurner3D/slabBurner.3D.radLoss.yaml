@@ -10,7 +10,7 @@ timestepper:
     ts_max_time: 100000
     ts_max_steps: 3000000
     ts_dt: 1.0E-10
-    ts_adapt_safety: 0.99
+    ts_adapt_safety: 0.90
     ts_adapt_type: physicsConstrained
   io: !ablate::io::Hdf5MultiFileSerializer
     interval: 1000
@@ -34,8 +34,70 @@ timestepper:
           name: allWallBoundaryRegion
         regions:
           - name: boundaryCellsTop
+          - name: boundaryCellsBottom
           - name: boundaryCellsFront
           - name: boundaryCellsBack
+      # create a label for the slab burner
+      - !ablate::domain::modifiers::CreateLabel
+        region:
+          name: slabBurnerRegion
+        function: !ablate::mathFunctions::geom::ConvexPolygon
+          # Dimensions to match paper: Radiation Heat Transfer in Ablating Boundary Layer Combustion Theory used for
+          #                            Hybrid Rocket Motor Analysis
+          points:
+            - [ 0.0132,-.1 ]
+            - [ 0.0132,0 ]
+            - [ 0.0142,0.010 ]
+            - [ 0.0932,0.010 ]
+            - [ 0.0933,0 ]
+            - [ 0.0933,-.1 ]
+          maxDistance: 0.004750
+
+      # create a label for defining the glowPlug
+      - !ablate::domain::modifiers::SubtractLabel
+        # cut the slabBurner and glow plug out of the flowRegion
+        differenceRegion:
+          name: flowRegion
+        minuendRegion:
+          name: interiorCells
+        subtrahendRegions:
+          - name: slabBurnerRegion
+      - !ablate::domain::modifiers::TagLabelInterface
+        leftRegion:
+          name: flowRegion
+        rightRegion:
+          name: boundaryCellsFront
+        boundaryFaceRegion:
+          name: boundaryFacesFront
+      - !ablate::domain::modifiers::SubtractLabel
+        # cut the slabBurner and glow plug out of the boundaryWalls
+        differenceRegion:
+          name: wallBoundaryRegion
+        minuendRegion:
+          name: allWallBoundaryRegion
+        subtrahendRegions:
+          - name: slabBurnerRegion
+      - !ablate::domain::modifiers::TagLabelInterface
+        # define the boundary between the slab burner and flow
+        leftRegion:
+          name: flowRegion
+        rightRegion:
+          name: slabBurnerRegion
+        boundaryFaceRegion:
+          name: slabBurnerBoundaryFaces
+        rightBoundaryCellRegion:
+          name: slabBurnerBoundaryCells
+
+      - !ablate::domain::modifiers::SubtractLabel
+        # remove the slabBurnerFace from the flowRegion
+        differenceRegion:
+          name: interiorFlowRegion
+        minuendRegion:
+          name: flowRegion
+        subtrahendRegions:
+          - name: slabBurnerBoundaryFaces
+        incompleteLabel: true
+
       - !ablate::domain::modifiers::GhostBoundaryCells
     fields:
       - !ablate::finiteVolume::CompressibleFlowFields
@@ -88,7 +150,7 @@ timestepper:
     - !ablate::finiteVolume::fieldFunctions::Euler
       # slab Burner
       region:
-        name: boundaryCellsLeft
+        name: slabBurnerBoundaryCells
       state: &fuelFieldState
         eos: *eos
         temperature: 653.0 #fuel temperature
@@ -112,14 +174,14 @@ timestepper:
               field: 0.02811595000348999
     - !ablate::finiteVolume::fieldFunctions::DensityMassFractions
       region:
-        name: boundaryCellsLeft
+        name: slabBurnerBoundaryCells
       state: *fuelFieldState
 
 solvers:
   - !ablate::finiteVolume::CompressibleFlowSolver
     id: flowField
     region:
-      name: interiorCells
+      name: interiorFlowRegion
     parameters:
       cfl: 0.45
     eos: *eos
@@ -213,7 +275,7 @@ solvers:
   - !ablate::boundarySolver::BoundarySolver
     id: walls
     region:
-      name: allWallBoundaryRegion
+      name: wallBoundaryRegion
     fieldBoundary:
       name: boundaryFaces
     mergeFaces: true
@@ -224,9 +286,9 @@ solvers:
   - !<!ablate::boundarySolver::BoundarySolver>
     id: slab boundary
     region:
-      name: boundaryCellsBottom
+      name: slabBurnerBoundaryCells
     fieldBoundary:
-      name: boundaryFaces
+      name: slabBurnerBoundaryFaces
     processes:
       - !<!ablate::boundarySolver::physics::Sublimation>
         latentHeatOfFusion: 1462876.0
