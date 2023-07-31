@@ -10,7 +10,7 @@ timestepper:
     ts_max_time: 100000
     ts_max_steps: 3000000
     ts_dt: 1.0E-10
-    ts_adapt_safety: 0.90
+    ts_adapt_safety: 0.99
     ts_adapt_type: physicsConstrained
   io: !ablate::io::Hdf5MultiFileSerializer
     interval: 1000
@@ -62,13 +62,6 @@ timestepper:
           name: interiorCells
         subtrahendRegions:
           - name: slabBurnerRegion
-      - !ablate::domain::modifiers::TagLabelInterface
-        leftRegion:
-          name: flowRegion
-        rightRegion:
-          name: boundaryCellsFront
-        boundaryFaceRegion:
-          name: boundaryFacesFront
       - !ablate::domain::modifiers::SubtractLabel
         # cut the slabBurner and glow plug out of the boundaryWalls
         differenceRegion:
@@ -87,7 +80,6 @@ timestepper:
           name: slabBurnerBoundaryFaces
         rightBoundaryCellRegion:
           name: slabBurnerBoundaryCells
-
       - !ablate::domain::modifiers::SubtractLabel
         # remove the slabBurnerFace from the flowRegion
         differenceRegion:
