@@ -16,10 +16,10 @@ timestepper:
     interval: 1000
   domain: !ablate::domain::BoxMeshBoundaryCells
     name: simpleBoxField
-    #    faces: [ 420,60,60 ] # this is ~.36mm
-    faces: [ 105,15,15 ]
+    faces: [ 355,60,60 ] # this is ~.36mm
+    #    faces: [ 105,15,15 ]
     lower: [ 0.0, 0.0, -0.0127 ]
-    upper: [ 0.1, 0.0254, 0.0127 ]
+    upper: [ 0.15, 0.0254, 0.0127 ]
     simplex: false
     options:
       dm_plex_hash_location: true
@@ -47,7 +47,7 @@ timestepper:
           points:
             - [ 0.0132,-.1 ]
             - [ 0.0132,0 ]
-            - [ 0.0142,0.010 ]
+            - [ 0.0232,0.010 ]
             - [ 0.0932,0.010 ]
             - [ 0.0933,0 ]
             - [ 0.0933,-.1 ]
@@ -100,11 +100,15 @@ timestepper:
             thresholdTemperature: 560
         conservedFieldOptions:
           petscfv_type: leastsquares
+        region:
+          name: domain
 
       # create a conserved field to track ndd
       - !ablate::finiteVolume::ExtraVariable
         name: "Progress"
         components: [ "NDD" ]
+        region:
+          name: domain
 
       # by adding a pressure field the code will compute and output pressure
       - !ablate::domain::FieldDescription
@@ -289,6 +293,39 @@ solvers:
         pgs: *pgs
         eos: *eos
         massFractions: *fuelMassFrac
+        radiationInterval: 10
+        radiation: !ablate::radiation::SurfaceRadiation
+          id: surfaceflux
+          region:
+            name: flowRegion
+          rays: 23
+          # the properties are a function of both gas and soot
+          properties: !ablate::eos::radiationProperties::Sum
+            - !ablate::eos::radiationProperties::Zimmer
+              eos: *eos
+            - !ablate::eos::radiationProperties::SootMeanProperties
+              eos: *eos
+          log: !<!ablate::monitors::logs::StdOut>
+            name: radlog
+        emissivity: 0.9
+        # density of pmma used to output reg rate
         solidDensity: 1190.0
     monitors:
       - !<!ablate::monitors::BoundarySolverMonitor> ""
+  - !ablate::radiation::VolumeRadiation
+    id: radiationSolver
+    region:
+      name: interiorCells
+    interval: 10
+    radiation: !ablate::radiation::Radiation
+      id: volRad
+      region:
+        name: flowRegion
+      rays: 18
+      properties: !ablate::eos::radiationProperties::Sum
+        - !ablate::eos::radiationProperties::Zimmer
+          eos: *eos
+        - !ablate::eos::radiationProperties::SootMeanProperties
+          eos: *eos
+      log: !<!ablate::monitors::logs::StdOut>
+        name: radlog

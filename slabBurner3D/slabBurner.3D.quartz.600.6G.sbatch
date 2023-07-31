@@ -27,7 +27,7 @@ mkdir tmp_$SLURM_JOBID
 cd tmp_$SLURM_JOBID
 
 ##### Launch parallel job using srun
-srun -n18432 /p/lustre1/mylotte1/ablateOpt/ablate \
+srun -n18432 /p/lustre1/mylotte1/ablateSlabs/ablate \
 	--input /p/lustre1/mylotte1/ablateInputs/slabBurner3D/slabBurner.3D.radLoss.yaml
 	
 echo 'Done'
